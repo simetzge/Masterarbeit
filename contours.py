@@ -21,6 +21,8 @@ THRESHOLD_MIN = 90
 THRESHOLD_MAX = 255
 MODIFY_THRESHOLD = False
 USE_TEMPLATE = True
+USE_ABSOLUTE_PATH = True
+ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
 
 try:
     
@@ -63,7 +65,10 @@ try:
     def searchFiles(extension):
         
         #get skript path
-        path = os.getcwd()
+        if USE_ABSOLUTE_PATH == True:
+            path = ABSOLUTE_PATH
+        else:
+            path = os.getcwd()
         
         #list all files in path
         dirs = os.listdir(path)
@@ -102,7 +107,11 @@ try:
 #####################################################################################################################################################
 
     def output(folder, img, name, mod=''):
-        path = os.getcwd()
+        
+        if USE_ABSOLUTE_PATH == True:
+            path = ABSOLUTE_PATH
+        else:
+            path = os.getcwd()
         #list all files in path
         dirs = os.listdir(path)
         if folder in dirs:
@@ -410,10 +419,6 @@ try:
             
             #(x, y), (w, h), angle = rect
             bl, br, tr , tl = cv2.boxPoints(rect).astype('int32')
-            
-            width = max(tl[1],br[1]) - min(tl[1],br[1])
-            
-            height = max(tl[0],br[0]) - min(tl[0],br[0])
             
             crop = img[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])]
             
