@@ -139,6 +139,12 @@ try:
     def scaleImage(img):
         scale = IMG_TARGET_SIZE / np.max(img.shape)
         return (cv2.resize(img, (0,0), fx = scale, fy = scale))
+
+#####################################################################################################################################################
+#      
+# normalize image to range from 0 to 255
+#
+#####################################################################################################################################################
     
     def normalizeImage(img):
         
@@ -442,7 +448,9 @@ try:
             
             crop = img[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])]
             
-            #output('rectanglecut', rectcut, fileName) 
+            #output('rectanglecut', rectcut, fileName)
+            crop = preprocessing (crop)
+            
             output('rect', crop, fileName, str(i)) 
             
             mask[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])] = True
@@ -450,9 +458,23 @@ try:
         imgcut = img.copy()
         rectcut = imgcut[mask]
         imgcut[mask] = 0
-        
+
         #send the modified images in the output function
-        output('imagecut', imgcut, fileName)     
+        output('imagecut', imgcut, fileName)
+
+#####################################################################################################################################################
+#
+# create binary images for ocr
+#
+#####################################################################################################################################################
+
+    def preprocessing(img):
+
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        #img = scaleImage(img)
+        img = normalizeImage(img)
+        ret, img = cv2.threshold(img, 140, 255, cv2.THRESH_BINARY)
+        return(img)
 
 #####################################################################################################################################################
 #
