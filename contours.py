@@ -9,6 +9,7 @@ import numpy as np
 import cv2
 import os
 import re
+#from ocr import *
 
 #####################################################################################################################################################
 #
@@ -24,11 +25,17 @@ USE_TEMPLATE = True
 USE_ABSOLUTE_PATH = True
 ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
 
-try:
-    
+try:   
 #####################################################################################################################################################
     
     def main():
+        
+        ##########################
+        #a few tests with files
+        #if TESTFLAG == True:
+         #   print ('works')
+        #testocr()
+        ###########################
         
         filePaths, fileNames = searchFiles('.jpg')
     
@@ -133,6 +140,15 @@ try:
         scale = IMG_TARGET_SIZE / np.max(img.shape)
         return (cv2.resize(img, (0,0), fx = scale, fy = scale))
     
+    def normalizeImage(img):
+        
+        #img = scaleImage(img)
+        (x, y) = img.shape
+        normImg = np.zeros((x,y))
+        img = cv2.normalize(img,  normImg, 0, 255, cv2.NORM_MINMAX)
+        return (img)
+        
+    
 ##################################################################################################################################################### 
 #
 # sets an adaptive threshold, sends the results to rect_detect and those results to output
@@ -140,9 +156,11 @@ try:
 #####################################################################################################################################################
 
     def rect_detect_adaptive(img, fileName):
-         
+        
         #convert to grayscale
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        gray = normalizeImage(gray)
         
         binary = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
 
@@ -177,14 +195,16 @@ try:
         
         allRois = []
         
+        #convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        gray = normalizeImage(gray)
+        
         while j <= 200:
             
             rois = []
             
             contours = []
-            
-            #convert to grayscale
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             
             ret, binary = cv2.threshold(gray, j, THRESHOLD_MAX, cv2.THRESH_BINARY)
             
@@ -433,8 +453,6 @@ try:
         
         #send the modified images in the output function
         output('imagecut', imgcut, fileName)     
-
-        print('hello')
 
 #####################################################################################################################################################
 #
