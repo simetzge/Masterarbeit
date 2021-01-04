@@ -322,7 +322,7 @@ try:
             rectArea = w * h
             
             #compare the areas to each other, make sure they don't differ too much
-            if contArea / rectArea < 0.8:
+            if contArea / rectArea < 0.85:
                 continue
             
             #ignore contours as big as the image
