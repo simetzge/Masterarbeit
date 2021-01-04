@@ -168,7 +168,7 @@ try:
         contours, rois = rect_detect(binary) 
         
         #print the number of rectangles for debug reasons
-        print(len(rois))    
+        #print(len(rois))    
         
         gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
         
@@ -211,7 +211,7 @@ try:
             contours, rois = rect_detect(binary)
         
             #print the number of rectangles for debug reasons
-            print(len(rois))    
+            #print(len(rois))    
         
             #add contours in red to image
             roisImg = cv2.drawContours(img, contours, -1, (0, 0, 230))
@@ -267,8 +267,8 @@ try:
             for  i in range (len(rois_list)):
                 if rois_list[i]["same"] >= roi["same"]:
                     roi = rois_list[i]
-            
-            print(roi["same"]) 
+            #print number of same rois for debug reasons
+            #print(roi["same"]) 
         #add contours in red to image
             if roi["same"] >= 6:
                 
@@ -284,10 +284,10 @@ try:
             #roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in rects], -1, (0, 230, 0))
         
         #convert to grayscale
-        gray = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
         #add the found rectangles in green to image
         roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in rects], -1, (0, 230, 0))
-            
+                    
         #send the modified images in the output function
         output('output', roisImg, fileName, str(same))
         
@@ -337,12 +337,12 @@ try:
                     
                     #get aspect ratios of rect and approx
                     asra = max(w,h)/min(w,h)
-
-                    print ("asra " + str(asra))
                     
                     #ignore this shape if aspect ratio doesn't fit
-                    if not (asra < aspectRatio * 1.4 and asra > aspectRatio *0.6):
+                    if not (asra < aspectRatio * 1.3 and asra > aspectRatio *0.7):
                         continue
+                    #print aspect ratio for debug reasons
+                    #print ("asra " + str(asra))                    
                 
                 #else aspect ratio should be max 2:1
                 else:
