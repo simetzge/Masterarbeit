@@ -444,9 +444,11 @@ try:
         for i, rect in enumerate(rects):
             
             #(x, y), (w, h), angle = rect
+        
             bl, br, tr , tl = cv2.boxPoints(rect).astype('int32')
             
-            crop = img[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])]
+            #crop = img[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])]
+            crop = rotate_board (img, rect)
             
             #output('rectanglecut', rectcut, fileName)
             crop = preprocessing (crop)
@@ -475,7 +477,27 @@ try:
         img = normalizeImage(img)
         ret, img = cv2.threshold(img, 140, 255, cv2.THRESH_BINARY)
         return(img)
+    
+#####################################################################################################################################################
+#
+# crop rotated rectangle with warpperspective
+#
+#####################################################################################################################################################
 
+    def rotate_board(img, rect):
+        
+        box = cv2.boxPoints(rect)
+        box = np.int0(box)
+        (x, y), (w, h), angle = rect
+        src = box.astype("float32")
+        dst = np.array([[0, h-1],[0, 0],[w-1, 0],[w-1, h-1]], dtype="float32")
+        
+        M = cv2.getPerspectiveTransform(src, dst)
+        
+        warped = cv2.warpPerspective(img, M, (int(w), int(h)))
+        
+        return (warped)
+        
 #####################################################################################################################################################
 #
 # call main
