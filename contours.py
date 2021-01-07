@@ -455,14 +455,20 @@ try:
             
             output('rect', crop, fileName, str(i)) 
             
-            mask[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])] = True
+            # mask area with size of detected rect
+            #mask[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])] = True
             
+            # mask area sligtly bigger than detected rect to cut the complete board with its border
+            mask[int(min(tl[1],br[1])*0.975): int(max(tl[1],br[1])*1.025),int(min(tl[0],br[0])*0.975):int(max(tl[0],br[0])*1.025)] = True
+        
+        #modify image: set mask area to black
         imgcut = img.copy()
         rectcut = imgcut[mask]
         imgcut[mask] = 0
 
         #send the modified images in the output function
         output('imagecut', imgcut, fileName)
+    
 
 #####################################################################################################################################################
 #
@@ -486,17 +492,97 @@ try:
 
     def rotate_board(img, rect):
         
+        #get boxpoints
         box = cv2.boxPoints(rect)
         box = np.int0(box)
         (x, y), (w, h), angle = rect
+        #cast boxpoints for source
         src = box.astype("float32")
+        #get array for destination
         dst = np.array([[0, h-1],[0, 0],[w-1, 0],[w-1, h-1]], dtype="float32")
         
+        #get rotation matrix
         M = cv2.getPerspectiveTransform(src, dst)
         
+        #warp
         warped = cv2.warpPerspective(img, M, (int(w), int(h)))
         
         return (warped)
+    
+#####################################################################################################################################################
+#
+# warp the board back to its former location to get a better fitting mask, failed and not used atm
+#
+#####################################################################################################################################################
+    
+    def get_mask(img, rect, board):
+        
+        #get boxpoints
+        box = cv2.boxPoints(rect)
+        box = np.int0(box)
+        (x, y), (w, h), angle = rect
+        #cast boxpoints for source
+        dst = box.astype("float32")
+        #get array for destination
+        src = board
+        #get rotation matrix
+        M = cv2.getPerspectiveTransform(src, dst)
+        #warp
+        warped = cv2.warpPerspective(img, M, (int(w), int(h)))       
+        
+        return(warped)
+    
+#####################################################################################################################################################
+#
+# rotate the whole image to get a better fitting mask, failed and not used atm
+#
+#####################################################################################################################################################
+
+    def rotate_image(img, rect, mask):
+        #creat mask
+        new_mask = np.zeros(img.shape[:2], dtype=bool)
+        (x, y), (w, h), angle = rect
+        #get height and width from image
+        imgh, imgw = img.shape[0], img.shape[1]
+        #get roation matrix
+        M = cv2.getRotationMatrix2D((x,y), angle, 1)
+        #rotate image
+        img_rot = cv2.warpAffine(img, M, (imgw, imgh))
+        
+        #cast to int, so the coordinates can be used as indices
+        x = int(x)
+        y = int(y)
+        w = int(w)
+        h = int(h)
+        #set mask to true in the area of the rectangle
+        new_mask[y-int(h/2):y+int(h/2),x-int(w/2):x+int(w/2)] = True
+        
+        #cut the rectangle out with mask
+        img_rot[new_mask] = 0
+        
+        #show for debug
+        cv2.imshow("rotate", img_rot)
+        cv2.waitKey(0)
+        
+        #crop rectangle (atm it's black because of mask, change order later)
+        img_crop = cv2.getRectSubPix(img_rot, (int(w),int(h)), (int(x),int(y)))
+        
+        #show for debug
+        cv2.imshow("cut", img_crop)
+        cv2.waitKey(0)
+        
+        #try to undo the roatation (failed atm)
+        if angle > 0:
+            angle = 360-angle
+        else:
+            angle = -360 - angle
+        M = cv2.getRotationMatrix2D((x,y), angle, 1)
+        img_rot = cv2.warpAffine(img_rot, M, (img_rot.shape[1], img_rot.shape[0]))
+        
+        #show for debug
+        cv2.imshow("rotate back", img_rot)
+        cv2.waitKey(0)
+        
         
 #####################################################################################################################################################
 #
@@ -508,4 +594,5 @@ try:
        main() 
 
 finally:
+    cv2.destroyAllWindows()
     print('done')
