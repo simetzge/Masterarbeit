@@ -9,7 +9,7 @@ import numpy as np
 import cv2
 import os
 import re
-#from ocr import *
+from ocr import *
 
 #####################################################################################################################################################
 #
@@ -61,6 +61,7 @@ try:
                 rect_detect_iterative(img, fileNames[i])
             else:
                 rect_detect_adaptive(img, fileNames[i])
+        
 
 #####################################################################################################################################################
 #    
@@ -443,7 +444,7 @@ try:
         
         for i, rect in enumerate(rects):
             
-            #(x, y), (w, h), angle = rect
+            (x, y), (w, h), angle = rect
         
             bl, br, tr , tl = cv2.boxPoints(rect).astype('int32')
             
@@ -453,13 +454,15 @@ try:
             #output('rectanglecut', rectcut, fileName)
             crop = preprocessing (crop)
             
+            print(image_to_text(crop))
+            
             output('rect', crop, fileName, str(i)) 
             
             # mask area with size of detected rect
             #mask[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])] = True
             
             # mask area sligtly bigger than detected rect to cut the complete board with its border
-            mask[int(min(tl[1],br[1])*0.975): int(max(tl[1],br[1])*1.025),int(min(tl[0],br[0])*0.975):int(max(tl[0],br[0])*1.025)] = True
+            mask[int(min(tl[1],br[1]) - 0.1 * w): int(max(tl[1],br[1]) + 0.1 * w),int(min(tl[0],br[0]) - 0.1 * h):int(max(tl[0],br[0]) + 0.1 * h)] = True
         
         #modify image: set mask area to black
         imgcut = img.copy()
@@ -481,7 +484,7 @@ try:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         #img = scaleImage(img)
         img = normalizeImage(img)
-        ret, img = cv2.threshold(img, 140, 255, cv2.THRESH_BINARY)
+        #ret, img = cv2.threshold(img, 140, 255, cv2.THRESH_BINARY)
         return(img)
     
 #####################################################################################################################################################
