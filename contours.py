@@ -454,7 +454,7 @@ try:
             #output('rectanglecut', rectcut, fileName)
             crop = preprocessing (crop)
             
-            print(image_to_text(crop))
+            image_to_text(crop)
             
             output('rect', crop, fileName, str(i)) 
             
@@ -482,9 +482,18 @@ try:
     def preprocessing(img):
 
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        #img = scaleImage(img)
+        img = scaleImage(img)
+        img = cv2.GaussianBlur(img,(9,9),0)
+        img = cv2.medianBlur(img,5) 
+               
         img = normalizeImage(img)
-        #ret, img = cv2.threshold(img, 140, 255, cv2.THRESH_BINARY)
+        
+        #img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
+        #img = cv2.GaussianBlur(img,(5,5),0)
+        
+        ret, img = cv2.threshold(img, 70, 255, cv2.THRESH_BINARY)
+        
+
         return(img)
     
 #####################################################################################################################################################
