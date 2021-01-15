@@ -480,21 +480,82 @@ try:
 #####################################################################################################################################################
 
     def preprocessing(img):
-
+        
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img = scaleImage(img)
-        img = cv2.GaussianBlur(img,(9,9),0)
-        img = cv2.medianBlur(img,5) 
+        filtered = cv2.adaptiveThreshold(img.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 41, 3)
+        
+        kernel = np.ones((1,1),np.uint8)
+        
+        #img = cv2.erode(img,kernel,iterations = 10)
+        
+        openening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+        
+        closing = cv2.morphologyEx(openening, cv2.MORPH_CLOSE, kernel)
+        
+        
+        
+        ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
+        ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY)
+        img = cv2.GaussianBlur(img,(1,1),0)
+        
+        ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY  + cv2.THRESH_OTSU)
+        
+        img = cv2.bitwise_or(img, closing)
+        
+        #img = cv2.medianBlur(img,5) 
                
         img = normalizeImage(img)
+        
+        #img = Skeleton(img)
+        
+        
         
         #img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
         #img = cv2.GaussianBlur(img,(5,5),0)
         
-        ret, img = cv2.threshold(img, 70, 255, cv2.THRESH_BINARY)
+        #ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
+        #############################################
+        # maybe try se canny edge ja?
+        #############################################
         
-
         return(img)
+    
+    #cannyedge from opencv doc
+    def CannyThreshold(img):
+        max_lowThreshold = 100
+        ratio = 3
+        kernel_size = 3
+        low_threshold = 1
+        img_blur = cv2.blur(img, (3,3))
+        detected_edges = cv2.Canny(img_blur, low_threshold, low_threshold*ratio, kernel_size)
+        mask = detected_edges != 0
+        dst = img * (mask[:,:].astype(img.dtype))
+        return (dst)
+    
+    #skeleton from opencv doc
+    def Skeleton(img):
+        # Step 1: Create an empty skeleton
+        size = np.size(img)
+        skel = np.zeros(img.shape, np.uint8)
+        
+        # Get a Cross Shaped Kernel
+        element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3))
+        
+        # Repeat steps 2-4
+        while True:
+            #Step 2: Open the image
+            open = cv2.morphologyEx(img, cv2.MORPH_OPEN, element)
+            #Step 3: Substract open from the original image
+            temp = cv2.subtract(img, open)
+            #Step 4: Erode the original image and refine the skeleton
+            eroded = cv2.erode(img, element)
+            skel = cv2.bitwise_or(skel,temp)
+            img = eroded.copy()
+            # Step 5: If there are no white pixels left ie.. the image has been completely eroded, quit the loop
+            if cv2.countNonZero(img)==0:
+                break
+        return(skel)
     
 #####################################################################################################################################################
 #
@@ -551,6 +612,7 @@ try:
 #####################################################################################################################################################
 
     def rotate_image(img, rect, mask):
+        
         #creat mask
         new_mask = np.zeros(img.shape[:2], dtype=bool)
         (x, y), (w, h), angle = rect
