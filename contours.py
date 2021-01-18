@@ -493,8 +493,6 @@ try:
         
         closing = cv2.morphologyEx(openening, cv2.MORPH_CLOSE, kernel)
         
-        
-        
         ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
         ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY)
         img = cv2.GaussianBlur(img,(1,1),0)
@@ -506,12 +504,14 @@ try:
         #img = cv2.medianBlur(img,5) 
                
         img = normalizeImage(img)
+        #img = cv2.GaussianBlur(img,(1,1),0)
+        #ret, img = cv2.threshold(img, 140, 255, cv2.THRESH_BINARY)
         
         #img = Skeleton(img)
         
+        #ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
         
-        
-        #img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
+        #img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,5,1)
         #img = cv2.GaussianBlur(img,(5,5),0)
         
         #ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
