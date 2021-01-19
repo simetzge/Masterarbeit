@@ -9,6 +9,7 @@ import numpy as np
 import cv2
 import os
 import re
+import math
 from ocr import *
 
 #####################################################################################################################################################
@@ -449,6 +450,11 @@ try:
             bl, br, tr , tl = cv2.boxPoints(rect).astype('int32')
             
             #crop = img[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])]
+            
+            #trying new version
+            hough_rotate(img,rect)
+            
+            #old version, works, but not perfect
             crop = rotate_board (img, rect)
             
             #output('rectanglecut', rectcut, fileName)
@@ -522,7 +528,7 @@ try:
         return(img)
     
     #cannyedge from opencv doc
-    def CannyThreshold(img):
+    def cannyThreshold(img):
         max_lowThreshold = 100
         ratio = 3
         kernel_size = 3
@@ -534,7 +540,7 @@ try:
         return (dst)
     
     #skeleton from opencv doc
-    def Skeleton(img):
+    def skeleton(img):
         # Step 1: Create an empty skeleton
         size = np.size(img)
         skel = np.zeros(img.shape, np.uint8)
@@ -581,6 +587,110 @@ try:
         warped = cv2.warpPerspective(img, M, (int(w), int(h)))
         
         return (warped)
+
+#####################################################################################################################################################
+#
+# better crop with Hough-Transform
+#
+#####################################################################################################################################################
+
+    def hough_rotate(img, rect):
+        
+        #how much bigger the crop image is than the board
+        sizeFactor = 0.2     
+        (x, y), (w, h), angle = rect
+        
+        #create bigger rect to get the complete board
+        #big_rect = (int(x - 0.1 * w), int(y - 0.1 * h)), ( int(w * 1.2), int(y * 1.2)), angle
+        #(x, y), (w, h), angle = big_rect
+        
+        bl, br, tr , tl = cv2.boxPoints(rect).astype('int32')
+        crop_img = img[int(min(tl[1],br[1]) - sizeFactor * w): int(max(tl[1],br[1]) + sizeFactor * w),int(min(tl[0],br[0]) - sizeFactor * h):int(max(tl[0],br[0]) + sizeFactor * h)]
+        
+        crop_img = scaleImage(crop_img)
+        
+        crop_img = cv2.GaussianBlur(crop_img,(3,3),5)
+        gray = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
+        
+        gray = normalizeImage(gray)
+        
+        ret, binary = cv2.threshold(gray, 180, THRESHOLD_MAX, cv2.THRESH_BINARY)
+        binary = cv2.GaussianBlur(binary,(3,3),5)
+        #ret, binary = cv2.threshold(binary, 180, THRESHOLD_MAX, cv2.THRESH_BINARY)
+
+
+        #binary = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
+        
+        contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        
+        contArea = 0
+        big_cont = contours[0]
+        
+        for contour in contours:
+            
+            #compute and search for the largest contour area     
+            
+            #a = cv2.contourArea(contour)
+            a = len(contour)
+            
+            if (contArea < a):
+                contArea = a
+                big_cont = contour
+        
+        #hull = cv2.convexHull()
+        
+        binary = skeleton (binary)
+        binary = cv2.GaussianBlur(binary,(3,3),5)
+        #ret, binary = cv2.threshold(binary, 180, THRESHOLD_MAX, cv2.THRESH_BINARY)
+        
+        # Find the convex hull object for each contour
+       # hull_list = []
+        #for i in range(len(contours)):
+            #hull = cv2.convexHull(contours[i])
+            #hull_list.append(hull)
+        
+        
+        # hough
+        #dst = cv2.Canny(binary, 50, 200, None, 3)
+        dst = cannyThreshold(binary)
+        
+
+        lines = cv2.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
+        cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
+        
+        #add contour in red
+        #roisImg = cv2.drawContours(cdst, hull_list, -1, (0, 0, 230))
+        
+        if lines is not None:
+            for i in range(0, len(lines)):
+                rho = lines[i][0][0]
+                theta = lines[i][0][1]
+                a = math.cos(theta)
+                b = math.sin(theta)
+                x0 = a * rho
+                y0 = b * rho
+                pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
+                pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+                cv2.line(cdst, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+               
+        #houghp
+        linesP = cv2.HoughLinesP(dst, 1, np.pi / 180, 40, None, 50, 10)
+    
+        if linesP is not None:
+            for i in range(0, len(linesP)):
+                l = linesP[i][0]
+                cv2.line(cdst, (l[0], l[1]), (l[2], l[3]), (0,0,255), 3, cv2.LINE_AA)
+
+
+            
+                
+        ################ hier weiter, größte contour gefunden
+            
+            
+        
+        
+        cv2.imshow("test", cdst)
+        cv2.waitKey()
     
 #####################################################################################################################################################
 #
