@@ -660,7 +660,9 @@ try:
         
         #add contour in red
         #roisImg = cv2.drawContours(cdst, hull_list, -1, (0, 0, 230))
-        
+        lineList = []
+        lineA = np.zeros((2,2))
+        lineB = np.zeros((2,2))
         if lines is not None:
             for i in range(0, len(lines)):
                 rho = lines[i][0][0]
@@ -672,6 +674,23 @@ try:
                 pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
                 pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
                 cv2.line(cdst, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+                line =[pt1,pt2]
+                lineList.append(line)
+                
+            for i in range(0, len(lineList)):    
+                for j in range(0, len(lineList)):
+                    if i == j:
+                        break
+                    #lineA[0][0] = lines[i][0][0]
+                    #lineA[0][1] = lines[i][0][1]
+                    #lineA[1][0] = lines[i][0][2]
+                    #lineA[1][1] = lines[i][0][3]
+                    #lineB[0][0] = lines[j][0][0]
+                    #lineB[0][1] = lines[j][0][1]
+                    #lineB[1][0] = lines[j][0][2]
+                    #lineB[1][1] = lines[j][0][3]
+                    inter = intersection(lineList[i], lineList[j])
+                    cdst = cv2.circle(cdst, inter, 4, (255,0,255), 4)
                
         #houghp
         linesP = cv2.HoughLinesP(dst, 1, np.pi / 180, 40, None, 50, 10)
@@ -679,18 +698,58 @@ try:
         if linesP is not None:
             for i in range(0, len(linesP)):
                 l = linesP[i][0]
-                cv2.line(cdst, (l[0], l[1]), (l[2], l[3]), (0,0,255), 3, cv2.LINE_AA)
-
-
-            
+                # skip if line is too short
+                if max(l[0], l[2]) - min(l[0], l[2]) < 1000 and max(l[1], l[3]) - min(l[1], l[3]) < 1000:
+                    break
                 
-        ################ hier weiter, größte contour gefunden
+                cv2.line(cdst, (l[0], l[1]), (l[2], l[3]), (0,0,255), 3, cv2.LINE_AA)
+                for j in range(0, len(linesP)):
+                    if i == j:
+                        break
+                    lineA[0][0] = linesP[i][0][0]
+                    lineA[0][1] = linesP[i][0][1]
+                    lineA[1][0] = linesP[i][0][2]
+                    lineA[1][1] = linesP[i][0][3]
+                    lineB[0][0] = linesP[j][0][0]
+                    lineB[0][1] = linesP[j][0][1]
+                    lineB[1][0] = linesP[j][0][2]
+                    lineB[1][1] = linesP[j][0][3]
+                    inter = intersection(lineA, lineB)
+                    cdst = cv2.circle(cdst, inter, 4, (255,0,255), 4)
+
+
+
+
+        ################ verbesserungswürdig, aber geht
             
             
         
         
         cv2.imshow("test", cdst)
         cv2.waitKey()
+     
+#####################################################################################################################################################
+#
+# compute intersection of two lines
+#
+#####################################################################################################################################################
+
+    def intersection(lineA, lineB):
+        
+        xdiff = (lineA[0][0] - lineA[1][0], lineB[0][0] - lineB[1][0])
+        ydiff = (lineA[0][1] - lineA[1][1], lineB[0][1] - lineB[1][1])
+        
+        div = det(xdiff, ydiff)
+        x = 0
+        y = 0
+        if div:           
+            d = (det (*lineA), det(*lineB))
+            x = det(d, xdiff) / div
+            y = det(d, ydiff) / div
+        return int(x),int(y)
+        
+    def det(a, b):
+        return a[0] * b[1] - a[1] * b[0]
     
 #####################################################################################################################################################
 #
