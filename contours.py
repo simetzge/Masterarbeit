@@ -416,7 +416,7 @@ try:
         ya = max(recta[1], rectb[1])
         #bottom right coordinates
         xb = min(recta[0] + recta[2], rectb[0] + rectb[2])
-        yb = min(recta[1] + recta[3],recta[1] + rectb[3])
+        yb = min(recta[1] + recta[3], recta[1] + rectb[3])
         
         intersection = max(0, xb - xa) * max(0, yb - ya)
         
@@ -660,10 +660,12 @@ try:
         
         #add contour in red
         #roisImg = cv2.drawContours(cdst, hull_list, -1, (0, 0, 230))
+        
+        # empty lineList to collect all lines        
         lineList = []
-        lineA = np.zeros((2,2))
-        lineB = np.zeros((2,2))
-        if lines is not None:
+        interList = []
+        if lines is not None:            
+            # go through lines, calculate the coordinates
             for i in range(0, len(lines)):
                 rho = lines[i][0][0]
                 theta = lines[i][0][1]
@@ -674,63 +676,131 @@ try:
                 pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
                 pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
                 cv2.line(cdst, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+                # add lines to List
                 line =[pt1,pt2]
                 lineList.append(line)
-                
+            # calculate every intersection between lines 
             for i in range(0, len(lineList)):    
                 for j in range(0, len(lineList)):
+                    # skip intersection of line with itself
                     if i == j:
                         break
-                    #lineA[0][0] = lines[i][0][0]
-                    #lineA[0][1] = lines[i][0][1]
-                    #lineA[1][0] = lines[i][0][2]
-                    #lineA[1][1] = lines[i][0][3]
-                    #lineB[0][0] = lines[j][0][0]
-                    #lineB[0][1] = lines[j][0][1]
-                    #lineB[1][0] = lines[j][0][2]
-                    #lineB[1][1] = lines[j][0][3]
-                    inter = intersection(lineList[i], lineList[j])
-                    cdst = cv2.circle(cdst, inter, 4, (255,0,255), 4)
-               
-        #houghp
-        linesP = cv2.HoughLinesP(dst, 1, np.pi / 180, 40, None, 50, 10)
-    
-        if linesP is not None:
-            for i in range(0, len(linesP)):
-                l = linesP[i][0]
-                # skip if line is too short
-                if max(l[0], l[2]) - min(l[0], l[2]) < 1000 and max(l[1], l[3]) - min(l[1], l[3]) < 1000:
-                    break
+                    # call intersection calculation                     
+                    interList.append(intersection(lineList[i], lineList[j]))
+                    # add intersections as dots to output image for visualization
+                    #cdst = cv2.circle(cdst, interList[-1], 4, (255,0,255), 4)
+        
+        tlList = []
+        trList = []
+        blList = []
+        brList = []
+        tliouList = []
+        triouList = []
+        bliouList = []
+        briouList = []
+        
+        height, width, channels = img.shape 
+        for inters in interList:
+            if inters[0] < width / 2 and inters[1] < height / 2:
+                tlList.append(inters)
                 
-                cv2.line(cdst, (l[0], l[1]), (l[2], l[3]), (0,0,255), 3, cv2.LINE_AA)
-                for j in range(0, len(linesP)):
-                    if i == j:
-                        break
-                    lineA[0][0] = linesP[i][0][0]
-                    lineA[0][1] = linesP[i][0][1]
-                    lineA[1][0] = linesP[i][0][2]
-                    lineA[1][1] = linesP[i][0][3]
-                    lineB[0][0] = linesP[j][0][0]
-                    lineB[0][1] = linesP[j][0][1]
-                    lineB[1][0] = linesP[j][0][2]
-                    lineB[1][1] = linesP[j][0][3]
-                    inter = intersection(lineA, lineB)
-                    cdst = cv2.circle(cdst, inter, 4, (255,0,255), 4)
+                #output for debug
+                #rectb = (inters[0], inters[1]), (10, 10), 0
+                #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (250, 0, 0))
+                
+            if inters[0] > width / 2 and inters[1] < height / 2:
+                trList.append(inters)
+                
+                #output for debug
+                #rectb = (inters[0], inters[1]), (10, 10), 0
+                #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (0, 250, 0))
+                
+            if inters[0] < width / 2 and inters[1] > height / 2:
+                blList.append(inters)
+                
+                #output for debug
+                #rectb = (inters[0], inters[1]), (10, 10), 0
+                #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (0, 250, 250))
+                
+            if inters[0] > width / 2 and inters[1] > height / 2:
+                brList.append(inters)
+                
+                #output for debug
+                #rectb = (inters[0], inters[1]), (10, 10), 0
+                #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (250, 250, 0))
+        
+        for i in range(0, max(len(tlList),len(trList),len(blList),len(brList))):
+            tliou = 0
+            triou = 0
+            bliou = 0
+            briou = 0
+            for j in range(0, max(len(tlList),len(trList),len(blList),len(brList))):
+                if i == j:
+                    break
+                if i < len(tlList) and j < len(tlList):
+                    recta = tlList[i][0], tlList[i][1],10,10
+                    rectb = tlList[j][0], tlList[j][1],10,10
+                    if intersection_over_union(recta, rectb) > 0.7:
+                        tliou += 1
 
+                if i < len(trList) and j < len(trList):
+                    recta = trList[i][0], trList[i][1],10,10
+                    rectb = trList[j][0], trList[j][1],10,10
+                    if intersection_over_union(recta, rectb) > 0.7:
+                        triou += 1
 
+                if i < len(blList) and j < len(blList):
+                    recta = blList[i][0], blList[i][1],10,10
+                    rectb = blList[j][0], blList[j][1],10,10
+                    if intersection_over_union(recta, rectb) > 0.7:
+                        tliou += 1
 
-
-        ################ verbesserungswürdig, aber geht
+                if i < len(brList) and j < len(brList):
+                    recta = brList[i][0], brList[i][1],10,10
+                    rectb = brList[j][0], brList[j][1],10,10
+                    if intersection_over_union(recta, rectb) > 0.7:
+                        briou += 1
+            tliouList.append(tliou)
+            triouList.append(triou)
+            bliouList.append(bliou)
+            briouList.append(briou)
+            
+            if tliou < 1 and i < len(tlList):
+                del tlList[i]
+            if triou < 1 and i < len(trList):
+                del trList[i]
+            if bliou < 1 and i < len(blList):
+                del blList[i]
+            if briou < 1 and i < len(brList):
+                del brList[i]
+        
+        print (str(len(tliouList)) + ", " + str(len(tlList)))
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32') for tl in tlList], -1, (250, 0, 0))
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32') for tr in trList], -1, (0, 250, 0)) 
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32') for bl in blList], -1, (0, 250, 250)) 
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32') for br in brList], -1, (250, 250, 0))                 
+            #tliouList.append(tliou)
+            #triouList.append(triou)
+            #bliouList.append(bliou)
+            #briouList.append(briou)
             
             
         
-        
+            #for j in range (len(interList)):
+                #if i == j:
+                 #   break
+                #recta = (interList[i][0], interList[i][1]), (10, 10), 0
+                #rectb = (interList[j][0], interList[j][1]), (10, 10), 0
+                
+                
+        # visualization for debug
         cv2.imshow("test", cdst)
         cv2.waitKey()
      
 #####################################################################################################################################################
 #
 # compute intersection of two lines
+# cast to int for use in images
 #
 #####################################################################################################################################################
 
