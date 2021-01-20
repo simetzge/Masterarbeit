@@ -596,6 +596,7 @@ try:
 
     def hough_rotate(img, rect):
         
+        
         #how much bigger the crop image is than the board
         sizeFactor = 0.2     
         (x, y), (w, h), angle = rect
@@ -617,8 +618,9 @@ try:
         ret, binary = cv2.threshold(gray, 180, THRESHOLD_MAX, cv2.THRESH_BINARY)
         binary = cv2.GaussianBlur(binary,(3,3),5)
         #ret, binary = cv2.threshold(binary, 180, THRESHOLD_MAX, cv2.THRESH_BINARY)
-
-
+        
+        
+        height, width = binary.shape 
         #binary = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
         
         contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -661,9 +663,16 @@ try:
         #add contour in red
         #roisImg = cv2.drawContours(cdst, hull_list, -1, (0, 0, 230))
         
-        # empty lineList to collect all lines        
+        # empty lineList to collect all lines
+        topList = []
+        bottomList = []
+        rightList = []
+        leftList = [] 
+        
         lineList = []
         interList = []
+        
+        
         if lines is not None:            
             # go through lines, calculate the coordinates
             for i in range(0, len(lines)):
@@ -678,17 +687,32 @@ try:
                 cv2.line(cdst, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
                 # add lines to List
                 line =[pt1,pt2]
-                lineList.append(line)
+                lineList.append(line)                
+
+                
             # calculate every intersection between lines 
             for i in range(0, len(lineList)):    
                 for j in range(0, len(lineList)):
                     # skip intersection of line with itself
-                    if i == j:
+                    if lineList[i] == lineList[j]:
                         break
-                    # call intersection calculation                     
-                    interList.append(intersection(lineList[i], lineList[j]))
+                    
+                    #skip if lines are in the same direction
+                    quia = getQuadrant(binary, lineList[i][0])
+                    quib = getQuadrant(binary, lineList[i][1])
+                    quja = getQuadrant(binary, lineList[j][0])
+                    qujb = getQuadrant(binary, lineList[j][1]) 
+                    if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
+                        break
+                    
+                    # call intersection calculation
+                    inter = intersection(lineList[i], lineList[j])
+                    #ignor if the intersection is on the corners
+                    if (inter[0] < 0 or inter [0] > max(width,height)) or (inter[1] < 0 or inter[1] > max(width,height)):
+                        break
+                    interList.append(inter)
                     # add intersections as dots to output image for visualization
-                    #cdst = cv2.circle(cdst, interList[-1], 4, (255,0,255), 4)
+                    cdst = cv2.circle(cdst, interList[-1], 4, (255,0,255), 4)
         
         tlList = []
         trList = []
@@ -699,34 +723,33 @@ try:
         bliouList = []
         briouList = []
         
-        height, width, channels = img.shape 
         for inters in interList:
             if inters[0] < width / 2 and inters[1] < height / 2:
                 tlList.append(inters)
                 
                 #output for debug
-                #rectb = (inters[0], inters[1]), (10, 10), 0
+                rectb = (inters[0], inters[1]), (50, 50), 0
                 #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (250, 0, 0))
                 
             if inters[0] > width / 2 and inters[1] < height / 2:
                 trList.append(inters)
                 
                 #output for debug
-                #rectb = (inters[0], inters[1]), (10, 10), 0
+                rectb = (inters[0], inters[1]), (50, 50), 0
                 #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (0, 250, 0))
                 
             if inters[0] < width / 2 and inters[1] > height / 2:
                 blList.append(inters)
                 
                 #output for debug
-                #rectb = (inters[0], inters[1]), (10, 10), 0
+                rectb = (inters[0], inters[1]), (50, 50), 0
                 #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (0, 250, 250))
                 
             if inters[0] > width / 2 and inters[1] > height / 2:
                 brList.append(inters)
                 
                 #output for debug
-                #rectb = (inters[0], inters[1]), (10, 10), 0
+                rectb = (inters[0], inters[1]), (50, 50), 0
                 #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (250, 250, 0))
         
         for i in range(0, max(len(tlList),len(trList),len(blList),len(brList))):
@@ -740,45 +763,58 @@ try:
                 if i < len(tlList) and j < len(tlList):
                     recta = tlList[i][0], tlList[i][1],10,10
                     rectb = tlList[j][0], tlList[j][1],10,10
-                    if intersection_over_union(recta, rectb) > 0.7:
+                    if intersection_over_union(recta, rectb) > 0.8:
                         tliou += 1
 
                 if i < len(trList) and j < len(trList):
                     recta = trList[i][0], trList[i][1],10,10
                     rectb = trList[j][0], trList[j][1],10,10
-                    if intersection_over_union(recta, rectb) > 0.7:
+                    if intersection_over_union(recta, rectb) > 0.8:
                         triou += 1
 
                 if i < len(blList) and j < len(blList):
                     recta = blList[i][0], blList[i][1],10,10
                     rectb = blList[j][0], blList[j][1],10,10
-                    if intersection_over_union(recta, rectb) > 0.7:
-                        tliou += 1
+                    if intersection_over_union(recta, rectb) > 0.8:
+                        bliou += 1
 
                 if i < len(brList) and j < len(brList):
                     recta = brList[i][0], brList[i][1],10,10
                     rectb = brList[j][0], brList[j][1],10,10
-                    if intersection_over_union(recta, rectb) > 0.7:
+                    if intersection_over_union(recta, rectb) > 0.8:
                         briou += 1
-            tliouList.append(tliou)
-            triouList.append(triou)
-            bliouList.append(bliou)
-            briouList.append(briou)
+            if i < len(tlList):
+                tliouList.append(tliou)
+            if i < len(trList):
+                triouList.append(triou)
+            if i < len(blList):
+                bliouList.append(bliou)
+            if i < len(brList):
+                briouList.append(briou)
             
-            if tliou < 1 and i < len(tlList):
-                del tlList[i]
-            if triou < 1 and i < len(trList):
-                del trList[i]
-            if bliou < 1 and i < len(blList):
-                del blList[i]
-            if briou < 1 and i < len(brList):
-                del brList[i]
+        #tlposition = np.argsort(tliouList)
+        #trposition = np.argsort(triouList)
+        #blposition = np.argsort(bliouList)
+        #brposition = np.argsort(briouList)
         
-        print (str(len(tliouList)) + ", " + str(len(tlList)))
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32') for tl in tlList], -1, (250, 0, 0))
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32') for tr in trList], -1, (0, 250, 0)) 
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32') for bl in blList], -1, (0, 250, 250)) 
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32') for br in brList], -1, (250, 250, 0))                 
+
+
+        #tl = tlList[tlposition[-1]]
+        #tr = trList[trposition[-1]] 
+        #bl = blList[blposition[-1]] 
+        #br = brList[brposition[-1]] 
+        
+        tl = getCorner(tlList)
+        tr = getCorner(trList)
+        bl = getCorner(blList)
+        br = getCorner(brList)
+        
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32')], -1, (250, 250, 250))
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 250, 250))
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 250, 250))
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 250, 250))   
+
+            
             #tliouList.append(tliou)
             #triouList.append(triou)
             #bliouList.append(bliou)
@@ -796,6 +832,50 @@ try:
         # visualization for debug
         cv2.imshow("test", cdst)
         cv2.waitKey()
+        
+#####################################################################################################################################################
+#
+# get corner
+#
+#####################################################################################################################################################
+
+    def getCorner(inList):
+        
+        iouList = []
+        for i in range(len(inList)):
+            iou = 0
+            for j in range(len(inList)):
+                if inList[i] != inList[j]:
+                    recta = inList[i][0], inList[i][1],50,50
+                    rectb = inList[j][0], inList[j][1],50,50
+                    if intersection_over_union(recta, rectb) > 0.9:
+                        iou += 1
+            iouList.append(iou)
+        position = np.argsort(iouList)
+        corner = inList[position[-1]]
+        print(corner)
+        return(corner)
+    
+#####################################################################################################################################################
+#
+# quadrant check
+#
+#####################################################################################################################################################
+
+    def getQuadrant(img, coordinate):
+        
+        height, width = img.shape
+        if coordinate[0] < width / 2 and coordinate[1] < height / 2:
+            return("tl")
+                
+        if coordinate[0] > width / 2 and coordinate[1] < height / 2:
+            return("tr")
+                
+        if coordinate[0] < width / 2 and coordinate[1] > height / 2:
+            return("bl")
+                
+        if coordinate[0] > width / 2 and coordinate[1] > height / 2:
+            return("br")
      
 #####################################################################################################################################################
 #
