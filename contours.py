@@ -452,10 +452,10 @@ try:
             #crop = img[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])]
             
             #trying new version
-            hough_rotate(img,rect)
+            crop =hough_rotate(img,rect)
             
             #old version, works, but not perfect
-            crop = rotate_board (img, rect)
+            #crop = rotate_board (img, rect)
             
             #output('rectanglecut', rectcut, fileName)
             crop = preprocessing (crop)
@@ -487,9 +487,12 @@ try:
 
     def preprocessing(img):
         
+        img = cv2.GaussianBlur(img,(3,3),5)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        img = scaleImage(img)
-        filtered = cv2.adaptiveThreshold(img.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 41, 3)
+        
+        #ret, img = cv2.threshold(img, 0, 255,cv2.THRESH_BINARY,cv2.THRESH_OTSU) #imgf contains Binary image
+        #img = scaleImage(img)
+        #filtered = cv2.adaptiveThreshold(img.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 41, 3)
         
         kernel = np.ones((1,1),np.uint8)
         
@@ -500,20 +503,21 @@ try:
         closing = cv2.morphologyEx(openening, cv2.MORPH_CLOSE, kernel)
         
         ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
-        ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY)
+        img = cv2.GaussianBlur(img,(1,1),0)
+        #ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY)
         img = cv2.GaussianBlur(img,(1,1),0)
         
-        ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY  + cv2.THRESH_OTSU)
-        
-        img = cv2.bitwise_or(img, closing)
-        
+        #ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY  + cv2.THRESH_OTSU)
+        img = cv2.GaussianBlur(img,(1,1),0)
+        #img = cv2.bitwise_or(img, closing)
+        img = cv2.GaussianBlur(img,(1,1),0)
         #img = cv2.medianBlur(img,5) 
                
-        img = normalizeImage(img)
+        #img = normalizeImage(img)
         #img = cv2.GaussianBlur(img,(1,1),0)
         #ret, img = cv2.threshold(img, 140, 255, cv2.THRESH_BINARY)
         
-        #img = Skeleton(img)
+        #img = skeleton(img)
         
         #ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
         
@@ -601,77 +605,33 @@ try:
         sizeFactor = 0.2     
         (x, y), (w, h), angle = rect
         
-        #create bigger rect to get the complete board
-        #big_rect = (int(x - 0.1 * w), int(y - 0.1 * h)), ( int(w * 1.2), int(y * 1.2)), angle
-        #(x, y), (w, h), angle = big_rect
-        
+        #crop image with a larger area than the detected rect to get the corners of the board
         bl, br, tr , tl = cv2.boxPoints(rect).astype('int32')
         crop_img = img[int(min(tl[1],br[1]) - sizeFactor * w): int(max(tl[1],br[1]) + sizeFactor * w),int(min(tl[0],br[0]) - sizeFactor * h):int(max(tl[0],br[0]) + sizeFactor * h)]
         
-        crop_img = scaleImage(crop_img)
-        
-        crop_img = cv2.GaussianBlur(crop_img,(3,3),5)
-        gray = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
-        
-        gray = normalizeImage(gray)
-        
+        #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
+        crop_img = scaleImage(crop_img)        
+        blur = cv2.GaussianBlur(crop_img,(3,3),5)
+        gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)        
+        gray = normalizeImage(gray)        
         ret, binary = cv2.threshold(gray, 180, THRESHOLD_MAX, cv2.THRESH_BINARY)
-        binary = cv2.GaussianBlur(binary,(3,3),5)
-        #ret, binary = cv2.threshold(binary, 180, THRESHOLD_MAX, cv2.THRESH_BINARY)
-        
-        
-        height, width = binary.shape 
-        #binary = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
-        
-        contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-        
-        contArea = 0
-        big_cont = contours[0]
-        
-        for contour in contours:
-            
-            #compute and search for the largest contour area     
-            
-            #a = cv2.contourArea(contour)
-            a = len(contour)
-            
-            if (contArea < a):
-                contArea = a
-                big_cont = contour
-        
-        #hull = cv2.convexHull()
-        
+        binary = cv2.GaussianBlur(binary,(3,3),5)           
         binary = skeleton (binary)
         binary = cv2.GaussianBlur(binary,(3,3),5)
-        #ret, binary = cv2.threshold(binary, 180, THRESHOLD_MAX, cv2.THRESH_BINARY)
         
-        # Find the convex hull object for each contour
-       # hull_list = []
-        #for i in range(len(contours)):
-            #hull = cv2.convexHull(contours[i])
-            #hull_list.append(hull)
+        #get shape
+        height, width = binary.shape 
         
-        
-        # hough
-        #dst = cv2.Canny(binary, 50, 200, None, 3)
+        # cannyedge        
         dst = cannyThreshold(binary)
-        
-
+        #hough with canny edge
         lines = cv2.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
-        cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
         
-        #add contour in red
-        #roisImg = cv2.drawContours(cdst, hull_list, -1, (0, 0, 230))
+        #cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)  
         
-        # empty lineList to collect all lines
-        topList = []
-        bottomList = []
-        rightList = []
-        leftList = [] 
-        
+        # empty lineList to collect all lines        
         lineList = []
-        interList = []
-        
+        interList = []        
         
         if lines is not None:            
             # go through lines, calculate the coordinates
@@ -684,11 +644,10 @@ try:
                 y0 = b * rho
                 pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
                 pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-                cv2.line(cdst, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+                #cv2.line(cdst, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
                 # add lines to List
                 line =[pt1,pt2]
                 lineList.append(line)                
-
                 
             # calculate every intersection between lines 
             for i in range(0, len(lineList)):    
@@ -712,126 +671,55 @@ try:
                         break
                     interList.append(inter)
                     # add intersections as dots to output image for visualization
-                    cdst = cv2.circle(cdst, interList[-1], 4, (255,0,255), 4)
+                    #cdst = cv2.circle(cdst, interList[-1], 4, (255,0,255), 4)
         
         tlList = []
         trList = []
         blList = []
         brList = []
-        tliouList = []
-        triouList = []
-        bliouList = []
-        briouList = []
         
+        #sort inter
         for inters in interList:
-            if inters[0] < width / 2 and inters[1] < height / 2:
+            if getQuadrant(binary, inters) == "tl":
                 tlList.append(inters)
-                
-                #output for debug
-                rectb = (inters[0], inters[1]), (50, 50), 0
-                #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (250, 0, 0))
-                
-            if inters[0] > width / 2 and inters[1] < height / 2:
+
+            if getQuadrant(binary, inters) == "tr":
                 trList.append(inters)
                 
-                #output for debug
-                rectb = (inters[0], inters[1]), (50, 50), 0
-                #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (0, 250, 0))
-                
-            if inters[0] < width / 2 and inters[1] > height / 2:
+            if getQuadrant(binary, inters) == "bl":
                 blList.append(inters)
                 
-                #output for debug
-                rectb = (inters[0], inters[1]), (50, 50), 0
-                #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (0, 250, 250))
-                
-            if inters[0] > width / 2 and inters[1] > height / 2:
-                brList.append(inters)
-                
-                #output for debug
-                rectb = (inters[0], inters[1]), (50, 50), 0
-                #cdst = cv2.drawContours(cdst, [cv2.boxPoints(rectb).astype('int32')], -1, (250, 250, 0))
+            if getQuadrant(binary, inters) == "br":
+                brList.append(inters)                
+        #cast tuple to list
+        tl = list(getCorner(tlList))
+        tr = list(getCorner(trList))
+        bl = list(getCorner(blList))
+        br = list(getCorner(brList))
         
-        for i in range(0, max(len(tlList),len(trList),len(blList),len(brList))):
-            tliou = 0
-            triou = 0
-            bliou = 0
-            briou = 0
-            for j in range(0, max(len(tlList),len(trList),len(blList),len(brList))):
-                if i == j:
-                    break
-                if i < len(tlList) and j < len(tlList):
-                    recta = tlList[i][0], tlList[i][1],10,10
-                    rectb = tlList[j][0], tlList[j][1],10,10
-                    if intersection_over_union(recta, rectb) > 0.8:
-                        tliou += 1
-
-                if i < len(trList) and j < len(trList):
-                    recta = trList[i][0], trList[i][1],10,10
-                    rectb = trList[j][0], trList[j][1],10,10
-                    if intersection_over_union(recta, rectb) > 0.8:
-                        triou += 1
-
-                if i < len(blList) and j < len(blList):
-                    recta = blList[i][0], blList[i][1],10,10
-                    rectb = blList[j][0], blList[j][1],10,10
-                    if intersection_over_union(recta, rectb) > 0.8:
-                        bliou += 1
-
-                if i < len(brList) and j < len(brList):
-                    recta = brList[i][0], brList[i][1],10,10
-                    rectb = brList[j][0], brList[j][1],10,10
-                    if intersection_over_union(recta, rectb) > 0.8:
-                        briou += 1
-            if i < len(tlList):
-                tliouList.append(tliou)
-            if i < len(trList):
-                triouList.append(triou)
-            if i < len(blList):
-                bliouList.append(bliou)
-            if i < len(brList):
-                briouList.append(briou)
-            
-        #tlposition = np.argsort(tliouList)
-        #trposition = np.argsort(triouList)
-        #blposition = np.argsort(bliouList)
-        #brposition = np.argsort(briouList)
+        #put points in array
+        src = [bl, tl, tr, br]
+        #get array for destination
+        dst = np.array([[0, height-1],[0, 0],[width-1, 0],[width-1, height-1]], dtype="float32")
         
-
-
-        #tl = tlList[tlposition[-1]]
-        #tr = trList[trposition[-1]] 
-        #bl = blList[blposition[-1]] 
-        #br = brList[brposition[-1]] 
+        #get rotation matrix
+        M = cv2.getPerspectiveTransform(np.float32(src), dst) 
+        #warp
+        warped = cv2.warpPerspective(crop_img, M, (int(width), int(height)))
         
-        tl = getCorner(tlList)
-        tr = getCorner(trList)
-        bl = getCorner(blList)
-        br = getCorner(brList)
-        
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32')], -1, (250, 250, 250))
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 250, 250))
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 250, 250))
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 250, 250))   
-
-            
-            #tliouList.append(tliou)
-            #triouList.append(triou)
-            #bliouList.append(bliou)
-            #briouList.append(briou)
-            
-            
-        
-            #for j in range (len(interList)):
-                #if i == j:
-                 #   break
-                #recta = (interList[i][0], interList[i][1]), (10, 10), 0
-                #rectb = (interList[j][0], interList[j][1]), (10, 10), 0
-                
-                
+        if warped.shape[0] > warped.shape[1]:
+            #warped = np.rot90(warped)
+            warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_CLOCKWISE) 
         # visualization for debug
-        cv2.imshow("test", cdst)
-        cv2.waitKey()
+        #cdst = crop_img
+        #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+        #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+        #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+        #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
+        #cv2.imshow("test", warped)
+        #cv2.waitKey()
+        
+        return (warped)
         
 #####################################################################################################################################################
 #
@@ -846,14 +734,14 @@ try:
             iou = 0
             for j in range(len(inList)):
                 if inList[i] != inList[j]:
-                    recta = inList[i][0], inList[i][1],50,50
-                    rectb = inList[j][0], inList[j][1],50,50
+                    recta = inList[i][0], inList[i][1],10,10
+                    rectb = inList[j][0], inList[j][1],10,10
                     if intersection_over_union(recta, rectb) > 0.9:
                         iou += 1
             iouList.append(iou)
         position = np.argsort(iouList)
         corner = inList[position[-1]]
-        print(corner)
+        #corner = [float(corn) for corn in corner]
         return(corner)
     
 #####################################################################################################################################################
