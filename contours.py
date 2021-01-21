@@ -19,11 +19,12 @@ from ocr import *
 ##################################################################################################################################################### 
 
 IMG_TARGET_SIZE = 1000
-THRESHOLD_MIN = 90
+THRESHOLD_MIN = 20
 THRESHOLD_MAX = 255
 MODIFY_THRESHOLD = False
 USE_TEMPLATE = True
 USE_ABSOLUTE_PATH = True
+SIMPLE_CROP = True
 ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
 
 try:   
@@ -59,10 +60,11 @@ try:
                 continue
             
             if MODIFY_THRESHOLD:
-                rect_detect_iterative(img, fileNames[i])
+                rects = rect_detect_iterative(img, fileNames[i])
             else:
-                rect_detect_adaptive(img, fileNames[i])
-        
+                rects = rect_detect_adaptive(img, fileNames[i])
+            cut(img, rects, fileNames[i])
+
 
 #####################################################################################################################################################
 #    
@@ -189,7 +191,8 @@ try:
         #send the modified images in the output function
         output('output', roisImg, fileName, 'adaptive')
         
-        cut(img, rois, fileName)
+        #cut(img, rois, fileName)
+        return(rois)
     
 #####################################################################################################################################################
 #
@@ -222,10 +225,10 @@ try:
             #print(len(rois))    
         
             #add contours in red to image
-            roisImg = cv2.drawContours(img, contours, -1, (0, 0, 230))
+            #roisImg = cv2.drawContours(img, contours, -1, (0, 0, 230))
         
             #add the found rectangles in green to image
-            roisImg = cv2.drawContours(roisImg, [cv2.boxPoints(rect).astype('int32') for rect in rois], -1, (0, 230, 0))
+            #roisImg = cv2.drawContours(roisImg, [cv2.boxPoints(rect).astype('int32') for rect in rois], -1, (0, 0, 250))
         
             #send the modified images in the output function
             #output(roisImg, fileName, str(j))
@@ -243,7 +246,6 @@ try:
         for r in allRois:
             
             for i in range(len(r)):
-                                
                 (x,y), (w,h), angle = r[i]
                 rois_dict = {
                     }
@@ -298,6 +300,8 @@ try:
                     
         #send the modified images in the output function
         output('output', roisImg, fileName, str(same))
+        #cut(img, rects, fileName)
+        return(rects)
         
 #####################################################################################################################################################
 #
@@ -451,15 +455,16 @@ try:
             
             #crop = img[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])]
             
-            #trying new version
-            crop =hough_rotate(img,rect)
-            
-            #old version, works, but not perfect
-            #crop = rotate_board (img, rect)
-            
+            if SIMPLE_CROP:
+                #old version, works, but not perfect
+                crop = rotate_board (img, rect)
+            else:
+                # new version
+                crop =hough_rotate(img,rect)
             #output('rectanglecut', rectcut, fileName)
-            crop = preprocessing (crop)
+            #crop = preprocessing (crop)
             
+            #ocr
             image_to_text(crop)
             
             output('rect', crop, fileName, str(i)) 
