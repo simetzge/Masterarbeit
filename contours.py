@@ -442,11 +442,10 @@ try:
 
     def cut(img, rects, fileName):
         
+        # generate mask for extraction of rectangles
         mask = np.zeros(img.shape[:2], dtype=bool)
-        #hier weitermachen rects stimmen nicht ganz und müssen korrigiert werden. das resultiert aus der Rotation der Rechtecke. cv.boxpoints
-        #exrahiert die Eckpunkte nach beschriebenem Schema, der Winkel ist ebenfalls bekannt. Problem ist, wie kriege ich das Rechteck sauber
-        #aus dem eigentlichen Bild? umgekehrt, die Tafel auszuschneiden und zu drehen scheint nicht das Problem (link)
         
+        # crop every rectangle with simple crop ()
         for i, rect in enumerate(rects):
             
             (x, y), (w, h), angle = rect
@@ -460,9 +459,10 @@ try:
                 crop = rotate_board (img, rect)
             else:
                 # new version
-                crop =hough_rotate(img,rect)
+                crop = hough_rotate(img,rect)
             #output('rectanglecut', rectcut, fileName)
-            #crop = preprocessing (crop)
+            
+            crop = preprocessing (crop)
             
             #ocr
             image_to_text(crop)
@@ -492,31 +492,40 @@ try:
 
     def preprocessing(img):
         
-        img = cv2.GaussianBlur(img,(3,3),5)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        median = cv2.medianBlur(gray, 5)
+        
+        #ret, gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        
+        kernel = np.ones((5,5),np.uint8)
+        
+        dilate = cv2.dilate(gray , kernel, iterations = 1)
+        
+        #img = cv2.GaussianBlur(img,(3,3),5)        
         
         #ret, img = cv2.threshold(img, 0, 255,cv2.THRESH_BINARY,cv2.THRESH_OTSU) #imgf contains Binary image
         #img = scaleImage(img)
         #filtered = cv2.adaptiveThreshold(img.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 41, 3)
         
-        kernel = np.ones((1,1),np.uint8)
+        #kernel = np.ones((1,1),np.uint8)
         
         #img = cv2.erode(img,kernel,iterations = 10)
         
-        openening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+        #openening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
         
-        closing = cv2.morphologyEx(openening, cv2.MORPH_CLOSE, kernel)
+        #closing = cv2.morphologyEx(openening, cv2.MORPH_CLOSE, kernel)
         
-        ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
-        img = cv2.GaussianBlur(img,(1,1),0)
+        #ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
+        #img = cv2.GaussianBlur(img,(1,1),0)
         #ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY)
-        img = cv2.GaussianBlur(img,(1,1),0)
+        #img = cv2.GaussianBlur(img,(1,1),0)
         
         #ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY  + cv2.THRESH_OTSU)
-        img = cv2.GaussianBlur(img,(1,1),0)
+        #img = cv2.GaussianBlur(img,(1,1),0)
         #img = cv2.bitwise_or(img, closing)
-        img = cv2.GaussianBlur(img,(1,1),0)
-        #img = cv2.medianBlur(img,5) 
+        #img = cv2.GaussianBlur(img,(1,1),0)
+
                
         #img = normalizeImage(img)
         #img = cv2.GaussianBlur(img,(1,1),0)
@@ -530,11 +539,26 @@ try:
         #img = cv2.GaussianBlur(img,(5,5),0)
         
         #ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
+        
         #############################################
         # maybe try se canny edge ja?
-        #############################################
+        #############################################        
         
-        return(img)
+        #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        #gray = cv2.medianBlur(gray,5)
+        
+        #gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        
+        #kernel = np.ones((5,5),np.uint8)
+        
+        #gray = cv2.dilate(gray, kernel, iterations = 1)
+        
+        #gray = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)
+        
+        #gray = cv2.Canny(gray, 100, 200)
+                
+        return(median)
     
     #cannyedge from opencv doc
     def cannyThreshold(img):
@@ -695,9 +719,10 @@ try:
                 blList.append(inters)
                 
             if getQuadrant(binary, inters) == "br":
-                brList.append(inters)                
+                brList.append(inters)
+        
         #cast tuple to list
-        tl = list(getCorner(tlList))
+        tl = list(getCorner(tlList))     
         tr = list(getCorner(trList))
         bl = list(getCorner(blList))
         br = list(getCorner(brList))
@@ -705,7 +730,7 @@ try:
         #put points in array
         src = [bl, tl, tr, br]
         #get array for destination
-        dst = np.array([[0, height-1],[0, 0],[width-1, 0],[width-1, height-1]], dtype="float32")
+        dst = np.array([[0, height],[0, 0],[width, 0],[width, height]], dtype="float32")
         
         #get rotation matrix
         M = cv2.getPerspectiveTransform(np.float32(src), dst) 
@@ -714,26 +739,35 @@ try:
         
         if warped.shape[0] > warped.shape[1]:
             #warped = np.rot90(warped)
-            warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_CLOCKWISE) 
+            warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_CLOCKWISE)
+        
+        # dsize
+        if USE_TEMPLATE == True:
+            dsize = (warped.shape[1], int(warped.shape[1] / aspectRatio))
+        else:
+            dsize = (warped.shape[1], int(warped.shape[1] * 0.8))
+
+        # resize image
+        warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_AREA)
+        
         # visualization for debug
         #cdst = crop_img
         #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
         #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
         #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
         #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
-        #cv2.imshow("test", warped)
+        #cv2.imshow("test", cdst)
         #cv2.waitKey()
         
         return (warped)
         
 #####################################################################################################################################################
 #
-# get corner
+# calculate the coordinate with the most intersections arround
 #
 #####################################################################################################################################################
 
     def getCorner(inList):
-        
         iouList = []
         for i in range(len(inList)):
             iou = 0
@@ -751,7 +785,7 @@ try:
     
 #####################################################################################################################################################
 #
-# quadrant check
+# return the abbreviation of the quadrant where the point is located
 #
 #####################################################################################################################################################
 
