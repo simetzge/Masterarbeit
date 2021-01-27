@@ -24,7 +24,7 @@ THRESHOLD_MAX = 255
 MODIFY_THRESHOLD = False
 USE_TEMPLATE = True
 USE_ABSOLUTE_PATH = True
-SIMPLE_CROP = True
+SIMPLE_CROP = False
 ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
 
 try:   
@@ -232,7 +232,7 @@ try:
         
             #send the modified images in the output function
             #output(roisImg, fileName, str(j))
-                        
+
             if len(rois) > 0:
                 
                 allRois.append(rois)
@@ -462,10 +462,19 @@ try:
                 crop = hough_rotate(img,rect)
             #output('rectanglecut', rectcut, fileName)
             
+            #end function if no crop image found (hough rotate returns [None] if something went wrong)
+            if len(crop) < 2:
+                print(fileName + " failed")
+                return (None)
+
             crop = preprocessing (crop)
             
             #ocr
-            image_to_text(crop)
+            text = image_to_text(crop)
+            
+            ##########################
+            #write text on image
+            cv2.putText(crop, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
             
             output('rect', crop, fileName, str(i)) 
             
@@ -494,27 +503,51 @@ try:
         
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
-        median = cv2.medianBlur(gray, 5)
+        # multiple blurring and normalization to get better contours
+        for i in range (100):
+            
+            median = cv2.medianBlur(gray, 3)
         
-        #ret, gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            gray = normalizeImage(median)
+            
+            if i % 10 == 0:
+                
+                gray = cv2.fastNlMeansDenoising(gray,7,7,7)
+                
+                #ret, gray = cv2.threshold(gray, 90, 255, cv2.THRESH_BINARY,cv2.THRESH_OTSU)
         
-        kernel = np.ones((5,5),np.uint8)
+                #gray = cv2.GaussianBlur(gray,(1,1),0)
+                
+                
+                #gray = skeleton(gray)
+                
+              
+        #gray = cv2.equalizeHist(gray)  
+        #gray = cv2.fastNlMeansDenoising(gray,7,7,7)
         
-        dilate = cv2.dilate(gray , kernel, iterations = 1)
+        #ret, gray = cv2.threshold(gray, 130, 255, cv2.THRESH_BINARY)
         
-        #img = cv2.GaussianBlur(img,(3,3),5)        
+        #kernel = np.ones((5,5),np.uint8)
         
+        #dilate = cv2.dilate(gray , kernel, iterations = 1)
+        
+        #gray = skeleton(gray)
+        
+        #median = cv2.GaussianBlur(median,(3,3),5)        
+        #gray = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
         #ret, img = cv2.threshold(img, 0, 255,cv2.THRESH_BINARY,cv2.THRESH_OTSU) #imgf contains Binary image
         #img = scaleImage(img)
-        #filtered = cv2.adaptiveThreshold(img.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 41, 3)
+        #gray = cv2.adaptiveThreshold(gray.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 41, 3)
         
         #kernel = np.ones((1,1),np.uint8)
         
-        #img = cv2.erode(img,kernel,iterations = 10)
+        #gray = cv2.erode(gray,kernel,iterations = 10)
         
-        #openening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+        #openening = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)
         
         #closing = cv2.morphologyEx(openening, cv2.MORPH_CLOSE, kernel)
+        
+        #gray = closing
         
         #ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
         #img = cv2.GaussianBlur(img,(1,1),0)
@@ -555,10 +588,8 @@ try:
         #gray = cv2.dilate(gray, kernel, iterations = 1)
         
         #gray = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)
-        
-        #gray = cv2.Canny(gray, 100, 200)
                 
-        return(median)
+        return(gray)
     
     #cannyedge from opencv doc
     def cannyThreshold(img):
@@ -619,6 +650,15 @@ try:
         #warp
         warped = cv2.warpPerspective(img, M, (int(w), int(h)))
         
+        # dsize
+        if USE_TEMPLATE == True:
+            dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE / aspectRatio))
+        else:
+            dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE * 0.8))
+
+        # resize image
+        warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_AREA)
+        
         return (warped)
 
 #####################################################################################################################################################
@@ -643,7 +683,10 @@ try:
         blur = cv2.GaussianBlur(crop_img,(3,3),5)
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)        
         gray = normalizeImage(gray)        
-        ret, binary = cv2.threshold(gray, 180, THRESHOLD_MAX, cv2.THRESH_BINARY)
+        ret, binary = cv2.threshold(gray, 170, THRESHOLD_MAX, cv2.THRESH_BINARY)
+        
+        #cv2.imshow("test", binary)
+        #cv2.waitKey()
         binary = cv2.GaussianBlur(binary,(3,3),5)           
         binary = skeleton (binary)
         binary = cv2.GaussianBlur(binary,(3,3),5)
@@ -656,7 +699,7 @@ try:
         #hough with canny edge
         lines = cv2.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
         
-        #cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)  
+        cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)  
         
         # empty lineList to collect all lines        
         lineList = []
@@ -673,7 +716,7 @@ try:
                 y0 = b * rho
                 pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
                 pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-                #cv2.line(cdst, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+                cv2.line(cdst, pt1, pt2, (0,0,255), 1, cv2.LINE_AA)
                 # add lines to List
                 line =[pt1,pt2]
                 lineList.append(line)                
@@ -696,11 +739,15 @@ try:
                     # call intersection calculation
                     inter = intersection(lineList[i], lineList[j])
                     #ignor if the intersection is on the corners
-                    if (inter[0] < 0 or inter [0] > max(width,height)) or (inter[1] < 0 or inter[1] > max(width,height)):
-                        break
-                    interList.append(inter)
-                    # add intersections as dots to output image for visualization
-                    #cdst = cv2.circle(cdst, interList[-1], 4, (255,0,255), 4)
+                    
+                    if not ((inter[0] < 1 or inter [0] > max(width,height)-1) or (inter[1] < 1 or inter[1] > max(width,height))):
+                        
+                        interList.append(inter)
+                        # add intersections as dots to output image for visualization
+                        cdst = cv2.circle(cdst, inter, 4, (255,0,255), 4)                    
+                    
+            #cv2.imshow("test", cdst)
+            #cv2.waitKey()
         
         tlList = []
         trList = []
@@ -722,10 +769,20 @@ try:
                 brList.append(inters)
         
         #cast tuple to list
-        tl = list(getCorner(tlList))     
-        tr = list(getCorner(trList))
-        bl = list(getCorner(blList))
-        br = list(getCorner(brList))
+        tl = getCorner(tlList)   
+        tr = getCorner(trList)
+        bl = getCorner(blList)
+        br = getCorner(brList)
+        
+        #when no corner detected return None
+        if tl == None or tr == None or bl == None or br == None:
+            #return ([None])
+            print()
+        
+        tl = list(tl)     
+        tr = list(tr)
+        bl = list(bl)
+        br = list(br)
         
         #put points in array
         src = [bl, tl, tr, br]
@@ -751,11 +808,11 @@ try:
         warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_AREA)
         
         # visualization for debug
-        #cdst = crop_img
-        #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-        #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-        #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-        #cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
+        cdst = crop_img
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
         #cv2.imshow("test", cdst)
         #cv2.waitKey()
         
@@ -768,19 +825,28 @@ try:
 #####################################################################################################################################################
 
     def getCorner(inList):
+        
+        # when list empty return 0
+        if len(inList) == 0:
+            return(None)
+        #empty intersection over union list
         iouList = []
+        #compare every item in list with every other item in list
         for i in range(len(inList)):
             iou = 0
             for j in range(len(inList)):
                 if inList[i] != inList[j]:
+                    #build rectangles around coordinates and check via intersection over union if they are close to each other
                     recta = inList[i][0], inList[i][1],10,10
                     rectb = inList[j][0], inList[j][1],10,10
                     if intersection_over_union(recta, rectb) > 0.9:
+                        #if close, counter +1
                         iou += 1
+            #save the counters in list
             iouList.append(iou)
+        #sort the counter list, return the coordinates with the highest counter
         position = np.argsort(iouList)
         corner = inList[position[-1]]
-        #corner = [float(corn) for corn in corner]
         return(corner)
     
 #####################################################################################################################################################
