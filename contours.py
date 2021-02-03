@@ -57,9 +57,10 @@ try:
             
         #detect rectangles in every image, adaptive or iterative
         for i, img  in enumerate(images):
-            
+            #skip template
             if 'template' in fileNames[i]:
                 continue
+            #skip all pictures but the one that should be checked
             if CHECK_PICTURE != "":
                 if not CHECK_PICTURE in fileNames[i]:
                     continue            
