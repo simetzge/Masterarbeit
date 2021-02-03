@@ -11,6 +11,7 @@ import os
 import re
 import math
 from ocr import *
+from CNN import *
 
 #####################################################################################################################################################
 #
@@ -26,6 +27,7 @@ USE_TEMPLATE = True
 USE_ABSOLUTE_PATH = True
 SIMPLE_CROP = False
 ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
+CHECK_PICTURE = "catacom_1051"
 
 try:   
 #####################################################################################################################################################
@@ -58,12 +60,15 @@ try:
             
             if 'template' in fileNames[i]:
                 continue
-            
+            if CHECK_PICTURE != "":
+                if not CHECK_PICTURE in fileNames[i]:
+                    continue            
             if MODIFY_THRESHOLD:
                 rects = rect_detect_iterative(img, fileNames[i])
             else:
                 rects = rect_detect_adaptive(img, fileNames[i])
             cut(img, rects, fileNames[i])
+            #CNN(img)
 
 
 #####################################################################################################################################################
@@ -470,11 +475,12 @@ try:
             crop = preprocessing (crop)
             
             #ocr
-            text = image_to_text(crop)
+            #################################
+            #text = image_to_text(crop)
             
-            ##########################
+            
             #write text on image
-            cv2.putText(crop, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+            #cv2.putText(crop, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
             
             output('rect', crop, fileName, str(i)) 
             
@@ -499,7 +505,7 @@ try:
 #
 #####################################################################################################################################################
 
-    def preprocessing(img):
+    def preprocessing_old(img):
         
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
@@ -510,18 +516,56 @@ try:
         
             gray = normalizeImage(median)
             
+            # set everything lower than 60 to 0
+            gray = np.where(gray < 60, 0, gray)
+            
             if i % 10 == 0:
                 
                 gray = cv2.fastNlMeansDenoising(gray,7,7,7)
                 
+                #try to set push values in different directiosn
+                #gray = np.where(gray < 130, 105, gray)
+                #gray = np.where(gray < 100, 80, gray)
+                #gray = np.where(gray < 75, 51, gray)
+                #gray = np.where(gray < 50, 0, gray)
+                #gray = np.where(gray > 160, 175, gray)
+                
+                # set everything lower than 60 to 0
+                #gray = np.where(gray < 60, 0, gray)
+                
+                # change low and high based on mean
+                #gray = np.where(gray < np.mean(gray), 0, gray)
+                #gray = np.where(gray > ((np.mean(gray)+255)/2), 255, gray)
+                
+                # change low based on mean
+                #gray = np.where(gray < np.mean(gray), 0, gray)
+                
+                #change values based on mean without zeros (black area)
+                #gray = np.where(gray < np.mean(gray), 0, gray)
+                #newgray = gray.copy()
+                #newgray = newgray[newgray!=0]
+                #mean = np.mean(newgray)
+                #print (mean, np.mean(gray))
+                #gray = np.where(gray > mean, 250, gray)
+                
+                #gray [gray == nan] = 0
+
+                # change high based on mean
+                #gray = np.where(gray > np.mean(gray), 150, gray)
+                 
                 #ret, gray = cv2.threshold(gray, 90, 255, cv2.THRESH_BINARY,cv2.THRESH_OTSU)
         
                 #gray = cv2.GaussianBlur(gray,(1,1),0)
                 
                 
                 #gray = skeleton(gray)
-                
-              
+        #newgray = gray.copy()
+        #newgray = newgray[newgray!=0]
+        #mean = np.mean(newgray)
+        #print (mean, np.mean(gray))
+        #gray = np.where(gray > mean, 250, gray)
+        #gray = np.where(gray < np.mean(gray), 0, gray)        
+        #gray = np.where(gray > np.mean(gray), 200, gray)      
         #gray = cv2.equalizeHist(gray)  
         #gray = cv2.fastNlMeansDenoising(gray,7,7,7)
         
@@ -642,13 +686,17 @@ try:
         #cast boxpoints for source
         src = box.astype("float32")
         #get array for destination
-        dst = np.array([[0, h-1],[0, 0],[w-1, 0],[w-1, h-1]], dtype="float32")
+        dst = np.array([[0, h],[0, 0],[w, 0],[w, h]], dtype="float32")
         
         #get rotation matrix
         M = cv2.getPerspectiveTransform(src, dst)
         
         #warp
         warped = cv2.warpPerspective(img, M, (int(w), int(h)))
+        
+        if warped.shape[0] > warped.shape[1]:
+            #warped = np.rot90(warped)
+            warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_CLOCKWISE)
         
         # dsize
         if USE_TEMPLATE == True:
@@ -677,13 +725,24 @@ try:
         #crop image with a larger area than the detected rect to get the corners of the board
         bl, br, tr , tl = cv2.boxPoints(rect).astype('int32')
         crop_img = img[int(min(tl[1],br[1]) - sizeFactor * w): int(max(tl[1],br[1]) + sizeFactor * w),int(min(tl[0],br[0]) - sizeFactor * h):int(max(tl[0],br[0]) + sizeFactor * h)]
+        #w = w + sizeFactor * 2 * w
+        #h = h + sizeFactor * 2 * h
+        #new_rect = (x,y ),(w,h ), angle
+        #crop_img = rotate_board(img, new_rect)
+        
+        if crop_img.shape[0] > crop_img.shape[1]:
+            #warped = np.rot90(warped)
+            crop_img = cv2.rotate(crop_img, cv2.cv2.ROTATE_90_CLOCKWISE)
         
         #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
         crop_img = scaleImage(crop_img)        
         blur = cv2.GaussianBlur(crop_img,(3,3),5)
-        gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)        
+        gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
         gray = normalizeImage(gray)        
-        ret, binary = cv2.threshold(gray, 170, THRESHOLD_MAX, cv2.THRESH_BINARY)
+        mean = np.mean(gray)
+        ret, binary = cv2.threshold(gray, mean+30, THRESHOLD_MAX, cv2.THRESH_BINARY)
+        #binary = cv2.adaptiveThreshold(binary,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
+        
         
         #cv2.imshow("test", binary)
         #cv2.waitKey()
@@ -699,7 +758,7 @@ try:
         #hough with canny edge
         lines = cv2.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
         
-        cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)  
+        cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
         
         # empty lineList to collect all lines        
         lineList = []
@@ -740,13 +799,13 @@ try:
                     inter = intersection(lineList[i], lineList[j])
                     #ignor if the intersection is on the corners
                     
-                    if not ((inter[0] < 1 or inter [0] > max(width,height)-1) or (inter[1] < 1 or inter[1] > max(width,height))):
+                    if not ((inter[0] < 1 or inter [0] > width) or inter[1] < 1 or inter[1] > height):
                         
                         interList.append(inter)
                         # add intersections as dots to output image for visualization
-                        cdst = cv2.circle(cdst, inter, 4, (255,0,255), 4)                    
+                    cdst = cv2.circle(cdst, inter, 4, (255,0,255), 4)                    
                     
-            #cv2.imshow("test", cdst)
+           # cv2.imshow("test", cdst)
             #cv2.waitKey()
         
         tlList = []
@@ -776,7 +835,7 @@ try:
         
         #when no corner detected return None
         if tl == None or tr == None or bl == None or br == None:
-            #return ([None])
+            return ([None])
             print()
         
         tl = list(tl)     
@@ -788,15 +847,11 @@ try:
         src = [bl, tl, tr, br]
         #get array for destination
         dst = np.array([[0, height],[0, 0],[width, 0],[width, height]], dtype="float32")
-        
+        print (src)
         #get rotation matrix
         M = cv2.getPerspectiveTransform(np.float32(src), dst) 
         #warp
         warped = cv2.warpPerspective(crop_img, M, (int(width), int(height)))
-        
-        if warped.shape[0] > warped.shape[1]:
-            #warped = np.rot90(warped)
-            warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_CLOCKWISE)
         
         # dsize
         if USE_TEMPLATE == True:
@@ -815,7 +870,6 @@ try:
         cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
         #cv2.imshow("test", cdst)
         #cv2.waitKey()
-        
         return (warped)
         
 #####################################################################################################################################################
