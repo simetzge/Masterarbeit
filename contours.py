@@ -27,7 +27,7 @@ USE_TEMPLATE = True
 USE_ABSOLUTE_PATH = True
 SIMPLE_CROP = False
 ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
-CHECK_PICTURE = "catacom_1051"
+CHECK_PICTURE = ""
 
 try:   
 #####################################################################################################################################################
@@ -63,7 +63,8 @@ try:
             #skip all pictures but the one that should be checked
             if CHECK_PICTURE != "":
                 if not CHECK_PICTURE in fileNames[i]:
-                    continue            
+                    continue      
+            print("the next image is " + fileNames[i])
             if MODIFY_THRESHOLD:
                 rects = rect_detect_iterative(img, fileNames[i])
             else:
@@ -466,12 +467,13 @@ try:
             else:
                 # new version
                 crop = hough_rotate(img,rect)
+                
             #output('rectanglecut', rectcut, fileName)
             
             #end function if no crop image found (hough rotate returns [None] if something went wrong)
             if len(crop) < 2:
                 print(fileName + " failed")
-                return (None)
+                continue
 
             crop = preprocessing (crop)
             
@@ -718,38 +720,61 @@ try:
 
     def hough_rotate(img, rect):
         
-        
+        debug_hough = False
         #how much bigger the crop image is than the board
-        sizeFactor = 0.2     
+        #sizeFactor = 0.25
         (x, y), (w, h), angle = rect
-        
+        #sizeFactor should increase with angle size, minimum should be 0.2
+        sizeFactor = max(round(0.003 * max(angle, -angle),1), 0.2)
+        print (sizeFactor)
         #crop image with a larger area than the detected rect to get the corners of the board
         bl, br, tr , tl = cv2.boxPoints(rect).astype('int32')
-        crop_img = img[int(min(tl[1],br[1]) - sizeFactor * w): int(max(tl[1],br[1]) + sizeFactor * w),int(min(tl[0],br[0]) - sizeFactor * h):int(max(tl[0],br[0]) + sizeFactor * h)]
-        #w = w + sizeFactor * 2 * w
-        #h = h + sizeFactor * 2 * h
-        #new_rect = (x,y ),(w,h ), angle
-        #crop_img = rotate_board(img, new_rect)
+        #left = int(max(min(tl[0],br[0]) - sizeFactor * w,1))
+        #right = int(min(max(tl[0],br[0]) + sizeFactor * w, w))
+        #top = int(max(min(tl[1],br[1]) - sizeFactor * h,1))
+        #bottom = int(min(max(tl[1],br[1]) + sizeFactor * h,h))
+        
+        left = min(tl[0],br[0]) - sizeFactor * h
+        right = max(tl[0],br[0]) + sizeFactor * h
+        top = min(tl[1],br[1]) - sizeFactor * w
+        bottom = max(tl[1],br[1]) + sizeFactor * w
+        if left < 0: left = 0
+        if right > img.shape[1]: right = img.shape[1]
+        if top < 0: top = 0
+        if bottom > img.shape[0]: bottom = img.shape[0]
+        left = int(left)
+        right = int(right)
+        top = int(top)
+        bottom = int(bottom)
+        
+        crop_img = img[top:bottom,left:right]
+        #crop_img = img[int(min(tl[1],br[1]) - sizeFactor * w): int(max(tl[1],br[1]) + sizeFactor * w),int(min(tl[0],br[0]) - sizeFactor * h):int(max(tl[0],br[0]) + sizeFactor * h)]
+        
+        new_rect = (x,y), (int(w*1.4), int(h*1.4)), angle
+        crop_img = rotate_board(img, new_rect)
         
         if crop_img.shape[0] > crop_img.shape[1]:
             #warped = np.rot90(warped)
-            crop_img = cv2.rotate(crop_img, cv2.cv2.ROTATE_90_CLOCKWISE)
+            crop_img = cv2.rotate(crop_img, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
         
         #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
-        crop_img = scaleImage(crop_img)        
-        blur = cv2.GaussianBlur(crop_img,(3,3),5)
+        crop_img = scaleImage(crop_img)
+        blur = cv2.bilateralFilter(crop_img,9,75,75)
+        blur = cv2.fastNlMeansDenoising(blur,7,7,7)        
+        blur = cv2.GaussianBlur(blur,(3,3),15)
+        
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
         gray = normalizeImage(gray)        
         mean = np.mean(gray)
-        ret, binary = cv2.threshold(gray, mean+30, THRESHOLD_MAX, cv2.THRESH_BINARY)
+        ret, binary = cv2.threshold(gray, int(mean*1.2), THRESHOLD_MAX, cv2.THRESH_BINARY)
         #binary = cv2.adaptiveThreshold(binary,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
         
-        
-        #cv2.imshow("test", binary)
-        #cv2.waitKey()
-        binary = cv2.GaussianBlur(binary,(3,3),5)           
+        if debug_hough:
+            cv2.imshow("test", binary)
+            cv2.waitKey()
+        binary = cv2.GaussianBlur(binary,(3,3),15)           
         binary = skeleton (binary)
-        binary = cv2.GaussianBlur(binary,(3,3),5)
+        binary = cv2.GaussianBlur(binary,(3,3),15)
         
         #get shape
         height, width = binary.shape 
@@ -805,9 +830,9 @@ try:
                         interList.append(inter)
                         # add intersections as dots to output image for visualization
                     cdst = cv2.circle(cdst, inter, 4, (255,0,255), 4)                    
-                    
-           # cv2.imshow("test", cdst)
-            #cv2.waitKey()
+            if debug_hough:       
+                cv2.imshow("test", cdst)
+                cv2.waitKey()
         
         tlList = []
         trList = []
@@ -834,9 +859,9 @@ try:
         bl = getCorner(blList)
         br = getCorner(brList)
         
-        #when no corner detected return None
+        #when no corner detected return simple cropped image
         if tl == None or tr == None or bl == None or br == None:
-            return ([None])
+            return (rotate_board(img, rect))
             print()
         
         tl = list(tl)     
@@ -869,8 +894,9 @@ try:
         cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
         cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
         cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
-        #cv2.imshow("test", cdst)
-        #cv2.waitKey()
+        if debug_hough:
+            cv2.imshow("test", cdst)
+            cv2.waitKey()
         return (warped)
         
 #####################################################################################################################################################
