@@ -26,8 +26,11 @@ MODIFY_THRESHOLD = False
 USE_TEMPLATE = True
 USE_ABSOLUTE_PATH = True
 SIMPLE_CROP = False
+CUT_THRESH = 150
 ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
 CHECK_PICTURE = ""
+################################################################
+COUNTER = 0
 
 try:   
 #####################################################################################################################################################
@@ -71,6 +74,7 @@ try:
                 rects = rect_detect_adaptive(img, fileNames[i])
             cut(img, rects, fileNames[i])
             #CNN(img)
+        print(COUNTER)
 
 
 #####################################################################################################################################################
@@ -139,7 +143,7 @@ try:
         if len(mod) == 0:
             cv2.imwrite(path + '\\' + folder + '\\' + name[:-4] + '.png', img)
         else:
-            cv2.imwrite(path + '\\' + folder + '\\' + name[:-4] + '_' + mod + '.png', img)     
+            cv2.imwrite(path + '\\' + folder + '\\' + name[:-4] + '_' + mod + '.png', img)
         
 #####################################################################################################################################################
 #      
@@ -466,7 +470,7 @@ try:
                 crop = rotate_board (img, rect)
             else:
                 # new version
-                crop = hough_rotate(img,rect)
+                crop = hough_rotate(img,rect, CUT_THRESH)
                 
             #output('rectanglecut', rectcut, fileName)
             
@@ -479,11 +483,11 @@ try:
             
             #ocr
             #################################
-            #text = image_to_text(crop)
+            text = image_to_text(crop)
             
             
             #write text on image
-            #cv2.putText(crop, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+            cv2.putText(crop, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
             
             output('rect', crop, fileName, str(i)) 
             
@@ -718,9 +722,14 @@ try:
 #
 #####################################################################################################################################################
 
-    def hough_rotate(img, rect):
+    def hough_rotate(img, rect, threshold):
         
         debug_hough = False
+        
+        #if threshold is too low, use simple crop
+        if threshold < 100:
+            return (rotate_board(img, rect))
+            
         #how much bigger the crop image is than the board
         #sizeFactor = 0.25
         (x, y), (w, h), angle = rect
@@ -750,7 +759,7 @@ try:
         crop_img = img[top:bottom,left:right]
         #crop_img = img[int(min(tl[1],br[1]) - sizeFactor * w): int(max(tl[1],br[1]) + sizeFactor * w),int(min(tl[0],br[0]) - sizeFactor * h):int(max(tl[0],br[0]) + sizeFactor * h)]
         
-        new_rect = (x,y), (int(w*1.4), int(h*1.4)), angle
+        new_rect = (x,y), (int(w*1.3), int(h*1.3)), angle
         crop_img = rotate_board(img, new_rect)
         
         if crop_img.shape[0] > crop_img.shape[1]:
@@ -766,7 +775,11 @@ try:
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
         gray = normalizeImage(gray)        
         mean = np.mean(gray)
-        ret, binary = cv2.threshold(gray, int(mean*1.2), THRESHOLD_MAX, cv2.THRESH_BINARY)
+        #mean *1.2 bisher zweitbeste (31), beste mean+25 (27)
+        
+        #gray = preprocessing(crop_img)
+        
+        ret, binary = cv2.threshold(gray, int(mean+30), THRESHOLD_MAX, cv2.THRESH_BINARY)
         #binary = cv2.adaptiveThreshold(binary,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
         
         if debug_hough:
@@ -782,7 +795,7 @@ try:
         # cannyedge        
         dst = cannyThreshold(binary)
         #hough with canny edge
-        lines = cv2.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
+        lines = cv2.HoughLines(dst, 1, np.pi / 180, threshold, None, 0, 0)
         
         cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
         
@@ -861,8 +874,12 @@ try:
         
         #when no corner detected return simple cropped image
         if tl == None or tr == None or bl == None or br == None:
-            return (rotate_board(img, rect))
-            print()
+            global COUNTER
+            COUNTER = COUNTER +1
+            #return (rotate_board(img, rect))
+            #perform hough rotate with lower threshold
+            return(hough_rotate(img, rect, threshold-5))
+            
         
         tl = list(tl)     
         tr = list(tr)

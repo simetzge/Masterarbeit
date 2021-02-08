@@ -21,11 +21,16 @@ def image_to_text(img):
     
     #img = preprocessing(img)
     #try to read
-    text = pytesseract.image_to_string(img)
-    #if no text is found, rotate and try again
-    if len(text) < 5:
-        img = cv2.rotate(img, cv2.cv2.ROTATE_180)
-        text = pytesseract.image_to_string(img)
+    texta = pytesseract.image_to_string(img)
+    #rotate and try again
+    img = cv2.rotate(img, cv2.cv2.ROTATE_180)
+    textb = pytesseract.image_to_string(img)
+    
+    #take the version with more chars detected
+    if len(texta) > len(textb):
+        text = texta
+    else:
+        text = textb
     #if 'campidoglio' is not on the board, it should be a chalk board, therefore use simpler charset
     if not"CAMPIDOGLIO" in text:
         text = pytesseract.image_to_string(img, config='board')
@@ -53,12 +58,12 @@ def preprocessing(img):
     # multiple blurring and normalization to get better contours
     for i in range (100):
             
-        median = cv2.medianBlur(gray, 3)
-        
-        gray = normalizeImage(median)
+        blur = cv2.medianBlur(gray, 3)
+        #blur = cv2.bilateralFilter(gray,9,75,75)
+        gray = normalizeImage(blur)
             
         # set everything lower than 50 to 0
-       # gray = np.where(gray < 60, 0, gray)
+        gray = np.where(gray < 60, 0, gray)
             
         if i % 10 == 0:
                 
