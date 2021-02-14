@@ -23,14 +23,14 @@ def image_to_text(img):
     #try to read
     texta = pytesseract.image_to_string(img)
     #rotate and try again
-    img = cv2.rotate(img, cv2.cv2.ROTATE_180)
-    textb = pytesseract.image_to_string(img)
+    #img = cv2.rotate(img, cv2.cv2.ROTATE_180)
+    #textb = pytesseract.image_to_string(img)
     
     #take the version with more chars detected
-    if len(texta) > len(textb):
-        text = texta
-    else:
-        text = textb
+    #if len(texta) >= len(textb):
+    text = texta
+    #else:
+        #text = textb
     #if 'campidoglio' is not on the board, it should be a chalk board, therefore use simpler charset
     if not"CAMPIDOGLIO" in text:
         text = pytesseract.image_to_string(img, config='board')
@@ -56,16 +56,41 @@ def preprocessing(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
     # multiple blurring and normalization to get better contours
-    for i in range (100):
+    for i in range (10):
             
         blur = cv2.medianBlur(gray, 3)
-        #blur = cv2.bilateralFilter(gray,9,75,75)
+ 
         gray = normalizeImage(blur)
             
         # set everything lower than 50 to 0
-        gray = np.where(gray < 60, 0, gray)
+        #gray = np.where(gray < 60, 0, gray)
             
         if i % 10 == 0:
                 
             gray = cv2.fastNlMeansDenoising(gray,7,7,7)
+    gray = (255-gray)
+    return(gray)
+
+def new_preprocessing(img):
+        
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = normalizeImage(gray)    
+    # multiple blurring and normalization to get better contours
+    #for i in range (10):
+            
+        #blur = cv2.medianBlur(gray, 3)
+        #blur = cv2.bilateralFilter(gray,9,75,75)
+        #gray = normalizeImage(blur)
+            
+        # set everything lower than 50 to 0
+        #gray = np.where(gray < 60, 0, gray)
+            
+        #if i % 10 == 0:
+                
+    gray = cv2.fastNlMeansDenoising(gray,15,15,15)
+    gray = cv2.bilateralFilter(gray,9,75,75)
+    gray = normalizeImage(gray)  
+    gray = cv2.medianBlur(gray, 3)
+    gray = (255-gray)
+
     return(gray)

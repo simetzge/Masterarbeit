@@ -479,7 +479,8 @@ try:
                 print(fileName + " failed")
                 continue
 
-            crop = preprocessing (crop)
+            #crop = new_preprocessing (crop)
+            crop = new_preprocessing (crop)
             
             #ocr
             #################################
@@ -769,8 +770,8 @@ try:
         #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
         crop_img = scaleImage(crop_img)
         blur = cv2.bilateralFilter(crop_img,9,75,75)
-        blur = cv2.fastNlMeansDenoising(blur,7,7,7)        
-        blur = cv2.GaussianBlur(blur,(3,3),15)
+        blur = cv2.fastNlMeansDenoising(blur,7,7,15)        
+        blur = cv2.GaussianBlur(blur,(7,7),15)
         
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
         gray = normalizeImage(gray)        
@@ -824,15 +825,16 @@ try:
                 for j in range(0, len(lineList)):
                     # skip intersection of line with itself
                     if lineList[i] == lineList[j]:
-                        break
+                        continue
                     
                     #skip if lines are in the same direction
                     quia = getQuadrant(binary, lineList[i][0])
                     quib = getQuadrant(binary, lineList[i][1])
                     quja = getQuadrant(binary, lineList[j][0])
                     qujb = getQuadrant(binary, lineList[j][1]) 
+                    #if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
                     if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
-                        break
+                        continue
                     
                     # call intersection calculation
                     inter = intersection(lineList[i], lineList[j])
@@ -842,7 +844,9 @@ try:
                         
                         interList.append(inter)
                         # add intersections as dots to output image for visualization
-                    cdst = cv2.circle(cdst, inter, 4, (255,0,255), 4)                    
+                        cdst = cv2.circle(cdst, inter, 4, (0,255,0), 4)
+                    else:
+                        cdst = cv2.circle(cdst, inter, 4, (0,0,255), 4)
             if debug_hough:       
                 cv2.imshow("test", cdst)
                 cv2.waitKey()
@@ -937,7 +941,7 @@ try:
                     #build rectangles around coordinates and check via intersection over union if they are close to each other
                     recta = inList[i][0], inList[i][1],10,10
                     rectb = inList[j][0], inList[j][1],10,10
-                    if intersection_over_union(recta, rectb) > 0.9:
+                    if intersection_over_union(recta, rectb) > 0.8:
                         #if close, counter +1
                         iou += 1
             #save the counters in list
