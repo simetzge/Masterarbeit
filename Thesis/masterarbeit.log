@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.2.14)  14 FEB 2021 12:38
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.2.14)  14 FEB 2021 13:28
 entering extended mode
 **./masterarbeit.tex
 (masterarbeit.tex
@@ -112,7 +112,7 @@ LaTeX Info: Redefining \frq on input line 304.
 ngerman -- \language number for naustrian undefined, default 48 used.
 )
 LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 2
-6.
+7.
 
 (C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
@@ -122,23 +122,24 @@ tex.def
 File: l3backend-pdftex.def 2021-01-09 L3 backend support: PDF output (pdfTeX)
 \l__kernel_color_stack_int=\count187
 \l__pdf_internal_box=\box47
-) (masterarbeit.aux (einleitung.aux) (tafeln.aux))
+) (masterarbeit.aux (einleitung.aux) (tafeln.aux) (texterkennung.aux)
+(sift.aux))
 \openout1 = `masterarbeit.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
 
 (C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
 ii
@@ -176,7 +177,7 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 
  [1]
 
-LaTeX Warning: Citation `teschl' on page 2 undefined on input line 76.
+LaTeX Warning: Citation `teschl' on page 2 undefined on input line 77.
 
 [2]
 \openout2 = `einleitung.aux'.
@@ -192,7 +193,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 8--10
  []
 
 )
-Underfull \hbox (badness 10000) in paragraph at lines 12--78
+Underfull \hbox (badness 10000) in paragraph at lines 12--79
 
  []
 
@@ -212,7 +213,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 7--11
  []
 
 )
-Underfull \hbox (badness 10000) in paragraph at lines 17--79
+Underfull \hbox (badness 10000) in paragraph at lines 17--80
 
  []
 
@@ -221,17 +222,31 @@ Underfull \hbox (badness 10000) in paragraph at lines 17--79
 
 
 ]
+\openout2 = `texterkennung.aux'.
+
+ (texterkennung.tex) [5
+
+
+
+]
+\openout2 = `sift.aux'.
+
+ (sift.tex) [6
+
+
+
+]
 No file masterarbeit.bbl.
-(masterarbeit.aux (einleitung.aux) (tafeln.aux))
+(masterarbeit.aux (einleitung.aux) (tafeln.aux) (texterkennung.aux) (sift.aux))
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 2407 strings out of 479618
- 35940 string characters out of 2865026
- 328086 words of memory out of 3000000
- 19553 multiletter control sequences out of 15000+200000
+ 2427 strings out of 479618
+ 36342 string characters out of 2865026
+ 331570 words of memory out of 3000000
+ 19559 multiletter control sequences out of 15000+200000
  417948 words of font info for 51 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  68i,10n,74p,211b,343s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -239,9 +254,9 @@ Here is how much of TeX's memory you used:
 /Users/Simon/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:
 /Users/Simon/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:
 /Users/Simon/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb>
-Output written on masterarbeit.pdf (6 pages, 47980 bytes).
+Output written on masterarbeit.pdf (8 pages, 51510 bytes).
 PDF statistics:
- 34 PDF objects out of 1000 (max. 8388607)
+ 42 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
