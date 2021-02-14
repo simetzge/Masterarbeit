@@ -1,0 +1,12 @@
+\contentsline {section}{\numberline {1}Allgemeines}{2}{}%
+\contentsline {subsection}{\numberline {1.1}Unterpunkt}{2}{}%
+\contentsline {section}{\numberline {2}Einleitung}{3}{}%
+\contentsline {subsection}{\numberline {2.1}Datenlage Archäologie}{3}{}%
+\contentsline {subsection}{\numberline {2.2}Grabung Kapitol}{3}{}%
+\contentsline {subsection}{\numberline {2.3}Datengrundlage und Vorhaben}{3}{}%
+\contentsline {section}{\numberline {3}Tafeldetektierung}{4}{}%
+\contentsline {subsection}{\numberline {3.1}Die Tafeln und ihre Tücken}{4}{}%
+\contentsline {subsection}{\numberline {3.2}Detektierungsmöglichkeiten}{4}{}%
+\contentsline {subsection}{\numberline {3.3}Ergebnisse CNN}{4}{}%
+\contentsline {subsection}{\numberline {3.4}Ergebnisse Feature Detection}{4}{}%
+\contentsline {subsection}{\numberline {3.5}Ergebnisse Kantenerkennung /Contours}{4}{}%

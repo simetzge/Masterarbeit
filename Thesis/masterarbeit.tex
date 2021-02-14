@@ -1,0 +1,88 @@
+\documentclass[a4paper,12pt,ngerman,titlepage]{article}
+
+%%%%%% packages %%%%%%%%%
+\usepackage{fancyhdr}
+\usepackage{times}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+% \usepackage[T1]{fontenc}
+\usepackage{graphicx}
+% \usepackage{amsmath}
+% \usepackage{amssymb}
+% 
+% 
+\usepackage{ngerman}
+
+%%%%%%pagestyle%%%%%%%%%
+\setlength{\headheight}{15pt}
+\pagestyle{fancy}
+
+\rfoot{\thepage}
+\cfoot{}
+%\lfoot{\includegraphics[width = 0.8\textwidth]{Fusszeilenlogo}}
+%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+% %%%%%% automatische Titelseite %%%%%%%%%
+% \author{Schreiber}
+% \date{Datum}
+% \title{Der Titel}
+% \maketitle
+% %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%% manuelle Titleseite %%%%%%%%%%%%
+\begin{titlepage}
+%    \begin{flushright}
+%        \includegraphics[scale=1]{HSM_Logo_T_gruen_rgb}%\\
+%    \end{flushright}
+%    \vspace{3cm}
+    %
+    \begin{center}
+        {\Huge Automatisierte Aufbereitung archäologischer Grabungsfotos mittels Computer Vision}\\
+        \vspace{2cm}
+        {\large Simon Metzger}\\
+        \vspace{1cm}
+        {\large{\textbf{ Masterarbeit}}}\\
+        \vspace{1cm}
+        {\large zur Erlangung des akademischen Grades Master of Arts im Studiengang Digitale Methodik der Geistes- und Kulturwissenschaften}\\
+        \vspace{1cm}
+        {\large Johannes-Gutenberg-Universität Mainz und Hochschule Mainz}
+            
+    \end{center}
+\end{titlepage}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+
+%%%%%%%%%%%% Vorspann %%%%%%%%%%%%%%
+\thispagestyle{empty}
+\renewcommand{\abstractname}{Zusammenfassung}
+\begin{abstract}
+    Im Format abstract
+\end{abstract}
+\newpage
+
+\thispagestyle{empty}
+\tableofcontents
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%% Inhalt %%%%%%%%%%%%%%
+\section{Allgemeines}
+Vom Allgemeinen
+\subsection{Unterpunkt}
+zum Speziellen
+\cite{teschl}
+
+\include{einleitung}
+\include{tafeln}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+%%%%%%%%%%%% Quellen %%%%%%%%%%%%%%
+\bibliographystyle{plain}
+\bibliography{quellen}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
