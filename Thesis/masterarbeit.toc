@@ -18,3 +18,4 @@
 \contentsline {subsection}{\numberline {5.1}SIFT allgemein}{6}{}%
 \contentsline {subsection}{\numberline {5.2}Ausgangsmaterial und Probleme}{6}{}%
 \contentsline {subsection}{\numberline {5.3}Vorgehen}{6}{}%
+\contentsline {section}{\numberline {6}Fazit}{7}{}%

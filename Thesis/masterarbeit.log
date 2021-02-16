@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.2.14)  14 FEB 2021 13:28
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.2.14)  14 FEB 2021 14:01
 entering extended mode
 **./masterarbeit.tex
 (masterarbeit.tex
@@ -236,17 +236,25 @@ Underfull \hbox (badness 10000) in paragraph at lines 17--80
 
 
 ]
+\openout2 = `fazit.aux'.
+
+ (fazit.tex) [7
+
+
+
+]
 No file masterarbeit.bbl.
-(masterarbeit.aux (einleitung.aux) (tafeln.aux) (texterkennung.aux) (sift.aux))
+(masterarbeit.aux (einleitung.aux) (tafeln.aux) (texterkennung.aux) (sift.aux)
+(fazit.aux))
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 2427 strings out of 479618
- 36342 string characters out of 2865026
+ 2434 strings out of 479618
+ 36455 string characters out of 2865026
  331570 words of memory out of 3000000
- 19559 multiletter control sequences out of 15000+200000
+ 19561 multiletter control sequences out of 15000+200000
  417948 words of font info for 51 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  68i,10n,74p,211b,343s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -254,9 +262,9 @@ Here is how much of TeX's memory you used:
 /Users/Simon/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:
 /Users/Simon/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:
 /Users/Simon/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb>
-Output written on masterarbeit.pdf (8 pages, 51510 bytes).
+Output written on masterarbeit.pdf (9 pages, 52411 bytes).
 PDF statistics:
- 42 PDF objects out of 1000 (max. 8388607)
+ 45 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

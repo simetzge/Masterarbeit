@@ -484,7 +484,10 @@ try:
             
             #ocr
             #################################
-            text = image_to_text(crop)
+            text, rotate = image_to_text(crop)
+            
+            if rotate == True:
+                crop = cv2.rotate(crop, cv2.cv2.ROTATE_180)
             
             
             #write text on image
