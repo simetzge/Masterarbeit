@@ -19,17 +19,28 @@ def main():
     #images = [cv2.imread(files, cv2.IMREAD_GRAYSCALE) for files in filePaths]
     images = [cv2.imread(files) for files in filePaths]
     for i, img  in enumerate(images):
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        img = normalizeImage(img)
-        text, rotate = image_to_text(img)
+        #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        #img = normalizeImage(img)
+        imga = new_preprocessing(img)
+        imgb = preprocessing(img)
+        
+        
+        text, rotate = image_to_text(imga)
         if rotate == True:
-            img = cv2.rotate(img, cv2.cv2.ROTATE_180)
-            
-            
+            imga = cv2.rotate(imga, cv2.cv2.ROTATE_180)
+                #write text on image
+        cv2.putText(imga, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+        output('recttest_out', imga, fileNames[i],'new')
+        
+        text, rotate = image_to_text(imgb)
+        if rotate == True:
+            imgb = cv2.rotate(imgb, cv2.cv2.ROTATE_180)
         #write text on image
-        cv2.putText(img, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+        cv2.putText(imgb, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+        output('recttest_out', imgb, fileNames[i],'old')    
+
             
-        output('recttest_out', img, fileNames[i])
+        
 
 def testocr():
     print('ocr standing by')

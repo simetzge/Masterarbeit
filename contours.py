@@ -153,7 +153,7 @@ try:
 
     def scaleImage(img):
         scale = IMG_TARGET_SIZE / np.max(img.shape)
-        return (cv2.resize(img, (0,0), fx = scale, fy = scale))
+        return (cv2.resize(img, (0,0), fx = scale, fy = scale, interpolation = cv2.INTER_CUBIC))
 
 #####################################################################################################################################################
 #      
@@ -716,7 +716,7 @@ try:
             dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE * 0.8))
 
         # resize image
-        warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_AREA)
+        warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_CUBIC)
         
         return (warped)
 
@@ -910,7 +910,7 @@ try:
             dsize = (warped.shape[1], int(warped.shape[1] * 0.8))
 
         # resize image
-        warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_AREA)
+        warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_CUBIC)
         
         # visualization for debug
         cdst = crop_img
