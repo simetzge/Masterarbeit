@@ -805,7 +805,7 @@ try:
         
         # empty lineList to collect all lines        
         lineList = []
-        interList = []        
+        interList = []
         
         if lines is not None:            
             # go through lines, calculate the coordinates
@@ -951,7 +951,18 @@ try:
             iouList.append(iou)
         #sort the counter list, return the coordinates with the highest counter
         position = np.argsort(iouList)
+        n = iouList.count(int(iouList[position[-1]]))
+        print (str(iouList[position[-1]]) + " kommt " + str(n) + " mal vor")
+        
+        #get mean of coordinates
         corner = inList[position[-1]]
+        cornarray = []
+        #cornarray = inList[position[-n:0]]
+        for i in range(n):
+            cornarray.append(inList[position[-i]])
+
+        corner = (int(sum(c[0] for c in cornarray)/n),int(sum(c[1] for c in cornarray)/n))
+        #corner = np.mean(cornarray, axis = 0)
         return(corner)
     
 #####################################################################################################################################################
