@@ -44,7 +44,7 @@ try:
         #testocr()
         ###########################
         
-        filePaths, fileNames = searchFiles('.jpg')
+        filePaths, fileNames = searchFiles('.jpg', 'input')
     
         images = []
     
@@ -84,7 +84,7 @@ try:
 #
 #####################################################################################################################################################
 
-    def searchFiles(extension):
+    def searchFiles(extension,folder):
         
         #get skript path
         if USE_ABSOLUTE_PATH == True:
@@ -100,11 +100,11 @@ try:
         names = []
         
         #if input dir found
-        if 'input' in dirs:
-            print('input gefunden')
+        if folder in dirs:
+            print(folder + ' gefunden')
             
             #list all files in input dir
-            content = os.listdir(path + '\\input')
+            content = os.listdir(path + '\\' + folder)
             
             #match the files with given extension
             for item in content:
@@ -112,11 +112,11 @@ try:
                 match = jregex.search(item)
                 #if found add to file array
                 if match != None:
-                    files.append(path + '\\input\\' + item)
+                    files.append(path + '\\' + folder + '\\' + item)
                     names.append(item)
         #print note and end skript if no input dir
         else:
-            print('input fehlt')
+            print(folder + ' fehlt')
             exit()
         #return all found files
         return(files, names)

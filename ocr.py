@@ -11,6 +11,25 @@ from PIL import Image
 TESTFLAG = True
 
 
+def main():
+    
+    filePaths, fileNames = searchFiles('.png', 'recttest')
+    images = []
+    
+    #images = [cv2.imread(files, cv2.IMREAD_GRAYSCALE) for files in filePaths]
+    images = [cv2.imread(files) for files in filePaths]
+    for i, img  in enumerate(images):
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        img = normalizeImage(img)
+        text, rotate = image_to_text(img)
+        if rotate == True:
+            img = cv2.rotate(img, cv2.cv2.ROTATE_180)
+            
+            
+        #write text on image
+        cv2.putText(img, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+            
+        output('recttest_out', img, fileNames[i])
 
 def testocr():
     print('ocr standing by')
@@ -107,3 +126,6 @@ def new_preprocessing(img):
     gray = (255-gray)
 
     return(gray)
+
+if __name__ == "__main__":
+    main() 
