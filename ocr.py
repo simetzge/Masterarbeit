@@ -7,8 +7,6 @@ Created on Mon Jan  4 11:32:32 2021
 import pytesseract
 import cv2
 from contours import *
-from PIL import Image
-TESTFLAG = True
 
 
 def main():
@@ -23,7 +21,6 @@ def main():
         #img = normalizeImage(img)
         imga = new_preprocessing(img)
         imgb = preprocessing(img)
-        
         
         text, rotate = image_to_text(imga)
         if rotate == True:
@@ -40,10 +37,27 @@ def main():
         output('recttest_out', imgb, fileNames[i],'old')    
 
             
-        
+#####################################################################################################################################################
+#
+# Calls the ocr subfunctions. Returns processed image with text on it
+#
+#####################################################################################################################################################     
 
-def testocr():
-    print('ocr standing by')
+def ocr(img):
+    #preimg = preprocessing(img)
+    preimg = new_preprocessing(img)
+    text, rotate = image_to_text(preimg)  
+    if rotate == True:
+        preimg = cv2.rotate(preimg, cv2.cv2.ROTATE_180)
+    #write text on image
+    cv2.putText(preimg, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+    return(preimg)
+
+#####################################################################################################################################################
+#
+# OCR with pytesseract
+#
+#####################################################################################################################################################
 
 def image_to_text(img):
     pytesseract.pytesseract.tesseract_cmd=r'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -79,7 +93,7 @@ def image_to_text(img):
 
     print (text)
     print("img to text done")
-    print (rotate)
+    #print (rotate)
     return(text, rotate)
 
 def textsplit(text):
@@ -130,11 +144,11 @@ def new_preprocessing(img):
         #if i % 10 == 0:
                 
     #gray = cv2.fastNlMeansDenoising(gray,15,15,15)
-    gray = cv2.bilateralFilter(gray,9,100,100)
-    gray = normalizeImage(gray)  
+    gray = cv2.bilateralFilter(gray,9,100,100)  
     gray = cv2.fastNlMeansDenoising(gray,15,15,15)
     #gray = cv2.medianBlur(gray, 15)
     gray = (255-gray)
+    gray = normalizeImage(gray)
 
     return(gray)
 

@@ -37,25 +37,19 @@ try:
     
     def main():
         
-        ##########################
-        #a few tests with files
-        #if TESTFLAG == True:
-         #   print ('works')
-        #testocr()
-        ###########################
-        
+        #get paths and names of all images in folder input
         filePaths, fileNames = searchFiles('.jpg', 'input')
     
+        #open the files in cv2
         images = []
-    
         #images = [cv2.imread(files, cv2.IMREAD_GRAYSCALE) for files in filePaths]
         images = [cv2.imread(files) for files in filePaths]
-    
+        
+        #scale images to 1000px
         images = [scaleImage(img) for img in images]
         
-        #get template from aspect ratio if flag is set
+        #get aspect ratio from template if flag is set
         if USE_TEMPLATE == True:
-            
             getAspectRatio(images, fileNames)
             
         #detect rectangles in every image, adaptive or iterative
@@ -72,7 +66,16 @@ try:
                 rects = rect_detect_iterative(img, fileNames[i])
             else:
                 rects = rect_detect_adaptive(img, fileNames[i])
-            cut(img, rects, fileNames[i])
+            
+            #crop found rectangles
+            cropimgs, restimg = cut(img, rects)
+            #perform OCR on cropped rectangles
+            for j, crop in enumerate(cropimgs):
+                ocrimg = ocr(crop)
+                output('rect', ocrimg, fileNames[i], str(j))
+            
+            #write images without rectangles
+            output('imagecut', restimg, fileNames[i])
             #CNN(img)
         print(COUNTER)
 
@@ -128,8 +131,7 @@ try:
 #
 #####################################################################################################################################################
 
-    def output(folder, img, name, mod=''):
-        
+    def output(folder, img, name, mod=''):    
         if USE_ABSOLUTE_PATH == True:
             path = ABSOLUTE_PATH
         else:
@@ -140,6 +142,7 @@ try:
             print(folder + '-Ordner vorhanden')
         else:
             os.makedirs(path + '\\' + folder)
+        #write files, add name modification if necessary
         if len(mod) == 0:
             cv2.imwrite(path + '\\' + folder + '\\' + name[:-4] + '.png', img)
         else:
@@ -157,18 +160,15 @@ try:
 
 #####################################################################################################################################################
 #      
-# normalize image to range from 0 to 255
+# normalize grayscale image to range from 0 to 255
 #
 #####################################################################################################################################################
     
     def normalizeImage(img):
-        
-        #img = scaleImage(img)
         (x, y) = img.shape
         normImg = np.zeros((x,y))
         img = cv2.normalize(img,  normImg, 0, 255, cv2.NORM_MINMAX)
         return (img)
-        
     
 ##################################################################################################################################################### 
 #
@@ -188,9 +188,6 @@ try:
         #findcontours
         contours, rois = rect_detect(binary) 
         
-        #print the number of rectangles for debug reasons
-        #print(len(rois))    
-        
         gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
         
         #add contours in red to image
@@ -201,8 +198,7 @@ try:
         
         #send the modified images in the output function
         output('output', roisImg, fileName, 'adaptive')
-        
-        #cut(img, rois, fileName)
+
         return(rois)
     
 #####################################################################################################################################################
@@ -213,46 +209,31 @@ try:
 
     def rect_detect_iterative(img, fileName):
         
-        j = THRESHOLD_MIN
-        
+        thresh = THRESHOLD_MIN
         allRois = []
         
-        #convert to grayscale
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
+        #convert to grayscale and normalize
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)     
         gray = normalizeImage(gray)
         
-        while j <= 200:
+        #search for rectangles with increasing threshold, max 200
+        while thresh <= 200:
             
-            rois = []
+            rois = []            
+            contours = []            
             
-            contours = []
-            
-            ret, binary = cv2.threshold(gray, j, THRESHOLD_MAX, cv2.THRESH_BINARY)
+            ret, binary = cv2.threshold(gray, thresh, THRESHOLD_MAX, cv2.THRESH_BINARY)    
             
             contours, rois = rect_detect(binary)
-        
-            #print the number of rectangles for debug reasons
-            #print(len(rois))    
-        
-            #add contours in red to image
-            #roisImg = cv2.drawContours(img, contours, -1, (0, 0, 230))
-        
-            #add the found rectangles in green to image
-            #roisImg = cv2.drawContours(roisImg, [cv2.boxPoints(rect).astype('int32') for rect in rois], -1, (0, 0, 250))
-        
-            #send the modified images in the output function
-            #output(roisImg, fileName, str(j))
-
-            if len(rois) > 0:
-                
-                allRois.append(rois)
             
-            j += 5
+            if len(rois) > 0:       
+                
+                allRois.append(rois)     
+                
+            thresh += 5
         
         #new rois list
-        rois_list = []
-        
+        rois_list = []        
         #go through the found rectangles and add them to an array of dictionaries
         for r in allRois:
             
@@ -288,30 +269,20 @@ try:
             for  i in range (len(rois_list)):
                 if rois_list[i]["same"] >= roi["same"]:
                     roi = rois_list[i]
-            #print number of same rois for debug reasons
-            #print(roi["same"]) 
         #add contours in red to image
-            if roi["same"] >= 6:
-                
+            if roi["same"] >= 6:              
                 #roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
                 rect = (roi["x"],roi["y"]),(roi["w"],roi["h"]),roi["angle"]
                 rects.append(rect)
                 same = roi["same"]
-        
-            #convert to grayscale
-            #gray = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        
-            #add the found rectangles in green to image
-            #roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in rects], -1, (0, 230, 0))
-        
-        #convert to grayscale
+        #convert to colored img for output
         gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
         #add the found rectangles in green to image
         roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in rects], -1, (0, 230, 0))
                     
         #send the modified images in the output function
         output('output', roisImg, fileName, str(same))
-        #cut(img, rects, fileName)
+        
         return(rects)
         
 #####################################################################################################################################################
@@ -363,9 +334,7 @@ try:
                     
                     #ignore this shape if aspect ratio doesn't fit
                     if not (asra < aspectRatio * 1.3 and asra > aspectRatio *0.7):
-                        continue
-                    #print aspect ratio for debug reasons
-                    #print ("asra " + str(asra))                    
+                        continue                 
                 
                 #else aspect ratio should be max 2:1
                 else:
@@ -439,20 +408,19 @@ try:
         rectareab = rectb[2] * rectb[3]
         
         iou = round(intersection / float(rectareaa + rectareab - intersection), 3)
-        
-        #print(iou)
-        
+
         return(iou)
 
 #####################################################################################################################################################
 #
 # cuts rectangle from image
-# sends both, modified image and rectangle, to output
+# returns both, modified image and rectangle
 #
 #####################################################################################################################################################
 
-    def cut(img, rects, fileName):
+    def cut(img, rects):
         
+        crops = []
         # generate mask for extraction of rectangles
         mask = np.zeros(img.shape[:2], dtype=bool)
         
@@ -463,40 +431,18 @@ try:
         
             bl, br, tr , tl = cv2.boxPoints(rect).astype('int32')
             
-            #crop = img[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])]
-            
             if SIMPLE_CROP:
                 #old version, works, but not perfect
                 crop = rotate_board (img, rect)
             else:
                 # new version
                 crop = hough_rotate(img,rect, CUT_THRESH)
-                
-            #output('rectanglecut', rectcut, fileName)
             
             #end function if no crop image found (hough rotate returns [None] if something went wrong)
             if len(crop) < 2:
-                print(fileName + " failed")
                 continue
-
-            #crop = new_preprocessing (crop)
-            crop = new_preprocessing (crop)
             
-            #ocr
-            #################################
-            text, rotate = image_to_text(crop)
-            
-            if rotate == True:
-                crop = cv2.rotate(crop, cv2.cv2.ROTATE_180)
-            
-            
-            #write text on image
-            cv2.putText(crop, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
-            
-            output('rect', crop, fileName, str(i)) 
-            
-            # mask area with size of detected rect
-            #mask[min(tl[1],br[1]): max(tl[1],br[1]),min(tl[0],br[0]):max(tl[0],br[0])] = True
+            crops.append(crop)
             
             # mask area sligtly bigger than detected rect to cut the complete board with its border
             mask[int(min(tl[1],br[1]) - 0.1 * w): int(max(tl[1],br[1]) + 0.1 * w),int(min(tl[0],br[0]) - 0.1 * h):int(max(tl[0],br[0]) + 0.1 * h)] = True
@@ -505,147 +451,9 @@ try:
         imgcut = img.copy()
         rectcut = imgcut[mask]
         imgcut[mask] = 0
+        
+        return(crops, imgcut)   
 
-        #send the modified images in the output function
-        output('imagecut', imgcut, fileName)
-    
-
-#####################################################################################################################################################
-#
-# create binary images for ocr
-#
-#####################################################################################################################################################
-
-    def preprocessing_old(img):
-        
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
-        # multiple blurring and normalization to get better contours
-        for i in range (100):
-            
-            median = cv2.medianBlur(gray, 3)
-        
-            gray = normalizeImage(median)
-            
-            # set everything lower than 60 to 0
-            gray = np.where(gray < 60, 0, gray)
-            
-            if i % 10 == 0:
-                
-                gray = cv2.fastNlMeansDenoising(gray,7,7,7)
-                
-                #try to set push values in different directiosn
-                #gray = np.where(gray < 130, 105, gray)
-                #gray = np.where(gray < 100, 80, gray)
-                #gray = np.where(gray < 75, 51, gray)
-                #gray = np.where(gray < 50, 0, gray)
-                #gray = np.where(gray > 160, 175, gray)
-                
-                # set everything lower than 60 to 0
-                #gray = np.where(gray < 60, 0, gray)
-                
-                # change low and high based on mean
-                #gray = np.where(gray < np.mean(gray), 0, gray)
-                #gray = np.where(gray > ((np.mean(gray)+255)/2), 255, gray)
-                
-                # change low based on mean
-                #gray = np.where(gray < np.mean(gray), 0, gray)
-                
-                #change values based on mean without zeros (black area)
-                #gray = np.where(gray < np.mean(gray), 0, gray)
-                #newgray = gray.copy()
-                #newgray = newgray[newgray!=0]
-                #mean = np.mean(newgray)
-                #print (mean, np.mean(gray))
-                #gray = np.where(gray > mean, 250, gray)
-                
-                #gray [gray == nan] = 0
-
-                # change high based on mean
-                #gray = np.where(gray > np.mean(gray), 150, gray)
-                 
-                #ret, gray = cv2.threshold(gray, 90, 255, cv2.THRESH_BINARY,cv2.THRESH_OTSU)
-        
-                #gray = cv2.GaussianBlur(gray,(1,1),0)
-                
-                
-                #gray = skeleton(gray)
-        #newgray = gray.copy()
-        #newgray = newgray[newgray!=0]
-        #mean = np.mean(newgray)
-        #print (mean, np.mean(gray))
-        #gray = np.where(gray > mean, 250, gray)
-        #gray = np.where(gray < np.mean(gray), 0, gray)        
-        #gray = np.where(gray > np.mean(gray), 200, gray)      
-        #gray = cv2.equalizeHist(gray)  
-        #gray = cv2.fastNlMeansDenoising(gray,7,7,7)
-        
-        #ret, gray = cv2.threshold(gray, 130, 255, cv2.THRESH_BINARY)
-        
-        #kernel = np.ones((5,5),np.uint8)
-        
-        #dilate = cv2.dilate(gray , kernel, iterations = 1)
-        
-        #gray = skeleton(gray)
-        
-        #median = cv2.GaussianBlur(median,(3,3),5)        
-        #gray = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
-        #ret, img = cv2.threshold(img, 0, 255,cv2.THRESH_BINARY,cv2.THRESH_OTSU) #imgf contains Binary image
-        #img = scaleImage(img)
-        #gray = cv2.adaptiveThreshold(gray.astype(np.uint8), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 41, 3)
-        
-        #kernel = np.ones((1,1),np.uint8)
-        
-        #gray = cv2.erode(gray,kernel,iterations = 10)
-        
-        #openening = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)
-        
-        #closing = cv2.morphologyEx(openening, cv2.MORPH_CLOSE, kernel)
-        
-        #gray = closing
-        
-        #ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
-        #img = cv2.GaussianBlur(img,(1,1),0)
-        #ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY)
-        #img = cv2.GaussianBlur(img,(1,1),0)
-        
-        #ret, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY  + cv2.THRESH_OTSU)
-        #img = cv2.GaussianBlur(img,(1,1),0)
-        #img = cv2.bitwise_or(img, closing)
-        #img = cv2.GaussianBlur(img,(1,1),0)
-
-               
-        #img = normalizeImage(img)
-        #img = cv2.GaussianBlur(img,(1,1),0)
-        #ret, img = cv2.threshold(img, 140, 255, cv2.THRESH_BINARY)
-        
-        #img = skeleton(img)
-        
-        #ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
-        
-        #img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,5,1)
-        #img = cv2.GaussianBlur(img,(5,5),0)
-        
-        #ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)
-        
-        #############################################
-        # maybe try se canny edge ja?
-        #############################################        
-        
-        #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
-        #gray = cv2.medianBlur(gray,5)
-        
-        #gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        
-        #kernel = np.ones((5,5),np.uint8)
-        
-        #gray = cv2.dilate(gray, kernel, iterations = 1)
-        
-        #gray = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)
-                
-        return(gray)
-    
     #cannyedge from opencv doc
     def cannyThreshold(img):
         max_lowThreshold = 100
@@ -728,41 +536,15 @@ try:
 
     def hough_rotate(img, rect, threshold):
         
+        #debug flag
         debug_hough = False
         
         #if threshold is too low, use simple crop
         if threshold < 100:
             return (rotate_board(img, rect))
-            
-        #how much bigger the crop image is than the board
-        #sizeFactor = 0.25
+        
         (x, y), (w, h), angle = rect
-        #sizeFactor should increase with angle size, minimum should be 0.2
-        sizeFactor = max(round(0.003 * max(angle, -angle),1), 0.2)
-        print (sizeFactor)
-        #crop image with a larger area than the detected rect to get the corners of the board
-        bl, br, tr , tl = cv2.boxPoints(rect).astype('int32')
-        #left = int(max(min(tl[0],br[0]) - sizeFactor * w,1))
-        #right = int(min(max(tl[0],br[0]) + sizeFactor * w, w))
-        #top = int(max(min(tl[1],br[1]) - sizeFactor * h,1))
-        #bottom = int(min(max(tl[1],br[1]) + sizeFactor * h,h))
-        
-        left = min(tl[0],br[0]) - sizeFactor * h
-        right = max(tl[0],br[0]) + sizeFactor * h
-        top = min(tl[1],br[1]) - sizeFactor * w
-        bottom = max(tl[1],br[1]) + sizeFactor * w
-        if left < 0: left = 0
-        if right > img.shape[1]: right = img.shape[1]
-        if top < 0: top = 0
-        if bottom > img.shape[0]: bottom = img.shape[0]
-        left = int(left)
-        right = int(right)
-        top = int(top)
-        bottom = int(bottom)
-        
-        crop_img = img[top:bottom,left:right]
-        #crop_img = img[int(min(tl[1],br[1]) - sizeFactor * w): int(max(tl[1],br[1]) + sizeFactor * w),int(min(tl[0],br[0]) - sizeFactor * h):int(max(tl[0],br[0]) + sizeFactor * h)]
-        
+
         new_rect = (x,y), (int(w*1.3), int(h*1.3)), angle
         crop_img = rotate_board(img, new_rect)
         
@@ -781,10 +563,7 @@ try:
         mean = np.mean(gray)
         #mean *1.2 bisher zweitbeste (31), beste mean+25 (27)
         
-        #gray = preprocessing(crop_img)
-        
         ret, binary = cv2.threshold(gray, int(mean+30), THRESHOLD_MAX, cv2.THRESH_BINARY)
-        #binary = cv2.adaptiveThreshold(binary,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
         
         if debug_hough:
             cv2.imshow("test", binary)
@@ -952,7 +731,7 @@ try:
         #sort the counter list, return the coordinates with the highest counter
         position = np.argsort(iouList)
         n = iouList.count(int(iouList[position[-1]]))
-        print (str(iouList[position[-1]]) + " kommt " + str(n) + " mal vor")
+        #print (str(iouList[position[-1]]) + " kommt " + str(n) + " mal vor")
         
         #get mean of coordinates
         corner = inList[position[-1]]
