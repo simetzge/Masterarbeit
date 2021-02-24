@@ -10,6 +10,7 @@ from contours import *
 
 
 def main():
+    #main function for direct testing and comparison of OCR methods, for debug only
     
     filePaths, fileNames = searchFiles('.png', 'recttest')
     images = []
@@ -25,7 +26,7 @@ def main():
         text, rotate = image_to_text(imga)
         if rotate == True:
             imga = cv2.rotate(imga, cv2.cv2.ROTATE_180)
-                #write text on image
+        #write text on image
         cv2.putText(imga, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
         output('recttest_out', imga, fileNames[i],'new')
         
@@ -60,43 +61,32 @@ def ocr(img):
 #####################################################################################################################################################
 
 def image_to_text(img):
-    pytesseract.pytesseract.tesseract_cmd=r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-    rotate = False
-    #text = pytesseract.image_to_string(r'C:\Users\Simon\Desktop\masterarbeit\contours\rect\testpaint.png')
     
-    #img = preprocessing(img)
+    #call for pytesseract
+    pytesseract.pytesseract.tesseract_cmd=r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    #set default value for rotate flag
+    rotate = False
+    
     #try to read
     texta = pytesseract.image_to_string(img, config='board')
     #rotate and try again
     img = cv2.rotate(img, cv2.cv2.ROTATE_180)
     textb = pytesseract.image_to_string(img, config='board')
     
-    #take the version with more chars detected
-    #if len(texta) >= len(textb):
-     #   text = texta
-    #else:
-     #   text = textb
-      #  roate = True
-    #if 'campidoglio' is not on the board, it should be a chalk board, therefore use simpler charset
-    #if not"CAMPIDOGLIO" in text:
-        #text = pytesseract.image_to_string(img, config='board')
-    #split text to insert linebreaks
-    #if the number of detected characters is still lower than 5, the detection failed
+    #take the version with more chars detected and send them to textsplit for proper text output, set rotate to True if necessary
     if len(texta) >= len(textb):
         text = textsplit(texta)
     else:
         text = textsplit(textb)
         rotate = True
-    
-    #if len(text) < 5:
-        #text = "fail"
-
+        
+    #prints for debug
     print (text)
     print("img to text done")
-    #print (rotate)
     return(text, rotate)
 
 def textsplit(text):
+    #rearrange text to avoid crash
     arr = text.split('\n')[0:-1]
     text = '\n'.join(arr)
     return(text)
@@ -149,8 +139,36 @@ def new_preprocessing(img):
     #gray = cv2.medianBlur(gray, 15)
     gray = (255-gray)
     gray = normalizeImage(gray)
+    gray = sharp_kernel(gray)
 
     return(gray)
 
+def sharpening(img):
+    #laplacian of gaussian:
+    #variables for laplace
+    ddepth = cv2.CV_16S
+    kernel_size = 3
+    #gaussian
+    blur = cv2.GaussianBlur(img, (3,3), 0)
+    #laplacian
+    laplace = cv2.Laplacian(blur, ddepth, ksize = kernel_size)
+    conv = cv2.convertScaleAbs(laplace)
+    #substraction
+    
+    
+    #cv2.imshow("laplace", conv)
+    #cv2.waitKey()
+    
+    return(dst)
+
+def sharp_kernel(img):
+
+    kernel = np.array([[-1, -1, -1],[-1, 8, -1],[-1, -1, 0]], np.float32)
+    #kernel = 1/3 * kernel
+    dst = cv2.filter2D(img, -1, kernel)
+    dst = normalizeImage(dst)
+
+    return(dst)
+    
 if __name__ == "__main__":
     main() 
