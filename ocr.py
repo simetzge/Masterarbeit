@@ -6,6 +6,7 @@ Created on Mon Jan  4 11:32:32 2021
 """
 import pytesseract
 import cv2
+import numpy as np
 from contours import *
 
 
@@ -21,21 +22,31 @@ def main():
         #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         #img = normalizeImage(img)
         imga = new_preprocessing(img)
+        imgc = sharpening(imga)
         imgb = preprocessing(img)
-        
+        imgd = sharp_kernel(imga)
+        imge = unsharp_mask(imga)
         text, rotate = image_to_text(imga)
         if rotate == True:
             imga = cv2.rotate(imga, cv2.cv2.ROTATE_180)
         #write text on image
         cv2.putText(imga, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
-        output('recttest_out', imga, fileNames[i],'new')
+        output('recttest_out', imga, "img " + str(i) + ".jpg",'new')
         
         text, rotate = image_to_text(imgb)
         if rotate == True:
             imgb = cv2.rotate(imgb, cv2.cv2.ROTATE_180)
         #write text on image
         cv2.putText(imgb, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
-        output('recttest_out', imgb, fileNames[i],'old')    
+        output('recttest_out', imgb, "img " + str(i) + ".jpg",'old')
+        text, rotate = image_to_text(imgc)
+        cv2.putText(imgc, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+        output('recttest_out', imgc, "img " + str(i) + ".jpg",'new_sharp')
+        text, rotate = image_to_text(imgd)
+        cv2.putText(imgd, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+        output('recttest_out', imgd, "img " + str(i) + ".jpg",'new_kernel')
+
+
 
             
 #####################################################################################################################################################
@@ -46,7 +57,7 @@ def main():
 
 def ocr(img):
     #preimg = preprocessing(img)
-    preimg = new_preprocessing(img)
+    preimg = preprocessing(img)
     text, rotate = image_to_text(preimg)  
     if rotate == True:
         preimg = cv2.rotate(preimg, cv2.cv2.ROTATE_180)
@@ -104,9 +115,9 @@ def preprocessing(img):
     # multiple blurring and normalization to get better contours
     for i in range (10):
             
-        blur = cv2.medianBlur(gray, 3)
+        gray = cv2.medianBlur(gray, 3)
  
-        gray = normalizeImage(blur)
+        gray = normalizeImage(gray)
             
         # set everything lower than 50 to 0
         #gray = np.where(gray < 60, 0, gray)
@@ -134,32 +145,50 @@ def new_preprocessing(img):
         #if i % 10 == 0:
                 
     #gray = cv2.fastNlMeansDenoising(gray,15,15,15)
-    gray = cv2.bilateralFilter(gray,9,100,100)  
-    gray = cv2.fastNlMeansDenoising(gray,15,15,15)
+    gray = cv2.bilateralFilter(gray,9,50,50)  
+    gray = cv2.fastNlMeansDenoising(gray,7,7,7)
     #gray = cv2.medianBlur(gray, 15)
     gray = (255-gray)
     gray = normalizeImage(gray)
-    gray = sharp_kernel(gray)
+    
 
     return(gray)
 
 def sharpening(img):
     #laplacian of gaussian:
+    #variables for substracion
+    amount = 1
     #variables for laplace
     ddepth = cv2.CV_16S
     kernel_size = 3
     #gaussian
-    blur = cv2.GaussianBlur(img, (3,3), 0)
+    blur = cv2.GaussianBlur(img, (3,3), 1)
     #laplacian
     laplace = cv2.Laplacian(blur, ddepth, ksize = kernel_size)
     conv = cv2.convertScaleAbs(laplace)
     #substraction
-    
+    sharp = float(amount +1) * img - float(amount) * conv
+    sharp = sharp.round().astype(np.uint8)
+    #sharp = normalizeImage(sharp)
     
     #cv2.imshow("laplace", conv)
     #cv2.waitKey()
     
-    return(dst)
+    return(sharp)
+
+#directly from tutorial
+def unsharp_mask(image, kernel_size=(5, 5), sigma=1.0, amount=1.0, threshold=0):
+    #"""Return a sharpened version of the image, using an unsharp mask."""
+    blurred = cv2.GaussianBlur(image, kernel_size, sigma)
+    sharpened = float(amount + 1) * image - float(amount) * blurred
+    sharpened = np.maximum(sharpened, np.zeros(sharpened.shape))
+    sharpened = np.minimum(sharpened, 255 * np.ones(sharpened.shape))
+    sharpened = sharpened.round().astype(np.uint8)
+    if threshold > 0:
+        low_contrast_mask = np.absolute(image - blurred) < threshold
+        np.copyto(sharpened, image, where=low_contrast_mask)
+    return (sharpened)
+
 
 def sharp_kernel(img):
 

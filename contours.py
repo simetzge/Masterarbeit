@@ -73,6 +73,7 @@ try:
             for j, crop in enumerate(cropimgs):
                 ocrimg = ocr(crop)
                 output('rect', ocrimg, fileNames[i], str(j))
+                #output('rect', crop, fileNames[i], str(j))
             
             #write images without rectangles
             output('imagecut', restimg, fileNames[i])
