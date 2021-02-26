@@ -122,7 +122,7 @@ def ocr(img):
     preimg = preprocessing(img)
     
     preimg = getinnerrect(preimg)
-    
+    preimg = normalizeImage(preimg)
     
     
     text, rotate = image_to_text(preimg)  
@@ -187,10 +187,29 @@ def getinnerrect(img):
         w = 0.95*w
         h = 0.95 *h
         rect = (x, y), (w, h), angle
-        #rois.append(rect)  
-    img = rotate_board(img, rect)
 
-    return (img)
+        #rois.append(rect)  
+    #img = rotate_board(img, rect)
+    
+    #get boxpoints
+    box = cv2.boxPoints(rect)
+    box = np.int0(box)
+    (x, y), (w, h), angle = rect
+    #cast boxpoints for source
+    src = box.astype("float32")
+    #get array for destination
+    dst = np.array([[0, h],[0, 0],[w, 0],[w, h]], dtype="float32")
+    
+    #get rotation matrix
+    M = cv2.getPerspectiveTransform(src, dst)
+    
+    #warp
+    warped = cv2.warpPerspective(img, M, (int(w), int(h)))
+    if warped.shape[0] > warped.shape[1]:
+        #warped = np.rot90(warped)
+        warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_CLOCKWISE)
+
+    return (warped)
     
     
 
