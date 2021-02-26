@@ -37,7 +37,7 @@ def main():
         if rotate == True:
             imgb = cv2.rotate(imgb, cv2.cv2.ROTATE_180)
         #write text on image
-        cv2.putText(imgb, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+        #cv2.putText(imgb, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
         output('recttest_out', imgb, "img " + str(i) + ".jpg",'old')
         text, rotate = image_to_text(imgc)
         cv2.putText(imgc, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
@@ -45,8 +45,69 @@ def main():
         text, rotate = image_to_text(imgd)
         cv2.putText(imgd, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
         output('recttest_out', imgd, "img " + str(i) + ".jpg",'new_kernel')
-
-
+        
+        
+        #binary = cv2.adaptiveThreshold(imgb,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
+        ret, binary = cv2.threshold(imgb, 120, 255, cv2.THRESH_BINARY) 
+        rois = []
+        #findcontours
+        #contours, rois = rect_detect(binary)
+        contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        #create rectangle around contours
+        global aspectRatio
+        aspectRatio = 0
+        for contour in contours:
+            (x, y), (w, h), angle = rect = cv2.minAreaRect(contour)
+            contArea = cv2.contourArea(contour)
+            if not 1000 < contArea:
+                continue  
+        #compute area of this rectangle
+            rectArea = w * h
+        #compare the areas to each other, make sure they don't differ too much
+            if contArea / rectArea < 0.85:
+                continue
+            #compute if area is not empty
+            if rectArea != 0:
+               
+                #if template is used, check for aspect ratio
+                if USE_TEMPLATE == True and aspectRatio != 0:
+                    
+                    #get aspect ratios of rect and approx
+                    asra = max(w,h)/min(w,h)
+                    
+                    #ignore this shape if aspect ratio doesn't fit
+                    if not (asra < aspectRatio * 1.3 and asra > aspectRatio *0.7):
+                        continue                 
+                
+                #else aspect ratio should be max 2:1
+                else:
+                    #make sure the aspect ratio is max 2:1
+                    if max(w,h) > 2 * min(w,h):
+                        continue
+                                #ignore contours as big as the image
+                if w < binary.shape[0] * 0.5 or h < binary.shape[1]*0.5:
+                    continue
+                w = 0.95*w
+                h = 0.95 *h
+                rect = (x, y), (w, h), angle
+            rois.append(rect)
+        
+        gray = cv2.cvtColor(imgb, cv2.COLOR_GRAY2BGR)
+        
+        #add contours in red to image
+        roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
+        
+        #add the found rectangles in green to image
+        roisImg = cv2.drawContours(roisImg, [cv2.boxPoints(rect).astype('int32') for rect in rois], -1, (0, 230, 0))
+        
+        for rect in rois:
+            img = rotate_board(img, rect)
+            cv2.putText(img, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+            output('recttest_out', img, "img " + str(i) + ".jpg",'old')
+        
+        cv2.imshow("roi", img)
+        cv2.waitKey()
+    cv2.destroyAllWindows()
 
             
 #####################################################################################################################################################
@@ -57,13 +118,81 @@ def main():
 
 def ocr(img):
     #preimg = preprocessing(img)
+    
     preimg = preprocessing(img)
+    
+    preimg = getinnerrect(preimg)
+    
+    
+    
     text, rotate = image_to_text(preimg)  
     if rotate == True:
         preimg = cv2.rotate(preimg, cv2.cv2.ROTATE_180)
     #write text on image
-    cv2.putText(preimg, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+    
+    #convert to colored img for output
+    preimg = cv2.cvtColor(preimg, cv2.COLOR_GRAY2BGR)
+    
+    #color the darkest areas for debug
+    #preimg = np.where(preimg < 20, 255, preimg)
+    #for columns in preimg:
+        #for rows in columns:
+            #if rows[0] == 255 and rows[1] == 255 and rows[2] == 255:
+                #rows[0] = 0
+                #rows[1] = 0
+    
+    
+    cv2.putText(preimg, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 230, 0), 3)
     return(preimg)
+
+def getinnerrect(img):
+    #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = img
+    #binary = cv2.adaptiveThreshold(imgb,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
+    ret, binary = cv2.threshold(gray, 120, 255, cv2.THRESH_BINARY) 
+    rois = []
+    #findcontours
+    contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
+        (x, y), (w, h), angle = rect = cv2.minAreaRect(contour)
+        contArea = cv2.contourArea(contour)
+        if not 1000 < contArea:
+            continue  
+        #compute area of this rectangle
+        rectArea = w * h
+        #compare the areas to each other, make sure they don't differ too much
+        if contArea / rectArea < 0.85:
+            continue
+            #compute if area is not empty
+        #if rectArea != 0:
+               
+            #if template is used, check for aspect ratio
+            #if USE_TEMPLATE == True and aspectRatio != 0:
+                    
+                #get aspect ratios of rect and approx
+             #   asra = max(w,h)/min(w,h)
+                    
+                #ignore this shape if aspect ratio doesn't fit
+              #  if not (asra < aspectRatio * 1.3 and asra > aspectRatio *0.7):
+               #     continue                 
+                
+            #else aspect ratio should be max 2:1
+            #else:
+                #make sure the aspect ratio is max 2:1
+             #   if max(w,h) > 2 * min(w,h):
+              #      continue
+            #ignore too small contours
+        if w < binary.shape[0] * 0.5 or h < binary.shape[1]*0.5:
+            continue
+        w = 0.95*w
+        h = 0.95 *h
+        rect = (x, y), (w, h), angle
+        #rois.append(rect)  
+    img = rotate_board(img, rect)
+
+    return (img)
+    
+    
 
 #####################################################################################################################################################
 #
@@ -115,9 +244,10 @@ def preprocessing(img):
     # multiple blurring and normalization to get better contours
     for i in range (10):
             
-        gray = cv2.medianBlur(gray, 3)
+        blur = cv2.medianBlur(gray, 3)
+        #blur = cv2.GaussianBlur(img, (3,3), 1)
  
-        gray = normalizeImage(gray)
+        gray = normalizeImage(blur)
             
         # set everything lower than 50 to 0
         #gray = np.where(gray < 60, 0, gray)

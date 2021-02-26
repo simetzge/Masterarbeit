@@ -519,7 +519,7 @@ try:
             warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_CLOCKWISE)
         
         # dsize
-        if USE_TEMPLATE == True:
+        if USE_TEMPLATE == True and 'aspectRatio' in globals():
             dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE / aspectRatio))
         else:
             dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE * 0.8))
