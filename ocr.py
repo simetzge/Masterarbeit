@@ -117,11 +117,13 @@ def main():
 #####################################################################################################################################################     
 
 def ocr(img):
-    #preimg = preprocessing(img)
-    
     preimg = preprocessing(img)
     
     preimg = getinnerrect(preimg)
+    
+    preimg = new_preprocessing(preimg)
+    
+    
     preimg = normalizeImage(preimg)
     
     
@@ -146,8 +148,12 @@ def ocr(img):
     return(preimg)
 
 def getinnerrect(img):
-    #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = img
+    
+    if len(img.shape) < 3:
+        gray = img
+    else:
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #gray = img
     #binary = cv2.adaptiveThreshold(imgb,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
     ret, binary = cv2.threshold(gray, 120, 255, cv2.THRESH_BINARY) 
     rois = []  
@@ -216,10 +222,10 @@ def getinnerrect(img):
     
     newrect = rois[0]
     #get boxpoints
-
-    box = cv2.boxPoints(newrect)
-    box = np.int0(box)
     (x, y), (w, h), angle = newrect
+    box = cv2.boxPoints(((x, y), (int(0.95*w), int(0.95*h)), angle))
+    box = np.int0(box)
+    
 
     #cast boxpoints for source
     src = box.astype("float32")
@@ -234,7 +240,8 @@ def getinnerrect(img):
     if warped.shape[0] > warped.shape[1]:
         #warped = np.rot90(warped)
         warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_CLOCKWISE)
-
+        
+    #warped = cv2.cvtColor(warped, cv2.COLOR_GRAY2BGR)
     return (warped)
     
     
@@ -284,7 +291,10 @@ def textsplit(text):
 
 def preprocessing(img):
         
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    if len(img.shape) < 3:
+        gray = img
+    else:
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
     # multiple blurring and normalization to get better contours
     for i in range (10):
@@ -305,7 +315,11 @@ def preprocessing(img):
 
 def new_preprocessing(img):
         
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    if len(img.shape) < 3:
+        gray = img
+    else:
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
     gray = normalizeImage(gray)    
     # multiple blurring and normalization to get better contours
     #for i in range (10):
@@ -320,7 +334,7 @@ def new_preprocessing(img):
         #if i % 10 == 0:
                 
     #gray = cv2.fastNlMeansDenoising(gray,15,15,15)
-    gray = cv2.bilateralFilter(gray,9,50,50)  
+    gray = cv2.bilateralFilter(gray,9,9,9)  
     gray = cv2.fastNlMeansDenoising(gray,7,7,7)
     #gray = cv2.medianBlur(gray, 15)
     gray = (255-gray)
