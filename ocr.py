@@ -150,19 +150,24 @@ def getinnerrect(img):
     gray = img
     #binary = cv2.adaptiveThreshold(imgb,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
     ret, binary = cv2.threshold(gray, 120, 255, cv2.THRESH_BINARY) 
-    rois = []
+    rois = []  
+    contAreas = []
+
     #findcontours
     contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    
     for contour in contours:
-        (x, y), (w, h), angle = rect = cv2.minAreaRect(contour)
+        #(x, y), (w, h), angle = rect = cv2.minAreaRect(contour)
         contArea = cv2.contourArea(contour)
-        if not 1000 < contArea:
-            continue  
+        contAreas.append(contArea)
+        
+        #if not 1000 < contArea:
+            #continue  
         #compute area of this rectangle
-        rectArea = w * h
+       # rectArea = w * h
         #compare the areas to each other, make sure they don't differ too much
-        if contArea / rectArea < 0.85:
-            continue
+        #if contArea / rectArea < 0.7:
+            #continue
             #compute if area is not empty
         #if rectArea != 0:
                
@@ -182,19 +187,40 @@ def getinnerrect(img):
              #   if max(w,h) > 2 * min(w,h):
               #      continue
             #ignore too small contours
-        if w < binary.shape[0] * 0.5 or h < binary.shape[1]*0.5:
-            continue
-        w = 0.95*w
-        h = 0.95 *h
-        rect = (x, y), (w, h), angle
+        #if w < binary.shape[0] * 0.6 or h < binary.shape[1] * 0.6:
+         #   continue
+        #if w > binary.shape[0] * 0.99 or h > binary.shape[1] * 0.99:
+           # continue
+        
+        #w = 0.95*w
+        #h = 0.95*h
+        #newrect = (x, y), (w, h), angle
 
-        #rois.append(rect)  
+        #rois.append(newrect)
+    positions = np.argsort(contAreas)
+    position = positions[-1]
+    contour = contours[position]
+    innerrect = cv2.minAreaRect(contour)
+    rois.append(innerrect)
+        
+    out = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+        
+    #add contours in red to image
+    #roisImg = cv2.drawContours(out, contours, -1, (0, 0, 230))
+    #add the found rectangles in green to image
+    #roisImg = cv2.drawContours(roisImg, [cv2.boxPoints(rect).astype('int32') for rect in rois], -1, (0, 230, 0))
     #img = rotate_board(img, rect)
+    #cv2.imshow("test", roisImg)
+    #cv2.waitKey()
     
+    
+    newrect = rois[0]
     #get boxpoints
-    box = cv2.boxPoints(rect)
+
+    box = cv2.boxPoints(newrect)
     box = np.int0(box)
-    (x, y), (w, h), angle = rect
+    (x, y), (w, h), angle = newrect
+
     #cast boxpoints for source
     src = box.astype("float32")
     #get array for destination
