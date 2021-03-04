@@ -7,7 +7,7 @@ Created on Mon Jan  4 11:32:32 2021
 import pytesseract
 import cv2
 import numpy as np
-from contours import *
+from basics import *
 
 
 def main():

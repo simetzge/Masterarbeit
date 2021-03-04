@@ -8,7 +8,7 @@ Created on Mon
 import cv2 as cv 
 import numpy as np
 import matplotlib.pyplot as plt
-from contours import *
+from basics import *
 def CNN(image):
 #%% constants
 # load YOLO object detector trained on COCO dataset (80 classes)
