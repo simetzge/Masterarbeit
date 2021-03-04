@@ -547,6 +547,7 @@ try:
         (x, y), (w, h), angle = rect
 
         new_rect = (x,y), (int(w*1.3), int(h*1.3)), angle
+
         crop_img = rotate_board(img, new_rect)
         
         if crop_img.shape[0] > crop_img.shape[1]:
@@ -554,7 +555,7 @@ try:
             crop_img = cv2.rotate(crop_img, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
         
         #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
-        crop_img = scaleImage(crop_img)
+        #crop_img = scaleImage(crop_img)
         blur = cv2.bilateralFilter(crop_img,9,75,75)
         blur = cv2.fastNlMeansDenoising(blur,7,7,15)        
         blur = cv2.GaussianBlur(blur,(7,7),15)
@@ -623,8 +624,11 @@ try:
                     inter = intersection(lineList[i], lineList[j])
                     #ignor if the intersection is on the corners
                     
-                    if not ((inter[0] < 1 or inter [0] > width) or inter[1] < 1 or inter[1] > height):
+                    #if not ((inter[0] < 1 or inter [0] > width) or inter[1] < 1 or inter[1] > height):
                         
+                    heightdiff = int((height - height / 1.1) / 2)
+                    widthdiff = int((width - width / 1.1) / 2)
+                    if not ((inter[0] < widthdiff or inter [0] > width-widthdiff) or inter[1] < heightdiff or inter[1] > height - heightdiff):    
                         interList.append(inter)
                         # add intersections as dots to output image for visualization
                         cdst = cv2.circle(cdst, inter, 4, (0,255,0), 4)

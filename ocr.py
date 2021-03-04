@@ -126,6 +126,8 @@ def ocr(img):
     
     preimg = normalizeImage(preimg)
     
+    preimg = (255-preimg)
+    
     
     text, rotate = image_to_text(preimg)  
     if rotate == True:
@@ -260,10 +262,12 @@ def image_to_text(img):
     rotate = False
     
     #try to read
-    texta = pytesseract.image_to_string(img, config='board')
+    #config = ('board')
+    config = ("board -l dic --oem 1 --psm 7")
+    texta = pytesseract.image_to_string(img, config=config)
     #rotate and try again
     img = cv2.rotate(img, cv2.cv2.ROTATE_180)
-    textb = pytesseract.image_to_string(img, config='board')
+    textb = pytesseract.image_to_string(img, config=config)
     
     #take the version with more chars detected and send them to textsplit for proper text output, set rotate to True if necessary
     if len(texta) >= len(textb):
@@ -310,7 +314,7 @@ def preprocessing(img):
         if i % 10 == 0:
                 
             gray = cv2.fastNlMeansDenoising(gray,7,7,7)
-    gray = (255-gray)
+    #gray = (255-gray)
     return(gray)
 
 def new_preprocessing(img):
@@ -337,7 +341,7 @@ def new_preprocessing(img):
     gray = cv2.bilateralFilter(gray,9,9,9)  
     gray = cv2.fastNlMeansDenoising(gray,7,7,7)
     #gray = cv2.medianBlur(gray, 15)
-    gray = (255-gray)
+    #gray = (255-gray)
     gray = normalizeImage(gray)
     
 
