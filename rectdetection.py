@@ -120,7 +120,7 @@ try:
             
             if len(rois) > 0:       
                 
-                allRois.append(rois)     
+                allRois.append(rois)
                 
             thresh += 5
         

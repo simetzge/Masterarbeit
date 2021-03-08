@@ -117,6 +117,7 @@ def main():
 #####################################################################################################################################################     
 
 def ocr(img):
+    
     preimg = preprocessing(img)
     
     preimg = getinnerrect(preimg)
@@ -128,6 +129,7 @@ def ocr(img):
     
     preimg = (255-preimg)
     
+    image_to_box(preimg)  
     
     text, rotate = image_to_text(preimg)  
     if rotate == True:
@@ -286,6 +288,102 @@ def textsplit(text):
     arr = text.split('\n')[0:-1]
     text = '\n'.join(arr)
     return(text)
+
+#####################################################################################################################################################
+#
+# OCR with pytesseract and image to data
+#
+#####################################################################################################################################################
+
+def image_to_data(img):
+    
+    #call for pytesseract
+    pytesseract.pytesseract.tesseract_cmd=r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    #set default value for rotate flag
+    rotate = False
+    
+    #convert to colored img for output
+    img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    #try to read
+    #config = ('board')
+    config = ("board -l dic --oem 1 --psm 7")
+    boxes = pytesseract.image_to_boxes(img, config=config)
+    
+    #for box in boxes:
+     #   for item in box:
+      #      print("item " + item + " item end")
+        #letter = box[0]
+        #rect = (box[1], box[2]), (box[3], box[4]), box[5]
+        #add the found rectangles in green to image
+        #img = cv2.drawContours(img, cv2.boxPoints(rect).astype('int32'), -1, (0, 230, 0))
+        #cv2.putText(img, letter, (box[1], box[2]),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+    
+    from pytesseract import Output
+    d = pytesseract.image_to_data(img, config=config, output_type=Output.DICT)
+    n_boxes = len(d['level'])
+    for i in range(n_boxes):
+        if(d['text'][i] != ""):
+            (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(img, d['text'][i], (x+w, y+h),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+
+    cv2.imshow("box", img)
+    cv2.waitKey()
+    
+#####################################################################################################################################################
+#
+# OCR with pytesseract and image to boxes
+#
+#####################################################################################################################################################
+
+def image_to_box(img):
+    
+    #call for pytesseract
+    pytesseract.pytesseract.tesseract_cmd=r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    #set default value for rotate flag
+    rotate = False
+    
+    #convert to colored img for output
+    img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+    #config = ('board')
+    config = ("board -l dic --oem 1 --psm 7")
+    #get characters with bounding boxes
+    boxes = pytesseract.image_to_boxes(img, config=config)
+    
+    #boxes is a list, where every single letter is a seperate entry. The list is casted into a string, the string is split at every space
+    string = ''.join(boxes)
+    string = string.split()
+
+    j = 0
+    newstring = []
+    row = []
+    rects = []
+    
+    #split the resulting list in a 2d list with 6 variables per row
+    for i in range(len(string)):
+        row.append(string[i])
+        if len(row) == 6:
+            newstring.append(row)
+            row = []
+    
+    #draw every character with its bounding box
+    for rows in newstring:
+                   
+        x, y, w, h = (int(rows[1]), int(rows[2]), int(rows[3]), int(rows[4]))
+        #angle = int(rows[5])
+        #rect = (x, y), (w, h), angle
+        
+        #y has to be inverted to be compatible with cv2 functions
+        cv2.rectangle(img, (x, img.shape[0] - y), (w, img.shape[0] - h), (0, 255, 0), 2)
+        cv2.putText(img, rows[0], (int(x + ((w-x) / 2)), int(img.shape[0] - y + (y-h)/2)),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+            
+        #img = cv2.drawContours(img, [cv2.boxPoints(rect).astype('int32') for rect in rects],-1, (0, 230, 0))
+            
+    cv2.imshow("box", img)
+    cv2.waitKey()    
+
+        
 
 #####################################################################################################################################################
 #
