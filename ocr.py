@@ -116,7 +116,7 @@ def main():
 #
 #####################################################################################################################################################     
 
-def ocr(img):
+def ocr(img, mode = 'image_to_text'):
     
     preimg = preprocessing(img)
     
@@ -124,20 +124,22 @@ def ocr(img):
     
     preimg = new_preprocessing(preimg)
     
-    
     preimg = normalizeImage(preimg)
     
     preimg = (255-preimg)
     
-    image_to_box(preimg)  
-    
-    text, rotate = image_to_text(preimg)  
+    text, rotate = image_to_text(preimg)
     if rotate == True:
+
         preimg = cv2.rotate(preimg, cv2.cv2.ROTATE_180)
+    
+    if mode == 'image_to_box':
+        boximg = image_to_box(preimg)
+        
     #write text on image
     
     #convert to colored img for output
-    preimg = cv2.cvtColor(preimg, cv2.COLOR_GRAY2BGR)
+    textimg = cv2.cvtColor(preimg, cv2.COLOR_GRAY2BGR)
     
     #color the darkest areas for debug
     #preimg = np.where(preimg < 20, 255, preimg)
@@ -147,9 +149,12 @@ def ocr(img):
                 #rows[0] = 0
                 #rows[1] = 0
     
+    cv2.putText(textimg, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 230, 0), 3)
     
-    cv2.putText(preimg, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 230, 0), 3)
-    return(preimg)
+    if mode == 'image_to_box':
+        return(boximg)
+    else:
+        return(textimg)
 
 def getinnerrect(img):
     
@@ -160,7 +165,7 @@ def getinnerrect(img):
     #gray = img
     #binary = cv2.adaptiveThreshold(imgb,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
     ret, binary = cv2.threshold(gray, 120, 255, cv2.THRESH_BINARY) 
-    rois = []  
+    rois = []
     contAreas = []
 
     #findcontours
@@ -379,10 +384,10 @@ def image_to_box(img):
         cv2.putText(img, rows[0], (int(x + ((w-x) / 2)), int(img.shape[0] - y + (y-h)/2)),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
             
         #img = cv2.drawContours(img, [cv2.boxPoints(rect).astype('int32') for rect in rects],-1, (0, 230, 0))
-            
-    cv2.imshow("box", img)
-    cv2.waitKey()    
-
+   
+    #cv2.imshow("box", img)
+    #cv2.waitKey()    
+    return(img)
         
 
 #####################################################################################################################################################

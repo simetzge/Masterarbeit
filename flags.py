@@ -20,6 +20,6 @@ USE_ABSOLUTE_PATH = True
 SIMPLE_CROP = False
 CUT_THRESH = 150
 ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
-CHECK_PICTURE = "1060"
+CHECK_PICTURE = ""
 ################################################################
 COUNTER = 0

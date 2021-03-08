@@ -52,8 +52,10 @@ try:
             cropimgs, restimg = cut(img, rects)
             #perform OCR on cropped rectangles
             for j, crop in enumerate(cropimgs):
-                ocrimg = ocr(crop)
-                output('rect', ocrimg, fileNames[i], str(j))
+                textimg = ocr(crop)
+                boximg = ocr(crop, mode = 'image_to_box')
+                output('rect', textimg, fileNames[i], str(j))
+                output('box', boximg, fileNames[i], str(j))
                 #output('rect', crop, fileNames[i], str(j))
             
             #write images without rectangles
