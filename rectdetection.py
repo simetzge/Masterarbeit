@@ -27,7 +27,7 @@ try:
         images = [cv2.imread(files) for files in filePaths]
         
         #scale images to 1000px
-        images = [scaleImage(img) for img in images]
+        #images = [scaleImage(img) for img in images]
         
         #get aspect ratio from template if flag is set
         if USE_TEMPLATE == True:
@@ -77,23 +77,36 @@ try:
         
         gray = normalizeImage(gray)
         
-        binary = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
-
+        #scale image
+        scaled = scaleImage(gray)
+        
+        binary = cv2.adaptiveThreshold(scaled,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)       
+        
         #findcontours
         contours, rois = rect_detect(binary) 
+        
+        #rois = [rescale(max(gray.shape[0],gray.shape[1]), roi) for roi in rois]
         
         gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
         
         #add contours in red to image
-        roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
+        #roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
+        
+        #rescale rois
+        newrois = []
+        for rect in rois:
+            scale = np.max(gray.shape) / IMG_TARGET_SIZE
+            (x,y), (w,h), angle = rect
+            rect = (x*scale, y*scale), (w*scale, h*scale), angle
+            newrois.append(rect)
         
         #add the found rectangles in green to image
-        roisImg = cv2.drawContours(roisImg, [cv2.boxPoints(rect).astype('int32') for rect in rois], -1, (0, 230, 0))
+        roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in newrois], -1, (0, 230, 0), 3)
         
         #send the modified images in the output function
         output('output', roisImg, fileName, 'adaptive')
 
-        return(rois)
+        return(newrois)
     
 #####################################################################################################################################################
 #
@@ -171,8 +184,10 @@ try:
                 same = roi["same"]
         #convert to colored img for output
         gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+        #add contours in red to image
+        roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
         #add the found rectangles in green to image
-        roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in rects], -1, (0, 230, 0))
+        roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in rects], -1, (0, 230, 0),3)
                     
         #send the modified images in the output function
         output('output', roisImg, fileName, str(same))
@@ -200,7 +215,7 @@ try:
             contArea = cv2.contourArea(contour)
             
             #throw out too small areas
-            if not 1000 < contArea:
+            if not max(binary.shape[0],binary.shape[1]) < contArea:
                 continue            
             
             #create rectangle around contours
@@ -268,7 +283,7 @@ try:
         if match == None:
             print("failed to find template")
         else:
-            
+            img = scaleImage(img)
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             
             binary = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
