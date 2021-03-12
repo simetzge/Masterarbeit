@@ -90,16 +90,7 @@ def scaleImage(img):
         scale = IMG_TARGET_SIZE / np.max(img.shape)
         return (cv2.resize(img, (0,0), fx = scale, fy = scale, interpolation = cv2.INTER_CUBIC))
     
-def rescale(shape, contour):
-    scale = shape / IMG_TARGET_SIZE
-    M = cv2.moments(contour)
-    cx = int(M['m10']/M['m00'])
-    cy = int(M['m01']/M['m00'])
-    cnt_norm = contour - [cx, cy]
-    cnt_scaled = cnt_norm * scale
-    cnt_scaled = cnt_scaled + [cx, cy]
-    cnt_scaled = cnt_scaled.astype(np.int32)
-    return(cnt_scaled)
+
 
 #####################################################################################################################################################
 #      

@@ -93,20 +93,23 @@ try:
         #roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
         
         #rescale rois
-        newrois = []
-        for rect in rois:
-            scale = np.max(gray.shape) / IMG_TARGET_SIZE
-            (x,y), (w,h), angle = rect
-            rect = (x*scale, y*scale), (w*scale, h*scale), angle
-            newrois.append(rect)
+        scaledrois = [rescale(gray, rect) for rect in rois]
         
         #add the found rectangles in green to image
-        roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in newrois], -1, (0, 230, 0), 3)
+        roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in scaledrois], -1, (0, 230, 0), 3)
         
         #send the modified images in the output function
         output('output', roisImg, fileName, 'adaptive')
 
-        return(newrois)
+        return(scaledrois)
+    
+    #rescale rectangles based on the size of the original image and the flag IMG_TARGET_SIZE which is used to downscale images at first
+    def rescale(img, rect):
+        scale = np.max(img.shape) / IMG_TARGET_SIZE
+        (x,y), (w,h), angle = rect
+        rect = (x*scale, y*scale), (w*scale, h*scale), angle
+        return (rect)
+
     
 #####################################################################################################################################################
 #
