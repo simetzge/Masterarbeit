@@ -11,6 +11,7 @@ import math
 from flags import *
 from ocr import *
 from cnn import *
+from evaluation import *
 from basics import *
 
 try:   
@@ -23,6 +24,9 @@ try:
     
         #open the files in cv2
         images = []
+        
+        ocrlist =[]
+        
         #images = [cv2.imread(files, cv2.IMREAD_GRAYSCALE) for files in filePaths]
         images = [cv2.imread(files) for files in filePaths]
         
@@ -51,16 +55,33 @@ try:
             #crop found rectangles
             cropimgs, restimg = cut(img, rects)
             #perform OCR on cropped rectangles
+            imagedict = {"image": fileNames[i]}
             for j, crop in enumerate(cropimgs):
-                textimg = ocr(crop)
-                boximg = ocr(crop, mode = 'image_to_box')
+                textimg, text = ocr(crop)
+                boximg, boxtext = ocr(crop, mode = 'image_to_box')
                 output('rect', textimg, fileNames[i], str(j))
                 output('box', boximg, fileNames[i], str(j))
                 #output('rect', crop, fileNames[i], str(j))
+                rectdict = {"rectangle": fileNames[i] + "_" + str(j), "textimage": text, "boximage": boxtext}
+                imagedict["rectangle " + str(j)] =  rectdict
             
+            ocrlist.append(imagedict)
+
             #write images without rectangles
             output('imagecut', restimg, fileNames[i])
-            #CNN(img)
+            
+            #use cnns to identify objects in the images
+            if USE_CNN == "coco" or USE_CNN == "both":
+                output('coco', coco(img), fileNames[i])
+            if USE_CNN == "yolo" or USE_CNN == "both":
+                output('yolo', yolo(img), fileNames[i])
+        
+        #csvOutput(outputlist)
+        if EVALUATE:
+            evaluation = csvInput("evaluationlist.csv")
+            compared = comparison(ocrlist)
+            evaluated = evaluate(evaluation, compared)
+            csvOutput(evaluated)
         print(COUNTER)
 
     
@@ -188,7 +209,7 @@ try:
         #convert to colored img for output
         gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
         #add contours in red to image
-        roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
+        #roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
         #add the found rectangles in green to image
         roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in rects], -1, (0, 230, 0),3)
                     

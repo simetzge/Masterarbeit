@@ -134,7 +134,7 @@ def ocr(img, mode = 'image_to_text'):
         preimg = cv2.rotate(preimg, cv2.cv2.ROTATE_180)
     
     if mode == 'image_to_box':
-        boximg = image_to_box(preimg)
+        boximg, boxtext = image_to_box(preimg)
         
     #write text on image
     
@@ -152,9 +152,9 @@ def ocr(img, mode = 'image_to_text'):
     cv2.putText(textimg, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 230, 0), 3)
     
     if mode == 'image_to_box':
-        return(boximg)
+        return(boximg, boxtext)
     else:
-        return(textimg)
+        return(textimg, text)
 
 def getinnerrect(img):
     
@@ -291,7 +291,7 @@ def image_to_text(img):
 def textsplit(text):
     #rearrange text to avoid crash
     arr = text.split('\n')[0:-1]
-    text = '\n'.join(arr)
+    text = ' '.join(arr)
     return(text)
 
 #####################################################################################################################################################
@@ -364,6 +364,7 @@ def image_to_box(img):
     newstring = []
     row = []
     rects = []
+    textlist = []
     
     #split the resulting list in a 2d list with 6 variables per row
     for i in range(len(string)):
@@ -374,7 +375,9 @@ def image_to_box(img):
     
     #draw every character with its bounding box
     for rows in newstring:
-                   
+        if rows[0] == "~":
+            newstring.remove(rows)
+            continue
         x, y, w, h = (int(rows[1]), int(rows[2]), int(rows[3]), int(rows[4]))
         #angle = int(rows[5])
         #rect = (x, y), (w, h), angle
@@ -382,12 +385,12 @@ def image_to_box(img):
         #y has to be inverted to be compatible with cv2 functions
         cv2.rectangle(img, (x, img.shape[0] - y), (w, img.shape[0] - h), (0, 255, 0), 2)
         cv2.putText(img, rows[0], (int(x + ((w-x) / 2)), int(img.shape[0] - y + (y-h)/2)),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
-            
+        textlist.append(str(rows[0]))    
         #img = cv2.drawContours(img, [cv2.boxPoints(rect).astype('int32') for rect in rects],-1, (0, 230, 0))
-   
+    text = "".join(textlist)
     #cv2.imshow("box", img)
     #cv2.waitKey()    
-    return(img)
+    return(img, text)
         
 
 #####################################################################################################################################################
