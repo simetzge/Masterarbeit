@@ -11,6 +11,7 @@ import cv2
 import numpy as np
 import csv
 import itertools
+from datetime import datetime
 
 from flags import *
 
@@ -186,7 +187,12 @@ def csvOutput(outputlist, folder = "evaluation", name = "output"):
         print(folder + '-Ordner vorhanden')
     else:
         os.makedirs(path + '\\' + folder)
-
+    
+    #get time and date for output name
+    if name =="output":
+        now = datetime.now()
+        name = now.strftime("%Y_%m_%d_%H_%M")
+    
     #open output file
     with open(path + '\\' + folder + '\\' + name + '.csv', 'w') as file:
         #write header
