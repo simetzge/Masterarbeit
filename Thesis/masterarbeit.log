@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.2.14)  14 FEB 2021 14:01
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=latex 2021.2.14)  23 MAR 2021 11:15
 entering extended mode
 **./masterarbeit.tex
 (masterarbeit.tex
@@ -91,15 +91,14 @@ Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
 fg
 File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
-Package graphics Info: Driver file: pdftex.def on input line 105.
+Package graphics Info: Driver file: dvips.def on input line 105.
 
-(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
-File: pdftex.def 2020/10/05 v1.2a Graphics/color driver for pdftex
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\dvips.def
+File: dvips.def 2017/06/20 v3.1d Graphics/color driver for dvips
 ))
 \Gin@req@height=\dimen140
 \Gin@req@width=\dimen141
-)
-(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/generic/german\ngerman.sty
+) (C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/generic/german\ngerman.sty 
 v2.5e 1998-07-08
 Package: ngerman 1998/07/08 v2.5e Support for writing german texts (br)
 \grmnU@D=\dimen142
@@ -117,13 +116,18 @@ LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 2
 (C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
-(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
-tex.def
-File: l3backend-pdftex.def 2021-01-09 L3 backend support: PDF output (pdfTeX)
-\l__kernel_color_stack_int=\count187
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-dvi
+ps.def
+File: l3backend-dvips.def 2021-01-09 L3 backend support: dvips
 \l__pdf_internal_box=\box47
+\g__pdf_backend_object_int=\count187
+\l__pdf_backend_content_box=\box48
+\l__pdf_backend_model_box=\box49
+\g__pdf_backend_annotation_int=\count188
+\g__pdf_backend_link_int=\count189
+\g__pdf_backend_link_sf_int=\count190
 ) (masterarbeit.aux (einleitung.aux) (tafeln.aux) (texterkennung.aux)
-(sift.aux))
+(sift.aux) (fazit.aux))
 \openout1 = `masterarbeit.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 27.
@@ -140,31 +144,9 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 27.
 LaTeX Font Info:    ... okay on input line 27.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 27.
 LaTeX Font Info:    ... okay on input line 27.
+ [1
 
-(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
-ii
-[Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count188
-\scratchdimen=\dimen143
-\scratchbox=\box48
-\nofMPsegments=\count189
-\nofMParguments=\count190
-\everyMPshowfont=\toks18
-\MPscratchCnt=\count191
-\MPscratchDim=\dimen144
-\MPnumerator=\count192
-\makeMPintoPDFobject=\count193
-\everyMPtoPDFconversion=\toks19
-)
-(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
-ase.sty
-Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
-Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
-85.
-) [1
-
-{C:/Users/Simon/AppData/Local/MiKTeX/pdftex/config/pdftex.map}]
-[1] (masterarbeit.toc
+] [1] (masterarbeit.toc
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <12> on input line 2.
 LaTeX Font Info:    External font `cmex10' loaded for size
@@ -203,17 +185,18 @@ Underfull \hbox (badness 10000) in paragraph at lines 12--79
 \openout2 = `tafeln.aux'.
 
  (tafeln.tex
-Underfull \hbox (badness 10000) in paragraph at lines 3--6
+Underfull \hbox (badness 10000) in paragraph at lines 14--22
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 7--11
-
+Overfull \hbox (6.2454pt too wide) in paragraph at lines 23--32
+[]\OT1/ptm/m/n/12 Problematiken auf-zei-gen: un-ter-schied-li-che Gr[]oe, Lich
+t und Be-leuch-tung, Win-
  []
 
-)
-Underfull \hbox (badness 10000) in paragraph at lines 17--80
+
+Underfull \hbox (badness 10000) in paragraph at lines 23--32
 
  []
 
@@ -222,23 +205,33 @@ Underfull \hbox (badness 10000) in paragraph at lines 17--80
 
 
 ]
+Underfull \hbox (badness 10000) in paragraph at lines 34--39
+
+ []
+
+)
+Underfull \hbox (badness 10000) in paragraph at lines 45--80
+
+ []
+
+[5]
 \openout2 = `texterkennung.aux'.
 
- (texterkennung.tex) [5
+ (texterkennung.tex) [6
 
 
 
 ]
 \openout2 = `sift.aux'.
 
- (sift.tex) [6
+ (sift.tex) [7
 
 
 
 ]
 \openout2 = `fazit.aux'.
 
- (fazit.tex) [7
+ (fazit.tex) [8
 
 
 
@@ -251,20 +244,12 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 2434 strings out of 479618
- 36455 string characters out of 2865026
- 331570 words of memory out of 3000000
- 19561 multiletter control sequences out of 15000+200000
- 417948 words of font info for 51 fonts, out of 3000000 for 9000
+ 2032 strings out of 479619
+ 31245 string characters out of 2865052
+ 328388 words of memory out of 3000000
+ 19176 multiletter control sequences out of 15000+200000
+ 410280 words of font info for 44 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 68i,10n,74p,211b,343s stack positions out of 5000i,500n,10000p,200000b,50000s
-{C:/Users/Simon/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}<C:
-/Users/Simon/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:
-/Users/Simon/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:
-/Users/Simon/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb>
-Output written on masterarbeit.pdf (9 pages, 52411 bytes).
-PDF statistics:
- 45 PDF objects out of 1000 (max. 8388607)
- 0 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 68i,10n,74p,571b,343s stack positions out of 5000i,500n,10000p,200000b,50000s
 
+Output written on masterarbeit.dvi (10 pages, 12064 bytes).

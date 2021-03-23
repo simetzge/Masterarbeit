@@ -6,16 +6,17 @@
 \contentsline {subsection}{\numberline {2.3}Datengrundlage und Vorhaben}{3}{}%
 \contentsline {section}{\numberline {3}Tafeldetektierung}{4}{}%
 \contentsline {subsection}{\numberline {3.1}Die Tafeln und ihre Tücken}{4}{}%
-\contentsline {subsection}{\numberline {3.2}Detektierungsmöglichkeiten}{4}{}%
-\contentsline {subsection}{\numberline {3.3}Ergebnisse CNN}{4}{}%
-\contentsline {subsection}{\numberline {3.4}Ergebnisse Feature Detection}{4}{}%
-\contentsline {subsection}{\numberline {3.5}Ergebnisse Kantenerkennung /Contours}{4}{}%
-\contentsline {section}{\numberline {4}Texterkennung}{5}{}%
-\contentsline {subsection}{\numberline {4.1}Texterkennung allgemein}{5}{}%
-\contentsline {subsection}{\numberline {4.2}Das Ausgangsmaterial}{5}{}%
-\contentsline {subsection}{\numberline {4.3}Vorgehen}{5}{}%
-\contentsline {section}{\numberline {5}SIFT}{6}{}%
-\contentsline {subsection}{\numberline {5.1}SIFT allgemein}{6}{}%
-\contentsline {subsection}{\numberline {5.2}Ausgangsmaterial und Probleme}{6}{}%
-\contentsline {subsection}{\numberline {5.3}Vorgehen}{6}{}%
-\contentsline {section}{\numberline {6}Fazit}{7}{}%
+\contentsline {subsubsection}{\numberline {3.1.1}Die Tafeln}{4}{}%
+\contentsline {subsection}{\numberline {3.2}Detektierungsmöglichkeiten}{5}{}%
+\contentsline {subsection}{\numberline {3.3}Ergebnisse CNN}{5}{}%
+\contentsline {subsection}{\numberline {3.4}Ergebnisse Feature Detection}{5}{}%
+\contentsline {subsection}{\numberline {3.5}Ergebnisse Kantenerkennung /Contours}{5}{}%
+\contentsline {section}{\numberline {4}Texterkennung}{6}{}%
+\contentsline {subsection}{\numberline {4.1}Texterkennung allgemein}{6}{}%
+\contentsline {subsection}{\numberline {4.2}Das Ausgangsmaterial}{6}{}%
+\contentsline {subsection}{\numberline {4.3}Vorgehen}{6}{}%
+\contentsline {section}{\numberline {5}SIFT}{7}{}%
+\contentsline {subsection}{\numberline {5.1}SIFT allgemein}{7}{}%
+\contentsline {subsection}{\numberline {5.2}Ausgangsmaterial und Probleme}{7}{}%
+\contentsline {subsection}{\numberline {5.3}Vorgehen}{7}{}%
+\contentsline {section}{\numberline {6}Fazit}{8}{}%

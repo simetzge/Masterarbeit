@@ -1,19 +1,80 @@
 \section{Tafeldetektierung}
+
+Das folgende Kapitel befasst sich mit dem ersten Schritt in der automatisierten Analyse der Grabungsfotos: der Erkennung der Schiefertafeln.\\
+Zunächst sollen die Tafeln vorgestellt und die Probleme bei der Detektion erörtert werden. Im Anschluss werden verschiedene Möglichkeiten der Erkennung präsentiert. Schließlich werden mehrere angewandte Methoden erörtert und die erzielten Ergebnisse vorgestellt.
+
 \subsection{Die Tafeln und ihre Tücken}
-Problematiken aufzeigen: unterschiedliche Größe, Licht und Beleuchtung, Winkel, Verdeckung\\
-evtl. Vergleiche zu Tafeln aus späterer Grabung als Positivbeispiel\\
-evtl. Vergleiche zu Tafeln der Bodenkunde als Negativbeispiel\\
+
+\subsubsection{Die Tafeln}
+
+Die Verwendung von Tafeln zur Dokumentation von Fund- und Grabungsarealen ist in allen, im weitesten Sinne grabenden, Wissenschaften weit verbreitet (Vgl. Bildquellen) . So setzt auch die Archäologie diese Methode ein. Dabei werden neben den zu dokumentierenden Gebieten verschiedenste Formen von Tafeln oder Schildern platziert, auf denen Zeit und Ort der Aufnahme sowie weitere bild- und motivbezogene Informationen festgehalten werden können. Der Vielfalt von Form und Material der Tafeln ist dabei keine Grenze gesetzt.
+Bei den Tafeln, die Gegenstand dieses Projektes sind, handelt es sich um Schiefertafeln mit einem Holzrahmen, die mit Kreide beschriftet wurden. Für die Detektion der Tafeln ergeben sich daraus folgende Faktoren:\\
+\begin{enumerate}
+\item Die Tafeln haben grundsätzlich eine rechteckige Form.
+\item Durch die breite des Rahmens können bis zu zwei Rechtecke erkannt werden, ein Inneres und ein Äußeres.
+\item Durch die große Differenz zwischen dem hellen Holzrahmen und der dunklen Schieferplatte sollte der innere Rand in der Regel gut detektierbar sein.
+\end{enumerate}
+\begin{SCfigure}[0.5][h]
+\caption{Beispiel eines Fotos der verwendeten Tafel.}
+\includegraphics[width=0.5\textwidth]{catacom_1053_cutout.png}
+\end{SCfigure}
+
+Die im Beispielbild gezeigte Tafel stellt gewissermaßen ein Idealbild dar: Die Tafel nimmt einen relativ großen Teil des Originalbildes -- bei der Darstellung hier handelt es sich um einen Ausschnitt -- ein. Sie ist frontal vor der Kamera positioniert. Die Beleuchtung ist gut und indirekt. Keines der weiteren Bildelemente verdeckt die Tafel.
+Diese Beschreibung impliziert schon die Problemfelder, die bei der Detektion beachtet werden müssen:
+\begin{enumerate}
+\item Die Tafel ist unter Umständen stark rotiert.
+\item Die Distanz der Tafel zur Kamera und damit ihre Größe im Bild kann stark variieren.
+\item Der Rahmen der Tafel kann teilweise verdeckt oder anderweitig durch Gegenstände überlagert sein.
+\item Die Farbe des Tafelrahmens kann dazu führen, dass sie sich nicht klar vom Hintergrund abhebt, was die Detektion des äußeren Randes erschweren kann.
+\item Unregelmäßigkeiten im Rahmen, die auf grobe Verarbeitung oder Abnutzung zurückzuführen sind, können die Detektion erschweren.
+\item Die Beleuchtung kann zu Problemen führen. Grundsätzlich sind alle Fotos hell und gut ausgeleuchtet, direktes Licht kann sich aber negativ auf die Kontraste auswirken.
+\item Weitere Gegenstände, die den Spezifika der Tafeln entsprechen, können im Bild vorhanden sein.
+\end{enumerate}
+
+Teilweise werden die hier genannten Probleme auch bei der Texterkennung wieder relevant. Auf diese und auf weitere wird an geeigneter Stelle zurückgegriffen.
+
+\subsubsection{Tafelvergleiche}
+
+Im Rahmen der Arbeit wurden weitere Tafeln exemplarisch dem Algorithmus unterzogen. Dabei handelte es sich um Aufnahmen der späteren Grabungen des Deutschen Archäologischen Institutes am Kapitol in Rom sowie um vergleichbare Fotos von Bodenuntersuchungen der Gruppe Terrestrische Ökohydrologie der Friedrich-Schiller-Universität Jena. Der ursprüngliche Gedanke dahinter war eine möglichst universale Detektion von Tafeln aller Art anzustreben. Während dieses Vorhaben aus Zeit- und Komplexitätsgründen ohnehin zum Scheitern verurteilt war, warf das weitere Material die Frage auf, wo die Grenze des technisch möglichen liegt, vor allem mit der hier letztlich gewählten Methodik.\\
+
+Die Tafeln beider Projekte sollen im Folgenden kurz vorgestellt werden, um das Spektrum der Komplexität 
+evtl. Vergleiche zu Tafeln aus späterer Grabung als Positivbeispiel:\\
+besser gearbeitete Tafeln\\
+besser lesbare Schrift\\
+evtl. Vergleiche zu Tafeln der Bodenkunde als Negativbeispiel:\\
+Tafel schwierig durch Form und Farbe\\
+Klarsichthülle: Reflektion und Formveränderung\\
+oft verdeckt\\
+
 \subsection{Detektierungsmöglichkeiten}
-Kurzvorstellung:\\
-Kantenerkennung\\
+
+\subsubsection{CNN}
+
 CNN\\
-Feature Detection\\
 
-\subsection{Ergebnisse CNN}
+Convolutional Neural Networks (CNN) Kurzdefinition\\
 
-\subsection{Ergebnisse Feature Detection}
+Coco und Coco bzw. Yolo Weights erklären\\
 
-\subsection{Ergebnisse Kantenerkennung /Contours}
+Code Herkunft erklären (Rücksprache Sellent bzgl. Quelle und Zitation etc.)\\
+
+\subsubsection{Ergebnisse CNN}
+
+Beispielbilder einfügen -> Schnell gemacht, da keine Ergebnisse\\
+
+\subsubsection{Ergebnisse Feature Detection}
+
+theoretische Grundlagen Feature Detection\\
+
+\subsubsection{Ergebnisse Feature Detection}
+
+alten Code raussuchen, aufbereiten und präsentieren\\
+
+\subsubsection{Contours}
+
+\subsubsection{Hough}
+
+\subsubsection{Ergebnisse Kantenerkennung /Contours}
 Detaillierte Beschreibung des Vorgehens\\
 Vor- und Nachteile aufzählen\\
 konkrete Probleme bennen\\
