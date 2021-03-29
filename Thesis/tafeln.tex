@@ -94,22 +94,145 @@ alten Code raussuchen, aufbereiten und präsentieren\\
 
 \subsubsection{Contours}
 
-Die Contours-Funktion von OpenCV basiert darauf, dass alle benachbarten Punkte mit gleicher Farbe oder Intensität als Teil einer Kontur betrachtet werden (Quelle OpenCV doc). Der Algorithmus liefert also eine Liste von Punkten, die Grundlage einer Vektorgrafik sind. Der Parameter
-\begin{verbatim}
-cv2.CHAIN_APPROX_SIMPLE
-\end{verbatim}
-vereinfacht die Kontur, indem redundante Punkte entfernt werden. Als Input für Contours werden binarisierte Bilder empfohlen. Das sind Bilder, die in eine Grauskala umgewandelt  und anhand eines Thresholds, eines Grenzwertes, in ein reines Schwarz-Weiß-Bild transformiert wurden. Zur Binarisierung wurden im Verlauf der Entwicklung zwei Verfahren geschrieben, von denen eines de facto nicht mehr in Verwendung ist, der Vollständigkeit halber hier aber aufgeführt werden soll.
+Die Contours-Funktion von OpenCV basiert darauf, dass alle benachbarten Punkte mit gleicher Farbe oder Intensität als Teil einer Kontur betrachtet werden (Quelle OpenCV doc). Der Algorithmus liefert also eine Liste von Punkten, die Grundlage einer Vektorgrafik sind. Der Parameter \verb|cv2.CHAIN_APPROX_SIMPLE| vereinfacht die Kontur, indem redundante Punkte entfernt werden. Als Input für Contours werden binarisierte Bilder empfohlen. Das sind Bilder, die in eine Grauskala umgewandelt  und anhand eines Thresholds, eines Grenzwertes, in ein reines Schwarz-Weiß-Bild transformiert wurden. Zur Binarisierung wurden im Verlauf der Entwicklung zwei Verfahren geschrieben, von denen eines de facto nicht mehr in Verwendung ist, der Vollständigkeit halber hier aber aufgeführt werden soll.
 Das Kernproblem, das zu der parallelen Entstehung zweier Konzepte führte, waren vor allem falsch-positive Detektionen von Tafeln, also Fälle, in denen korrekterweise Rechtecke erkannt wurden, die aber keine Tafeln waren.
+
+
 \begin{SCfigure}[0.5][h!]
 \caption{Falsch-Positive: Hier werden korrekterweise Rechtecke detektiert, die allerdings keine Tafeln und somit uninteressant für die weitere Verarbeitung sind.}
 \includegraphics[width=0.5\textwidth]{catacom_1023_adaptive.png}
 \end{SCfigure}
 
-\subsubsection*{ Adaptive Ansatz}
+\subsubsection*{Adaptiver Ansatz}
 Der adaptive Ansatz heißt so aufgrund der Verwendung eines adaptiven Thresholds, der auf Bildausschnitten vorher festgelegter Größe gewissermaßen lokale Thresholds festlegt und so gut geeignet ist, um Bilder mit großen Unterschieden in der Helligkeit zu binarisieren, ohne dass wichtige Informationen verloren gehen (Quelle OpenCV doc). Da es bei dem vorliegenden Material, vor allem aufgrund von Schatten und direktem Sonnenlicht, große Helligkeitsunterschiede sowohl zwischen den Bildern als auch innerhalb eines einzelnen Bildes gibt, ist die Arbeit mit einem fixen Threshold schwierig und dieser Ansatz bot sich an. Allerdings entstand dadurch eine relativ große Zahl an falsch-positiven, wie oben zu sehen. So kam es zur Entwicklung des zweitens Ansatzes.\\
+Die Umsetzung des adaptiven Ansatzes sieht wie folgt aus:
+Als Input für die entsprechende Funktion werden das zu bearbeitende Bild und der dazugehörige Dateiname übergeben, der für die Nachverfolgung und den Output wichtig ist. Das Bild wird in eine Grauskala umgewandelt und in mit der Funktion \verb|scaleImage| auf eine Größe von 1000 Pixeln skaliert. Dieser Schritt erfolgt, um die Detektion durch kleinere Datenmengen zu beschleunigen und um durch die dadurch einheitliche Größe der Bilder präzisere Kriterien für die Rechtecksdetektion formulieren zu können. Das skalierte Bild wird jetzt mittels adaptiven Threshold binarisiert. Es folgt die eigentliche Rechtecksdetektion durch den Aufruf der Funktion \verb|rect_detect|, auf die später genauer eingegangen wird. Die so gewonnenen Konturen und entdeckten Rechtecke werden auf das skalierte Bild übertragen und der \verb|output|-Funktion übergeben. Die Rechtecke selbst, im Code als \verb|rois| (region of interest) bezeichnet, werden auf die ursprüngliche Bildgröße zurückskaliert und in das Hauptprogramm übergeben, damit die Bilder in ihrer höheren Ursprungsauflösung weiter bearbeitet werden können.
 
-\subsubsection*{ Iterative Ansatz}
-Der Iterative Ansatz ist danach benannt, dass durch ein Spektrum an Thresholds iteriert wird. In jedem dieser so entstandenen binären Bilder werden anschließend die Contours gesucht und aus diesen wiederum die Rechtecke ausgewählt. Die Idee dahinter war, dass die Falsch-Positiven oft weniger konstant in den Bildern detektiert wurden als die tatsächlichen Tafeln. Würde man also ein Bild mit verschiedenen Thresholds binarisieren sollte das Rechteck, dass in den meisten dieser binären Bilder entdeckt wird, die Tafel sein. In der Implementierung dieses Ansatzes werden von 20 bis 200 in Fünferschritten 37 Thresholds durchlaufen. Die Gleichheit zweier Rechtecke wird dabei mittels \textit{Intersection over Union} berechnet, deren Ergebnis sich der 1 nähert, je gleicher die Rechtecke in Position und Größe sind.
+\begin{lstlisting}[language=Python]
+def rect_detect_adaptive(img, fileName):
+        
+    #convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+    gray = normalizeImage(gray)
+        
+    #scale image
+    scaled = scaleImage(gray)
+    
+    #set threshold
+    binary = cv2.adaptiveThreshold(scaled,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)       
+        
+    #detect contours and rectangles
+    contours, rois = rect_detect(binary) 
+       
+    scaled = cv2.cvtColor(scaled, cv2.COLOR_GRAY2BGR)
+        
+    #add contours in red to image
+    roisImg = cv2.drawContours(scaled,contours, -1,(0,0,230))
+        
+    #rescale rois
+    scaledrois = [rescale(gray, rect) for rect in rois]
+        
+    #add the found rectangles in green to image
+    roisImg = cv2.drawContours(scaled, [cv2.boxPoints(rect).astype('int32') for rect in rois], -1, (0, 230, 0), 2)
+        
+    #send the modified images in the output function
+    output('output', roisImg, fileName, 'adaptive')
+
+    return(scaledrois)
+\end{lstlisting}
+
+\begin{SCfigure}[0.5][h!]
+\caption{Detektion mittels adaptiven Ansatz: Aus allen gefunden Konturen (rot) werden die Rechtecke ausgewählt (grün).}
+\includegraphics[width=0.5\textwidth]{catacom_1020_adaptive.png}
+\end{SCfigure}
+
+\subsubsection*{Iterativer Ansatz}
+Der Iterative Ansatz ist danach benannt, dass durch ein Spektrum an Thresholds iteriert wird. In jedem dieser so entstandenen binären Bilder werden anschließend die Contours gesucht und aus diesen wiederum die Rechtecke ausgewählt. Die Idee dahinter war, dass die Falsch-Positiven oft weniger konstant in den Bildern detektiert wurden als die tatsächlichen Tafeln. Würde man also ein Bild mit verschiedenen Thresholds binarisieren sollte das Rechteck, dass in den meisten dieser binären Bilder entdeckt wird, die Tafel sein. In der Implementierung dieses Ansatzes werden von 20 bis 200 in Fünferschritten 37 Thresholds durchlaufen. Die Gleichheit zweier Rechtecke wird dabei mittels \textit{Intersection over Union} berechnet, deren Ergebnis sich der 1 nähert, je gleicher die Rechtecke in Position und Größe sind. Im Detail sieht das wie folgt aus: Aus den globalen Flags wird ein Wert für den minimalen Threshold übernommen. Wie bereits in dem adaptiven Verfahren wird das Bild in eine Grauskala umgewandelt. Beginnend beim minimalen Threshold (default = 20) werden die Bilder binarisiert und mit \verb|rect_detect| auf Rechtecke untersucht. Diese werden in der Liste \verb|allRois| gespeichert und der Threshold um 5 erhöht, bis der Wert von 200 erreicht ist.
+Im Anschluss werden die Rechtecke in eine Liste von Dictionaries überführt. Das hat den Hintergrund, dass sich hier leicht und übersichtlich ein Keyword einfügen lässt, mit dem die Zahl ähnlicher Rechtecke gemessen werden kann. In zwei Schleifen wird diese Liste durchlaufen und so je zwei Rechtecke mittels \verb|intersection_over_union| miteinander verglichen. Wird ein Wert von über 0.9, also eine hohe Übereinstimmung, erzielt, wird das Keyword \verb|same| um eins erhöht.
+Schließlich wird das Rechteck mit dem höchsten \verb|same|-Wert als ein Tafelfund betrachtet. Das weitere Verfahren ist wie beim adaptiven Ansatz: Das gefundene Rechteck wird auf das Bild übertragen und ausgegeben und dann ins Hauptprogramm zurückgegeben. Im Gegensatz zum adaptiven Ansatz ist hier eine Rückgabe mehrerer Rechtecke nicht möglich; Es wird immer genau ein Rechteck übergeben.
+\begin{lstlisting}[language=Python]
+def rect_detect_iterative(img, fileName):
+        
+    thresh = THRESHOLD_MIN
+    allRois = []
+        
+    #convert to grayscale and normalize
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)     
+    gray = normalizeImage(gray)
+        
+    #search for rectangles with increasing threshold, max 200
+    while thresh <= 200:
+            
+        rois = []            
+        contours = []            
+        
+        ret, binary = cv2.threshold(gray, thresh, THRESHOLD_MAX, cv2.THRESH_BINARY)    
+            
+        contours, rois = rect_detect(binary)
+            
+        if len(rois) > 0:       
+                
+            allRois.append(rois)
+                
+        thresh += 5
+        
+    #new rois list
+    rois_list = []        
+    #go through the found rectangles and add them to an array of dictionaries
+    for r in allRois:
+            
+        for i in range(len(r)):
+            (x,y), (w,h), angle = r[i]
+            rois_dict = {
+                    }
+            rois_dict["x"] = x
+            rois_dict["y"] = y
+            rois_dict["w"] = w
+            rois_dict["h"] = h
+            rois_dict["angle"] = angle
+            rois_dict["same"] = 0
+                
+            rois_list.append(rois_dict)
+        
+    #find and count rectangles in the same area
+    for i in range (len(rois_list)):
+        for j in range (len(rois_list)):
+            recta = rois_list[i]["x"], rois_list[i]["y"],rois_list[i]["w"],rois_list[i]["h"]
+            rectb = rois_list[j]["x"], rois_list[j]["y"],rois_list[j]["w"],rois_list[j]["h"]
+            if intersection_over_union(recta, rectb) > 0.9:
+                rois_list[i]["same"] = rois_list[i]["same"] + 1
+                rois_list[j]["same"] = rois_list[j]["same"] + 1
+    #new rectangle list
+    rects = []
+    #same is the number of same rois in the area, 0 is default
+    same = 0
+        
+    #if there are dictionaries in the list, search for the one with the highest number of same rectangles in the area
+    if len(rois_list) > 0:
+        roi = rois_list[0]
+        for  i in range (len(rois_list)):
+            if rois_list[i]["same"] >= roi["same"]:
+                roi = rois_list[i]
+    #add contours in red to image
+        if roi["same"] >= 6:              
+            #roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
+            rect = (roi["x"],roi["y"]),(roi["w"],roi["h"]),roi["angle"]
+            rects.append(rect)
+            same = roi["same"]
+    #convert to colored img for output
+    gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+    #add contours in red to image
+    #roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
+    #add the found rectangles in green to image
+    roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in rects], -1, (0, 230, 0),3)
+                    
+    #send the modified images in the output function
+    output('output', roisImg, fileName, str(same))
+        
+    return(rects)
+\end{lstlisting}
+
 Tatsächlich können mit diesem Verfahren die Zahl der Falsch-Positiven reduziert werden, ohne das Problem allerdings ganz zu lösen. Generell lässt sich sagen, dass je öfter ein Rechteck in einer der Iterationen erkannt wird, desto größer ist die Wahrscheinlichkeit, dass es sich tatsächlich um eine Tafel handelt. Ab einem Wert von 20 liegt die Quote bei 100\%. Es gibt aber auch korrekt erkannte Tafeln, die nur in 6 der Iterationen detektiert werden und umgekehrt Falsch-Positive, die in bis zu 14 Iterationen vorkommen. Zwar handelt es sich hier jeweils um Ausreißer, das Problem bleibt jedoch bestehen. Empirisch hat sich gezeigt, dass alles unter 6 Iterationen mit Sicherheit keine Tafel ist und somit aussortiert werden kann. Wenige Ausreißer verhindern, dass diese Grenze nach oben gesetzt werden kann. Auch dieser Ansatz führte also nicht zum gewünschten Ergebnis.
 \begin{SCfigure}[0.5][h!]
 \caption{Falsch-Positive beim Iterativen Ansatz. Hier wurden in 14 Iterationen die Holzbretter als Rechteck identifiziert.}
@@ -118,6 +241,12 @@ Tatsächlich können mit diesem Verfahren die Zahl der Falsch-Positiven reduzier
 \caption{Direkte Sonneneinstrahlung macht die Erkennung schwierig, vor allem, da sich der Rahmen nicht mehr stark vom Schiefer abhebt. Nur in 6 Iterationen wurde diese Tafel erkannt.}
 \includegraphics[width=0.5\textwidth]{catacom_1162_6.png}
 \end{SCfigure}\\
+
+\subsubsection{Rectangle Detection}
+
+Die beiden vorgestellten Ansätze beziehen sich auf das Verfahren der Binarisierung. Die eigentliche Rechtecksdetektion wird von beiden aber in die Funktion \verb|rect_detect| ausgelagert. Das zugrundeliegende Verfahren ist dabei einfach gehalten: Mittels \verb|cv2.minAreaRect| wird das kleinstmögliche Rechteck um eine Kontur gelegt. Der Flächeninhalt dieses Rechtecks wird mit dem der Kontur verglichen. Gleichen sich die Flächen zu einem gewissen Grad -- bewährt hat sich hier eine Konturfläche von 85\% der Rechtecksfläche -- kann angenommen werden, dass es sich bei der Kontur um ein Rechteck handelt.
+Der ursprüngliche Gedanke war, weitere Auswahlkriterien möglichst bereits in der Binarisierung zu treffen. Da hier aber zunächst garantiert werden muss, dass kein mögliches Rechteck ausgeschlossen wird, also Falsch-Positive in kauf genommen werden müssen, um Falsch-Negative auszuschließen, entstehen hier widersprüchliche Anforderungen. Die Priorisierung   Die Lösung besteht darin, 
+
 \subsubsection{Hough}
 
 Später schreiben, je nachdem ob sich der Algorithmus verbessern lässt und präzisere Ergebnisse zu erzielen als simple crop oder nicht. In letzterem Falle Ansatz und Fehlschlag vorstellen.\\
@@ -125,4 +254,4 @@ Später schreiben, je nachdem ob sich der Algorithmus verbessern lässt und prä
 \subsubsection{Ergebnisse Kantenerkennung /Contours}
 Detaillierte Beschreibung des Vorgehens\\
 Vor- und Nachteile aufzählen\\
-konkrete Probleme bennen\\
+konkrete Probleme benennen\\
