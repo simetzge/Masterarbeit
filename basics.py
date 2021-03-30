@@ -89,8 +89,8 @@ def output(folder, img, name, mod=''):
 #
 #####################################################################################################################################################
 
-def scaleImage(img):
-        scale = IMG_TARGET_SIZE / np.max(img.shape)
+def scaleImage(img, size = IMG_TARGET_SIZE):
+        scale = size / np.max(img.shape)
         return (cv2.resize(img, (0,0), fx = scale, fy = scale, interpolation = cv2.INTER_CUBIC))
     
 #####################################################################################################################################################

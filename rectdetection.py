@@ -105,7 +105,7 @@ try:
         binary = cv2.adaptiveThreshold(scaled,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)       
         
         #detect contours and rectangles
-        contours, rois = rect_detect(binary)
+        contours, rois = rect_detect(binary,img)#img for debug
         
         #rois = [rescale(max(gray.shape[0],gray.shape[1]), roi) for roi in rois]
         
@@ -156,7 +156,7 @@ try:
             
             ret, binary = cv2.threshold(gray, thresh, THRESHOLD_MAX, cv2.THRESH_BINARY)    
             
-            contours, rois = rect_detect(binary)
+            contours, rois = rect_detect(binary,img)#img for debug
             
             if len(rois) > 0:       
                 
@@ -225,7 +225,7 @@ try:
 #
 #####################################################################################################################################################
         
-    def rect_detect(binary):
+    def rect_detect(binary, img):
         
         #findcontours
         contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -278,7 +278,7 @@ try:
                 
             #if every condition is met, save the rectangle area in the array
             rois.append(rect)
-            maskcut(binary, contour)
+            maskcut(img, contour)
         
         return (contours, rois)
     
@@ -315,7 +315,7 @@ try:
             binary = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
 
             #detect template
-            contours, rois = rect_detect(binary) 
+            contours, rois = rect_detect(binary,img)#img for debug 
             
             #compute aspect ratio, write in global variable
             (x, y), (w, h), angle = rois[0]            
@@ -811,11 +811,13 @@ try:
 #####################################################################################################################################################
 
     def maskcut(img,contour):
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        img = scaleImage(img)
         mask = np.zeros(img.shape,np.uint8)
-        cv2.drawContours(mask,[contour],0,255,-1)
+        cv2.drawContours(mask,[contour],0,(255,255,255),-1)
         #newmask = np.zeros(img.shape,np.uint8)
-        mask = cv2.bitwise_and(img, mask)
+        #newmask = img[mask]
+        mask = cv2.bitwise_and(mask, img)
+        #masked = cv2.bitwise_and(img, img, mask=mask)
         out = mask
         cv2.imshow("rotate back", out)
         cv2.waitKey(0)

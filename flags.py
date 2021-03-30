@@ -24,9 +24,9 @@ ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
 #use iterative instead of adaptive threshold
 MODIFY_THRESHOLD = False
 #search for a template to get aspect ratio
-USE_TEMPLATE = False
+USE_TEMPLATE = True
 #use simple crop instead of the more complex hough based crop
-SIMPLE_CROP = False
+SIMPLE_CROP = True
 #use CNN: yolo, coco, both
 USE_CNN = ""
 #evaluate OCR

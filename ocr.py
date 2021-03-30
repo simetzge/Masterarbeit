@@ -122,7 +122,7 @@ def ocr(img, mode = 'image_to_text'):
     
     preimg = getinnerrect(preimg)
     
-    preimg = new_preprocessing(preimg)
+    #preimg = new_preprocessing(preimg)
     
     preimg = normalizeImage(preimg)
     
@@ -384,7 +384,7 @@ def image_to_box(img):
         
         #y has to be inverted to be compatible with cv2 functions
         cv2.rectangle(img, (x, img.shape[0] - y), (w, img.shape[0] - h), (0, 255, 0), 2)
-        cv2.putText(img, rows[0], (int(x + ((w-x) / 2)), int(img.shape[0] - y + (y-h)/2)),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
+        cv2.putText(img, rows[0], (int(x + ((w-x) / 2)), int(img.shape[0] - y + (y-h)/2)),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 3)
         textlist.append(str(rows[0]))    
         #img = cv2.drawContours(img, [cv2.boxPoints(rect).astype('int32') for rect in rects],-1, (0, 230, 0))
     text = "".join(textlist)
@@ -407,7 +407,7 @@ def preprocessing(img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
     # multiple blurring and normalization to get better contours
-    for i in range (10):
+    for i in range (10):#chenged from 10 to 1 for evaluation test
             
         blur = cv2.medianBlur(gray, 3)
         #blur = cv2.GaussianBlur(img, (3,3), 1)

@@ -245,7 +245,67 @@ Tatsächlich können mit diesem Verfahren die Zahl der Falsch-Positiven reduzier
 \subsubsection{Rectangle Detection}
 
 Die beiden vorgestellten Ansätze beziehen sich auf das Verfahren der Binarisierung. Die eigentliche Rechtecksdetektion wird von beiden aber in die Funktion \verb|rect_detect| ausgelagert. Das zugrundeliegende Verfahren ist dabei einfach gehalten: Mittels \verb|cv2.minAreaRect| wird das kleinstmögliche Rechteck um eine Kontur gelegt. Der Flächeninhalt dieses Rechtecks wird mit dem der Kontur verglichen. Gleichen sich die Flächen zu einem gewissen Grad -- bewährt hat sich hier eine Konturfläche von 85\% der Rechtecksfläche -- kann angenommen werden, dass es sich bei der Kontur um ein Rechteck handelt.
-Der ursprüngliche Gedanke war, weitere Auswahlkriterien möglichst bereits in der Binarisierung zu treffen. Da hier aber zunächst garantiert werden muss, dass kein mögliches Rechteck ausgeschlossen wird, also Falsch-Positive in kauf genommen werden müssen, um Falsch-Negative auszuschließen, entstehen hier widersprüchliche Anforderungen. Die Priorisierung   Die Lösung besteht darin, 
+Der ursprüngliche Gedanke war, weitere Auswahlkriterien möglichst bereits in der Binarisierung zu treffen. Da hier aber zunächst garantiert werden muss, dass kein mögliches Rechteck ausgeschlossen wird, also Falsch-Positive in kauf genommen werden müssen, um Falsch-Negative auszuschließen, entstehen hier widersprüchliche Anforderungen. Diese Priorisierung folgt daraus, dass eine erneute Prüfung einmal aussortierter Areale nicht möglich ist und diese für weitere Prozesse verloren sind.
+Dieser Gedanke wurde jedoch verworfen. Stattdessen wurden die Auswahlkriterien, ab wann eine Kontur als gültiges Rechteck betrachtet, immer weiter verfeinert. Der folgende Code zeigt die zahlreichen Bedingungen, die zum Ausschluss einer Kontur als mögliche Tafel führen.
+Zunächst werden alle Konturen mittels \verb|findContours| ermittelt. Aus diesen werden dann alle zu kleinen Elemente aussortiert: Was in der Fläche eine gewisse Größe unterschreitet kann keine Tafel sein, da diese immer eine gewisse Prominenz im Bild haben. Der nächste Schritt ist dann der bereits beschriebene Vergleich zwischen Fläche der Kontur und Fläche des kleinsten, die Kontur umfassenden Rechtecks. Als nächstes werden dann Rechtecke aussortiert, die einen großen Teil des Bildes -- über 90\% einer Kantenlänge -- einnehmen. Eine Tafel wird niemals diese Größe im Bild erreichen, stattdessen können hier Bilder aussortiert werden, die in ihrer Gesamtheit von einer Kontur eingerahmt sind und so zu Fehlern führten. Schließlich wird geprüft, ob die Seitenverhältnisse stimmen. Das geschieht anhand eines optionalen Templates. Dieses Template besteht aus einem Bild, das der Nutzer im Input-Ordner hinterlegen kann. Dieses Bild sollte optimale Bedingungen für eine Erkennung bieten, also eine gut sichtbare Tafel und keine Störobjekte und mögliche Falsch-Positive enthalten. Die Tafel auf diesem Bild wird gleich zu Beginn des Programmes erkannt und daraus das Seitenverhältnis der Tafel berechnet. Dieses Seitenverhältnis kann mit dem jedes Rechtecks verglichen werden. Weichen die Werte zu stark voneinander ab, kann es sich nicht um eine der gesuchten Tafeln handeln. Eine gewissen Abweichung muss aber durch die Rotation der Tafeln in Kauf genommen werden. Dieser Prozess könnte verbessert werden, indem man ihn in spätere Bereiche des Programmes verschiebt, an denen die Rotation herausgerechnet wird. Da der Vorgang allerdings schon ausreichend gut funktioniert ist der zusätzliche Aufwand nicht nötig.
+
+\begin{lstlisting}[language=Python]        
+def rect_detect(binary):
+        
+    #findcontours
+    contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        
+    #creat array for regions of interest
+    rois = []
+        
+    #move through every contour in array contours
+    for contour in contours:
+            
+        #compute contour area
+        contArea = cv2.contourArea(contour)
+          
+        #throw out too small areas
+        if not max(binary.shape[0],binary.shape[1]) < contArea:
+                continue            
+            
+        #create rectangle around contours
+        (x, y), (w, h), angle = rect = cv2.minAreaRect(contour)
+            
+        #compute area of this rectangle
+        rectArea = w * h
+            
+        #compare the areas to each other, make sure they don't differ too much
+        if contArea / rectArea < 0.85:
+            continue
+            
+        #ignore contours as big as the image
+        if w > binary.shape[0] * 0.9 or h > binary.shape[1]*0.9:
+            continue
+            
+        #compute if area is not empty
+        if rectArea != 0:
+               
+            #if template is used, check for aspect ratio
+            if USE_TEMPLATE == True and aspectRatio != 0:
+                    
+                #get aspect ratios of rect and approx
+                asra = max(w,h)/min(w,h)
+                   
+                #ignore this shape if aspect ratio doesn't fit
+                if not (asra < aspectRatio * 1.3 and asra > aspectRatio *0.7):
+                    continue                 
+                
+            #else aspect ratio should be max 2:1
+            else:
+                #make sure the aspect ratio is max 2:1
+                if max(w,h) > 2 * min(w,h):
+                    continue
+                
+        #if every condition is met, save the rectangle area in the array
+        rois.append(rect)
+        
+     return (contours, rois)
+\end{lstlisting}
 
 \subsubsection{Hough}
 
