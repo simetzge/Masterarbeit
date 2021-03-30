@@ -30,7 +30,7 @@ try:
         #images = [cv2.imread(files, cv2.IMREAD_GRAYSCALE) for files in filePaths]
         images = [cv2.imread(files) for files in filePaths]
         
-        #scale images to 1000px
+        #scale images to 1000px -> moved to rect_detect_adaptive
         #images = [scaleImage(img) for img in images]
         
         #get aspect ratio from template if flag is set
@@ -97,6 +97,8 @@ try:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
         gray = normalizeImage(gray)
+        
+        gray = cv2.bilateralFilter(gray,9,9,9) 
         
         #scale image
         scaled = scaleImage(gray)
@@ -278,7 +280,7 @@ try:
                 
             #if every condition is met, save the rectangle area in the array
             rois.append(rect)
-            maskcut(img, contour)
+            #maskcut(img, contour)
         
         return (contours, rois)
     
