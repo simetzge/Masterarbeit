@@ -13,11 +13,14 @@ import difflib
 def evaluate(evaluationdict, ocrlist):
     
     ratiolist = []
-    
+    #compare dicts with ocr and evaluationlist
     for dicts in ocrlist:
         for entry in evaluationdict:
+            #entries are the same if lowercase of both names is a match
             if entry["Image"].lower() == dicts["image"].lower(): 
+                #ignore spaces
                 ground = entry["Content"].replace(" ","")
+                #get ratio for comparison, add to dict
                 for i in range(len(dicts)-1):                    
                     key = "rectangle " + str(i)
                     box = dicts[key]["boximage"].replace(" ", "")
@@ -45,7 +48,7 @@ def comparison(ocrlist):
 
 
 #####################################################################################################################################################
-#      
+#
 # evaluation output as csv
 #
 #####################################################################################################################################################

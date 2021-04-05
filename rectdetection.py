@@ -48,27 +48,33 @@ try:
                     continue      
             print("the next image is " + fileNames[i])
             if MODIFY_THRESHOLD:
-                rects = rect_detect_iterative(img, fileNames[i])
+                rects,conts = rect_detect_iterative(img, fileNames[i])
             else:
-                rects = rect_detect_adaptive(img, fileNames[i])
+                rects,conts = rect_detect_adaptive(img, fileNames[i])
+                rects = [rescaleRect(img, rect) for rect in rects]
+            if len(rects) > 0:
+                #crop found rectangle
+                if CONT_BASED_CUT == True:
+                    masked = contMask(img,conts)
+                else:
+                    masked = None
             
-            #crop found rectangles
-            cropimgs, restimg = cut(img, rects)
-            #perform OCR on cropped rectangles
-            imagedict = {"image": fileNames[i]}
-            for j, crop in enumerate(cropimgs):
-                textimg, text = ocr(crop)
-                boximg, boxtext = ocr(crop, mode = 'image_to_box')
-                output('rect', textimg, fileNames[i], str(j))
-                output('box', boximg, fileNames[i], str(j))
-                #output('rect', crop, fileNames[i], str(j))
-                rectdict = {"rectangle": fileNames[i] + "_" + str(j), "textimage": text, "boximage": boxtext}
-                imagedict["rectangle " + str(j)] =  rectdict
+                cropimgs, restimg = cut(img, rects, masked = masked)
+                #perform OCR on cropped rectangles
+                imagedict = {"image": fileNames[i]}
+                for j, crop in enumerate(cropimgs):
+                    textimg, text = ocr(crop)
+                    boximg, boxtext = ocr(crop, mode = 'image_to_box')
+                    output('rect', textimg, fileNames[i], str(j))
+                    output('box', boximg, fileNames[i], str(j))
+                    #output('rect', crop, fileNames[i], str(j))
+                    rectdict = {"rectangle": fileNames[i] + "_" + str(j), "textimage": text, "boximage": boxtext}
+                    imagedict["rectangle " + str(j)] =  rectdict
             
-            ocrlist.append(imagedict)
+                ocrlist.append(imagedict)
 
-            #write images without rectangles
-            output('imagecut', restimg, fileNames[i])
+                #write images without rectangles
+                output('imagecut', restimg, fileNames[i])
             
             #use cnns to identify objects in the images
             if USE_CNN == "coco" or USE_CNN == "both":
@@ -98,8 +104,8 @@ try:
         
         gray = normalizeImage(gray)
         
-        gray = cv2.bilateralFilter(gray,9,9,9) 
-        
+        gray = cv2.bilateralFilter(gray,9,9,9)  
+
         #scale image
         scaled = scaleImage(gray)
         
@@ -107,9 +113,9 @@ try:
         binary = cv2.adaptiveThreshold(scaled,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)       
         
         #detect contours and rectangles
-        contours, rois = rect_detect(binary,img)#img for debug
+        contours, rois, roisConts = rect_detect(binary)
         
-        #rois = [rescale(max(gray.shape[0],gray.shape[1]), roi) for roi in rois]
+        #rois = [rescaleRect(max(gray.shape[0],gray.shape[1]), roi) for roi in rois]
         
         scaled = cv2.cvtColor(scaled, cv2.COLOR_GRAY2BGR)
         
@@ -117,24 +123,49 @@ try:
         roisImg = cv2.drawContours(scaled, contours, -1, (0, 0, 230))
         
         #rescale rois
-        scaledrois = [rescale(gray, rect) for rect in rois]
+        #scaledrois = [rescaleRect(gray, rect) for rect in rois]
         
         #add the found rectangles in green to image
         roisImg = cv2.drawContours(scaled, [cv2.boxPoints(rect).astype('int32') for rect in rois], -1, (0, 230, 0), 2)
         
         #send the modified images in the output function
         output('output', roisImg, fileName, 'adaptive')
-
-        return(scaledrois)
+        #rescaleCont(img, scaled, rectConts)
+        #return(scaledrois)
+        return(rois, roisConts)
     
     #rescale rectangles based on the size of the original image and the flag IMG_TARGET_SIZE which is used to downscale images at first
-    def rescale(img, rect):
+    def rescaleRect(img, rect):
         scale = np.max(img.shape) / IMG_TARGET_SIZE
         (x,y), (w,h), angle = rect
         rect = (x*scale, y*scale), (w*scale, h*scale), angle
         return (rect)
-
     
+    def contMask(img,contours, rescale = not MODIFY_THRESHOLD):
+        cropImgs = []
+        if rescale == True:    
+            scaledImg = scaleImage(img)
+            for contour in contours:
+                mask = np.zeros(scaledImg.shape,np.uint8)
+                cv2.drawContours(mask,[contour],0,(255,255,255),-1)
+                #scaledArea = cv2.bitwise_and(mask, scaledImg)
+                scaledMask = scaleImage(mask, np.max(img.shape))
+                cut = cv2.bitwise_and(scaledMask, img)
+                cropImgs.append(cut)
+        else:
+            for contour in contours:
+                mask = np.zeros(img.shape,np.uint8)
+                #mask = img
+             
+                mask[:,:,:]=0
+             
+                cv2.drawContours(mask,[contour],0,(255,255,255),-1)
+                #show(mask)
+                cut = cv2.bitwise_and(mask, img)
+                #show(cut)
+                cropImgs.append(cut)
+        return(cropImgs)    
+            
 #####################################################################################################################################################
 #
 # sets an increasing threshold, sends the results to rect_detect and those results to output
@@ -145,6 +176,7 @@ try:
         
         thresh = THRESHOLD_MIN
         allRois = []
+        allConts = []
         
         #convert to grayscale and normalize
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)     
@@ -158,21 +190,21 @@ try:
             
             ret, binary = cv2.threshold(gray, thresh, THRESHOLD_MAX, cv2.THRESH_BINARY)    
             
-            contours, rois = rect_detect(binary,img)#img for debug
+            contours, rois, rectConts = rect_detect(binary)#img for debug
             
             if len(rois) > 0:       
                 
                 allRois.append(rois)
-                
+                allConts.append(rectConts)
             thresh += 5
         
         #new rois list
         rois_list = []        
         #go through the found rectangles and add them to an array of dictionaries
-        for r in allRois:
-            
-            for i in range(len(r)):
-                (x,y), (w,h), angle = r[i]
+        for i, r in enumerate(allRois):
+            cont = allConts[i]
+            for j in range(len(r)):
+                (x,y), (w,h), angle = r[j]
                 rois_dict = {
                     }
                 rois_dict["x"] = x
@@ -181,6 +213,8 @@ try:
                 rois_dict["h"] = h
                 rois_dict["angle"] = angle
                 rois_dict["same"] = 0
+                rois_dict["cont"] = cont
+                
                 
                 rois_list.append(rois_dict)
         
@@ -194,6 +228,7 @@ try:
                     rois_list[j]["same"] = rois_list[j]["same"] + 1
         #new rectangle list
         rects = []
+        cont = None
         #same is the number of same rois in the area, 0 is default
         same = 0
         
@@ -209,6 +244,7 @@ try:
                 rect = (roi["x"],roi["y"]),(roi["w"],roi["h"]),roi["angle"]
                 rects.append(rect)
                 same = roi["same"]
+                cont = roi["cont"]
         #convert to colored img for output
         gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
         #add contours in red to image
@@ -219,7 +255,7 @@ try:
         #send the modified images in the output function
         output('output', roisImg, fileName, str(same))
         
-        return(rects)
+        return(rects,cont)
         
 #####################################################################################################################################################
 #
@@ -227,13 +263,14 @@ try:
 #
 #####################################################################################################################################################
         
-    def rect_detect(binary, img):
+    def rect_detect(binary):
         
         #findcontours
         contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         
         #creat array for regions of interest
         rois = []
+        rectConts = []
         
         #move through every contour in array contours
         for contour in contours:
@@ -280,9 +317,9 @@ try:
                 
             #if every condition is met, save the rectangle area in the array
             rois.append(rect)
-            #maskcut(img, contour)
+            rectConts.append(contour)
         
-        return (contours, rois)
+        return (contours, rois, rectConts)
     
 #####################################################################################################################################################
 #
@@ -317,7 +354,7 @@ try:
             binary = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
 
             #detect template
-            contours, rois = rect_detect(binary,img)#img for debug 
+            contours, rois, rectConts = rect_detect(binary)
             
             #compute aspect ratio, write in global variable
             (x, y), (w, h), angle = rois[0]            
@@ -355,7 +392,7 @@ try:
 #
 #####################################################################################################################################################
 
-    def cut(img, rects):
+    def cut(img, rects, masked = None):
         
         crops = []
         # generate mask for extraction of rectangles
@@ -370,11 +407,16 @@ try:
             
             if SIMPLE_CROP:
                 #old version, works, but not perfect
-                crop = rotate_board (img, rect)
+                if masked != None:
+                    crop = rotate_board (masked[i], rect)
+                else:
+                    crop = rotate_board (img, rect)
             else:
                 # new version
-                crop = hough_rotate(img,rect, CUT_THRESH)
-            
+                if masked != None:
+                    crop = hough_rotate(masked[i],rect, CUT_THRESH)
+                else:
+                    crop = hough_rotate(img,rect, CUT_THRESH)
             #end function if no crop image found (hough rotate returns [None] if something went wrong)
             if len(crop) < 2:
                 continue
@@ -388,7 +430,6 @@ try:
         imgcut = img.copy()
         rectcut = imgcut[mask]
         imgcut[mask] = 0
-        
         return(crops, imgcut)   
 
     #cannyedge from opencv doc
@@ -474,7 +515,7 @@ try:
     def hough_rotate(img, rect, threshold):
         
         #debug flag
-        debug_hough = False
+        debug_hough = True
         
         #if threshold is too low, use simple crop
         if threshold < 100:
@@ -507,11 +548,11 @@ try:
             cv2.imshow("test", binary)
             cv2.waitKey()
         binary = cv2.GaussianBlur(binary,(3,3),15)           
-        binary = skeleton (binary)
+        #binary = skeleton (binary)
         binary = cv2.GaussianBlur(binary,(3,3),15)
         
         #get shape
-        height, width = binary.shape 
+        height, width = binary.shape
         
         # cannyedge        
         dst = cannyThreshold(binary)
@@ -828,7 +869,7 @@ try:
 #
 # call main
 #
-#####################################################################################################################################################        
+#####################################################################################################################################################            
 
     if __name__ == "__main__":
        main() 

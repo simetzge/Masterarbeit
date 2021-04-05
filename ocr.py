@@ -120,9 +120,11 @@ def ocr(img, mode = 'image_to_text'):
     
     preimg = preprocessing(img)
     
-    preimg = getinnerrect(preimg)
+    #preimg = getinnerrect(preimg)
     
     #preimg = new_preprocessing(preimg)
+    if CONT_BASED_CUT:
+        preimg = np.where(preimg < 1, 127, preimg)
     
     preimg = normalizeImage(preimg)
     

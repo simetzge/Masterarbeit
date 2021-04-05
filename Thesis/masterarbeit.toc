@@ -4,19 +4,27 @@
 \contentsline {subsection}{\numberline {2.1}Datenlage Archäologie}{3}{}%
 \contentsline {subsection}{\numberline {2.2}Grabung Kapitol}{3}{}%
 \contentsline {subsection}{\numberline {2.3}Datengrundlage und Vorhaben}{3}{}%
+\contentsline {subsubsection}{\numberline {2.3.1}Datensatz vorstellen}{3}{}%
 \contentsline {section}{\numberline {3}Tafeldetektierung}{4}{}%
 \contentsline {subsection}{\numberline {3.1}Die Tafeln und ihre Tücken}{4}{}%
 \contentsline {subsubsection}{\numberline {3.1.1}Die Tafeln}{4}{}%
-\contentsline {subsection}{\numberline {3.2}Detektierungsmöglichkeiten}{5}{}%
-\contentsline {subsection}{\numberline {3.3}Ergebnisse CNN}{5}{}%
-\contentsline {subsection}{\numberline {3.4}Ergebnisse Feature Detection}{5}{}%
-\contentsline {subsection}{\numberline {3.5}Ergebnisse Kantenerkennung /Contours}{5}{}%
-\contentsline {section}{\numberline {4}Texterkennung}{6}{}%
-\contentsline {subsection}{\numberline {4.1}Texterkennung allgemein}{6}{}%
-\contentsline {subsection}{\numberline {4.2}Das Ausgangsmaterial}{6}{}%
-\contentsline {subsection}{\numberline {4.3}Vorgehen}{6}{}%
-\contentsline {section}{\numberline {5}SIFT}{7}{}%
-\contentsline {subsection}{\numberline {5.1}SIFT allgemein}{7}{}%
-\contentsline {subsection}{\numberline {5.2}Ausgangsmaterial und Probleme}{7}{}%
-\contentsline {subsection}{\numberline {5.3}Vorgehen}{7}{}%
-\contentsline {section}{\numberline {6}Fazit}{8}{}%
+\contentsline {subsubsection}{\numberline {3.1.2}Tafelvergleiche}{5}{}%
+\contentsline {subsection}{\numberline {3.2}Detektierungsmöglichkeiten}{6}{}%
+\contentsline {subsubsection}{\numberline {3.2.1}CNN}{6}{}%
+\contentsline {subsubsection}{\numberline {3.2.2}Ergebnisse CNN}{6}{}%
+\contentsline {subsubsection}{\numberline {3.2.3}Ergebnisse Feature Detection}{7}{}%
+\contentsline {subsubsection}{\numberline {3.2.4}Ergebnisse Feature Detection}{8}{}%
+\contentsline {subsubsection}{\numberline {3.2.5}Contours}{8}{}%
+\contentsline {subsubsection}{\numberline {3.2.6}Rectangle Detection}{15}{}%
+\contentsline {subsubsection}{\numberline {3.2.7}Hough}{17}{}%
+\contentsline {subsubsection}{\numberline {3.2.8}Ergebnisse Kantenerkennung /Contours}{17}{}%
+\contentsline {section}{\numberline {4}Texterkennung}{18}{}%
+\contentsline {subsection}{\numberline {4.1}Texterkennung allgemein}{18}{}%
+\contentsline {subsection}{\numberline {4.2}Das Ausgangsmaterial}{18}{}%
+\contentsline {subsection}{\numberline {4.3}Tesseract}{18}{}%
+\contentsline {subsection}{\numberline {4.4}Vorgehen}{18}{}%
+\contentsline {section}{\numberline {5}SIFT}{19}{}%
+\contentsline {subsection}{\numberline {5.1}SIFT allgemein}{19}{}%
+\contentsline {subsection}{\numberline {5.2}Ausgangsmaterial und Probleme}{19}{}%
+\contentsline {subsection}{\numberline {5.3}Vorgehen}{19}{}%
+\contentsline {section}{\numberline {6}Fazit}{20}{}%

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=latex 2021.2.14)  23 MAR 2021 11:15
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=latex 2021.2.14)  31 MAR 2021 11:35
 entering extended mode
 **./masterarbeit.tex
 (masterarbeit.tex
@@ -98,10 +98,23 @@ File: dvips.def 2017/06/20 v3.1d Graphics/color driver for dvips
 ))
 \Gin@req@height=\dimen140
 \Gin@req@width=\dimen141
-) (C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/generic/german\ngerman.sty 
+) (C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/sidecap\sidecap.sty
+Package: sidecap 2003/06/06 v1.6f SideCap Package (RN/HjG)
+
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty
+Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
+)
+\SC@BOXWD=\dimen142
+\SC@CAPWD=\dimen143
+\SC@tempdima=\dimen144
+\SC@tempdimb=\dimen145
+\c@SC@C=\count187
+\SC@BOX=\box47
+)
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/generic/german\ngerman.sty
 v2.5e 1998-07-08
 Package: ngerman 1998/07/08 v2.5e Support for writing german texts (br)
-\grmnU@D=\dimen142
+\grmnU@D=\dimen146
 LaTeX Info: Redefining \glqq on input line 255.
 LaTeX Info: Redefining \glq on input line 268.
 LaTeX Info: Redefining \flqq on input line 281.
@@ -110,40 +123,105 @@ LaTeX Info: Redefining \flq on input line 297.
 LaTeX Info: Redefining \frq on input line 304.
 ngerman -- \language number for naustrian undefined, default 48 used.
 )
-LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 2
-7.
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.sty
+\lst@mode=\count188
+\lst@gtempboxa=\box48
+\lst@token=\toks18
+\lst@length=\count189
+\lst@currlwidth=\dimen147
+\lst@column=\count190
+\lst@pos=\count191
+\lst@lostspace=\dimen148
+\lst@width=\dimen149
+\lst@newlines=\count192
+\lst@lineno=\count193
+\lst@maxwidth=\dimen150
 
-(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstmisc.sty
+File: lstmisc.sty 2020/03/24 1.8d (Carsten Heinz)
+\c@lstnumber=\count194
+\lst@skipnumbers=\count195
+\lst@framebox=\box49
+)
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.cfg
+File: listings.cfg 2020/03/24 1.8d listings configuration
+))
+Package: listings 2020/03/24 1.8d (Carsten Heinz)
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+Package: xcolor 2016/05/11 v2.12 LaTeX color extensions (UK)
+
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: dvips.def on input line 225.
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1348.
+Package xcolor Info: Model `RGB' extended on input line 1364.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1366.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1367.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1370.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
+)
+LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 5
+6.
+ (C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 (C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-dvi
 ps.def
 File: l3backend-dvips.def 2021-01-09 L3 backend support: dvips
-\l__pdf_internal_box=\box47
-\g__pdf_backend_object_int=\count187
-\l__pdf_backend_content_box=\box48
-\l__pdf_backend_model_box=\box49
-\g__pdf_backend_annotation_int=\count188
-\g__pdf_backend_link_int=\count189
-\g__pdf_backend_link_sf_int=\count190
+\l__pdf_internal_box=\box50
+\g__pdf_backend_object_int=\count196
+\l__pdf_backend_content_box=\box51
+\l__pdf_backend_model_box=\box52
+\g__pdf_backend_annotation_int=\count197
+\g__pdf_backend_link_int=\count198
+\g__pdf_backend_link_sf_int=\count199
 ) (masterarbeit.aux (einleitung.aux) (tafeln.aux) (texterkennung.aux)
 (sift.aux) (fazit.aux))
 \openout1 = `masterarbeit.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/ragged2e\ragged2e.sty
+Package: ragged2e 2019/07/28 v2.2 ragged2e Package (MS)
+
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/ms\everysel.sty
+Package: everysel 2011/10/28 v1.2 EverySelectfont Package (MS)
+
+ABD: EverySelectfont initializing macros
+LaTeX Info: Redefining \selectfont on input line 126.
+)
+\CenteringLeftskip=\skip58
+\RaggedLeftLeftskip=\skip59
+\RaggedRightLeftskip=\skip60
+\CenteringRightskip=\skip61
+\RaggedLeftRightskip=\skip62
+\RaggedRightRightskip=\skip63
+\CenteringParfillskip=\skip64
+\RaggedLeftParfillskip=\skip65
+\RaggedRightParfillskip=\skip66
+\JustifyingParfillskip=\skip67
+\CenteringParindent=\skip68
+\RaggedLeftParindent=\skip69
+\RaggedRightParindent=\skip70
+\JustifyingParindent=\skip71
+)
+\c@lstlisting=\count266
  [1
 
 ] [1] (masterarbeit.toc
@@ -159,23 +237,33 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 
  [1]
 
-LaTeX Warning: Citation `teschl' on page 2 undefined on input line 77.
+LaTeX Warning: Citation `teschl' on page 2 undefined on input line 108.
 
 [2]
 \openout2 = `einleitung.aux'.
 
  (einleitung.tex
-Underfull \hbox (badness 10000) in paragraph at lines 4--6
+Underfull \hbox (badness 10000) in paragraph at lines 3--4
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 8--10
+Underfull \hbox (badness 10000) in paragraph at lines 6--8
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10--12
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15--18
 
  []
 
 )
-Underfull \hbox (badness 10000) in paragraph at lines 12--79
+Underfull \hbox (badness 10000) in paragraph at lines 19--110
 
  []
 
@@ -185,53 +273,546 @@ Underfull \hbox (badness 10000) in paragraph at lines 12--79
 \openout2 = `tafeln.aux'.
 
  (tafeln.tex
-Underfull \hbox (badness 10000) in paragraph at lines 14--22
+Underfull \hbox (badness 10000) in paragraph at lines 10--12
 
  []
 
 
-Overfull \hbox (6.2454pt too wide) in paragraph at lines 23--32
-[]\OT1/ptm/m/n/12 Problematiken auf-zei-gen: un-ter-schied-li-che Gr[]oe, Lich
-t und Be-leuch-tung, Win-
+Overfull \hbox (5.768pt too wide) in paragraph at lines 15--16
+[]\OT1/ptm/m/n/12 Durch die groe Dif-fe-renz zwi-schen dem hel-len Holz-rah-me
+n und der dunklen
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 23--32
+LaTeX Warning: File `catacom_1020_cutout.png' not found on input line 19.
 
+
+! LaTeX Error: Cannot determine size of graphic in ./images//catacom_1020_cutou
+t.png (no BoundingBox).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.19 ...th=0.6\textwidth]{catacom_1020_cutout.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+File: ./images//catacom_1020_cutout.png Graphic file (type eps)
+<./images//catacom_1020_cutout.png>
+Underfull \hbox (badness 10000) in paragraph at lines 20--20
+[][]\OT1/ptm/m/n/12 : |Beispiel
  []
+
+
+Underfull \hbox (badness 7344) in paragraph at lines 20--20
+\OT1/ptm/m/n/12 ei-nes Fo-tos der ver-
+ []
+
+
+Underfull \hbox (badness 5231) in paragraph at lines 20--20
+\OT1/ptm/m/n/12 wen-de-ten Ta-fel. GOT
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 20--20
+\OT1/ptm/m/n/12 be-zeich-net die Kam-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 20--20
+\OT1/ptm/m/n/12 pa-gne, dar-un-ter folgt
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 20--20
+\OT1/ptm/m/n/12 das Da-tum. US ist
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 20--20
+\OT1/ptm/m/n/12 die Abk[]urzung f[]ur
+ []
+
+
+Underfull \hbox (badness 1946) in paragraph at lines 20--20
+\OT1/ptm/m/it/12 unit[]a stra-ti-gra-fi-ca\OT1/ptm/m/n/12 , die
+ []
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 [4
 
 
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 34--39
-
+Overfull \hbox (4.12389pt too wide) in paragraph at lines 28--29
+\OT1/ptm/m/n/12 Hin-ter-grund ab-hebt, was die De-tek-ti-on des []aue-ren Ran-
+des er-schwe-ren kann. 
  []
 
-)
-Underfull \hbox (badness 10000) in paragraph at lines 45--80
+
+Underfull \hbox (badness 10000) in paragraph at lines 38--39
 
  []
 
 [5]
+Underfull \hbox (badness 10000) in paragraph at lines 40--48
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 53--54
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 55--56
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 57--58
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 59--60
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 63--64
+
+ []
+
+[6]
+
+LaTeX Warning: File `coco_fail.PNG' not found on input line 69.
+
+
+! LaTeX Error: Cannot determine size of graphic in ./images//coco_fail.PNG (no 
+BoundingBox).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.69 ...aphics[width=0.5\textwidth]{coco_fail.PNG}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+File: ./images//coco_fail.PNG Graphic file (type eps)
+<./images//coco_fail.PNG>
+Underfull \hbox (badness 4981) in paragraph at lines 70--70
+[][]\OT1/ptm/m/n/12 : |Eine bei-spiel-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 70--70
+\OT1/ptm/m/n/12 Weights: Es wer-den zwar
+ []
+
+
+Underfull \hbox (badness 7326) in paragraph at lines 70--70
+\OT1/ptm/m/n/12 Die Ob-jek-te wer-den nicht
+ []
+
+
+LaTeX Warning: File `coco_surfboard.PNG' not found on input line 74.
+
+
+! LaTeX Error: Cannot determine size of graphic in ./images//coco_surfboard.PNG
+ (no BoundingBox).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.74 ...s[width=0.5\textwidth]{coco_surfboard.PNG}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+File: ./images//coco_surfboard.PNG Graphic file (type eps)
+<./images//coco_surfboard.PNG>
+Underfull \hbox (badness 2189) in paragraph at lines 75--75
+\OT1/ptm/m/n/12 zu-verl[]assig ge-nug, um CO-
+ []
+
+
+LaTeX Warning: File `scissors.PNG' not found on input line 79.
+
+
+! LaTeX Error: Cannot determine size of graphic in ./images//scissors.PNG (no B
+oundingBox).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.79 ...raphics[width=0.5\textwidth]{scissors.PNG}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+File: ./images//scissors.PNG Graphic file (type eps)
+<./images//scissors.PNG>
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+LaTeX Warning: File `sportsball.PNG' not found on input line 84.
+
+
+! LaTeX Error: Cannot determine size of graphic in ./images//sportsball.PNG (no
+ BoundingBox).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.84 ...phics[width=0.5\textwidth]{sportsball.PNG}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+File: ./images//sportsball.PNG Graphic file (type eps)
+<./images//sportsball.PNG>
+Underfull \hbox (badness 10000) in paragraph at lines 85--85
+[][]\OT1/ptm/m/n/12 : |... oder als
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 85--85
+\OT1/ptm/m/n/12 lich-keit mit be-schrif-te-ten,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 85--85
+\OT1/ptm/m/n/12 recht-e-cki-gen Ob-jek-ten wie
+ []
+
+
+Underfull \hbox (badness 2894) in paragraph at lines 85--85
+\OT1/ptm/m/n/12 B[]uchern be-steht so-mit al-so
+ []
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 89--90
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 93--94
+
+ []
+
+[7]
+LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 9
+7.
+ (C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1pcr.fd
+File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
+)
+Overfull \hbox (0.53613pt too wide) in paragraph at lines 97--99
+\OT1/ptm/m/n/12 Con-tours wer-den bi-na-ri-sier-te Bil-der emp-foh-len. Das sin
+d Bil-der, die in ei-ne Graus-
+ []
+
+[8]
+
+LaTeX Warning: File `catacom_1023_adaptive.png' not found on input line 103.
+
+
+! LaTeX Error: Cannot determine size of graphic in ./images//catacom_1023_adapt
+ive.png (no BoundingBox).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.103 ...0.5\textwidth]{catacom_1023_adaptive.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+File: ./images//catacom_1023_adaptive.png Graphic file (type eps)
+<./images//catacom_1023_adaptive.png>
+Underfull \hbox (badness 10000) in paragraph at lines 104--104
+[][]\OT1/ptm/m/n/12 :
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 104--104
+|\OT1/ptm/m/n/12 Falsch-Positive:
+ []
+
+
+Underfull \hbox (badness 1728) in paragraph at lines 104--104
+\OT1/ptm/m/n/12 ter-wei-se Recht-e-cke
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 104--104
+\OT1/ptm/m/n/12 de-tek-tiert, die
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 104--104
+\OT1/ptm/m/n/12 al-ler-dings kei-ne
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 104--104
+\OT1/ptm/m/n/12 Ta-feln und so-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 104--104
+\OT1/ptm/m/n/12 mit un-in-ter-essant
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 104--104
+\OT1/ptm/m/n/12 f[]ur die wei-te-re
+ []
+
+[9]
+(C:\Users\Simon\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstlang1.sty
+File: lstlang1.sty 2020/03/24 1.8d listings language file
+)
+
+LaTeX Warning: File `catacom_1020_adaptive.png' not found on input line 147.
+
+
+! LaTeX Error: File `catacom_1020_adaptive.png' not found.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.147 ...0.5\textwidth]{catacom_1020_adaptive.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+
+! LaTeX Error: Cannot determine size of graphic in catacom_1020_adaptive.png (n
+o BoundingBox).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.147 ...0.5\textwidth]{catacom_1020_adaptive.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+File: catacom_1020_adaptive.png Graphic file (type eps)
+<catacom_1020_adaptive.png>
+Underfull \hbox (badness 10000) in paragraph at lines 148--148
+[][]\OT1/ptm/m/n/12 :
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 148--148
+|\OT1/ptm/m/n/12 Detektion mit-tels
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 148--148
+\OT1/ptm/m/n/12 ad-ap-ti-ven An-satz:
+ []
+
+
+Underfull \hbox (badness 1924) in paragraph at lines 148--148
+\OT1/ptm/m/n/12 den die Recht-e-cke
+ []
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[10] [11] [12]
+
+LaTeX Warning: File `catacom_1083_14.png' not found on input line 239.
+
+
+! LaTeX Error: Cannot determine size of graphic in ./images//catacom_1083_14.pn
+g (no BoundingBox).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.239 ...width=0.5\textwidth]{catacom_1083_14.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+File: ./images//catacom_1083_14.png Graphic file (type eps)
+<./images//catacom_1083_14.png>
+Underfull \hbox (badness 10000) in paragraph at lines 240--240
+[][]\OT1/ptm/m/n/12 :
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 240--240
+|\OT1/ptm/m/n/12 Falsch-Positive
+ []
+
+
+Underfull \hbox (badness 4205) in paragraph at lines 240--240
+\OT1/ptm/m/n/12 satz. Hier wur-den
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 240--240
+\OT1/ptm/m/n/12 in 14 Ite-ra-tio-nen
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 240--240
+\OT1/ptm/m/n/12 die Holz-bret-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 240--240
+\OT1/ptm/m/n/12 ter als Recht-eck
+ []
+
+
+LaTeX Warning: File `catacom_1162_6.png' not found on input line 242.
+
+
+! LaTeX Error: Cannot determine size of graphic in ./images//catacom_1162_6.png
+ (no BoundingBox).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.242 ...[width=0.5\textwidth]{catacom_1162_6.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+File: ./images//catacom_1162_6.png Graphic file (type eps)
+<./images//catacom_1162_6.png>
+Underfull \hbox (badness 10000) in paragraph at lines 243--243
+[][]\OT1/ptm/m/n/12 :
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 243--243
+|\OT1/ptm/m/n/12 Direkte Son-nen-
+ []
+
+
+Underfull \hbox (badness 3417) in paragraph at lines 243--243
+\OT1/ptm/m/n/12 ein-strah-lung macht
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 243--243
+\OT1/ptm/m/n/12 die Er-ken-nung
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 243--243
+\OT1/ptm/m/n/12 schwie-rig, vor
+ []
+
+
+Underfull \hbox (badness 1342) in paragraph at lines 243--243
+\OT1/ptm/m/n/12 al-lem, da sich der
+ []
+
+
+Underfull \hbox (badness 4713) in paragraph at lines 243--243
+\OT1/ptm/m/n/12 ab-hebt. Nur in 6
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 243--243
+\OT1/ptm/m/n/12 Ite-ra-tio-nen wur-de
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 236--244
+
+ []
+
+[13] [14] [15] [16]
+Underfull \hbox (badness 10000) in paragraph at lines 312--313
+
+ []
+
+)
+Underfull \hbox (badness 10000) in paragraph at lines 315--111
+
+ []
+
+[17]
 \openout2 = `texterkennung.aux'.
 
- (texterkennung.tex) [6
+ (texterkennung.tex
+Underfull \hbox (badness 10000) in paragraph at lines 3--4
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5--6
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7--15
+
+ []
+
+
+Overfull \hbox (6.2454pt too wide) in paragraph at lines 16--18
+[]\OT1/ptm/m/n/12 Problematiken auf-zei-gen: un-ter-schied-li-che Gr[]oe, Lich
+t und Be-leuch-tung, Win-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 16--18
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 20--21
+
+ []
+
+)
+Underfull \hbox (badness 10000) in paragraph at lines 23--112
+
+ []
+
+[18
 
 
 
 ]
 \openout2 = `sift.aux'.
 
- (sift.tex) [7
+ (sift.tex) [19
 
 
 
 ]
 \openout2 = `fazit.aux'.
 
- (fazit.tex) [8
+ (fazit.tex) [20
 
 
 
@@ -242,14 +823,17 @@ No file masterarbeit.bbl.
 
 LaTeX Warning: There were undefined references.
 
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
  ) 
 Here is how much of TeX's memory you used:
- 2032 strings out of 479619
- 31245 string characters out of 2865052
- 328388 words of memory out of 3000000
- 19176 multiletter control sequences out of 15000+200000
- 410280 words of font info for 44 fonts, out of 3000000 for 9000
+ 4732 strings out of 479619
+ 68053 string characters out of 2865052
+ 946071 words of memory out of 3000000
+ 21791 multiletter control sequences out of 15000+200000
+ 412274 words of font info for 49 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 68i,10n,74p,571b,343s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 68i,12n,74p,4076b,1929s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on masterarbeit.dvi (10 pages, 12064 bytes).
+Output written on masterarbeit.dvi (22 pages, 125292 bytes).

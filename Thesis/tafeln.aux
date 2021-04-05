@@ -2,14 +2,38 @@
 \@writefile{toc}{\contentsline {section}{\numberline {3}Tafeldetektierung}{4}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Die Tafeln und ihre Tücken}{4}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.1}Die Tafeln}{4}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Detektierungsmöglichkeiten}{5}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Ergebnisse CNN}{5}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Ergebnisse Feature Detection}{5}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Ergebnisse Kantenerkennung /Contours}{5}{}\protected@file@percent }
+\newlabel{SC@1}{{3.1.1}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Beispiel eines Fotos der verwendeten Tafel. GOT bezeichnet die Kampagne, darunter folgt das Datum. US ist die Abkürzung für \textit  {unità stratigrafica}, die stratigrafische Einheit.}}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.2}Tafelvergleiche}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Detektierungsmöglichkeiten}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}CNN}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}Ergebnisse CNN}{6}{}\protected@file@percent }
+\newlabel{SC@2}{{3.2.2}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Eine beispielhafte Auswertung mit COCO-Weights: Es werden zwar durchaus Objekte erkannt, die Tafel ist aber nicht darunter. Die Objekte werden nicht korrekt erkannt, was aber bei dieser untypischen Fotografie nicht weiter verwunderlich ist.}}{7}{}\protected@file@percent }
+\newlabel{SC@3}{{3.2.2}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Auffällig häufig ist die Klassifizierung des Nordungspfeils als Surfbrett. Diese ist aber nicht häufig und zuverlässig genug, um COCO zur Erkennung des Pfeils einzusetzen.}}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.3}Ergebnisse Feature Detection}{7}{}\protected@file@percent }
+\newlabel{SC@4}{{3.2.2}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Ähnlich wie bei COCO klassifiziert auch YOLO die Tafeln nur auf wenigen Bilder. Dann allerdings als Scheren...}}{8}{}\protected@file@percent }
+\newlabel{SC@5}{{3.2.2}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces ... oder als Sportgerät. Die erhoffte Ähnlichkeit mit beschrifteten, rechteckigen Objekten wie Büchern besteht somit also nicht.}}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.4}Ergebnisse Feature Detection}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.5}Contours}{8}{}\protected@file@percent }
+\newlabel{SC@6}{{3.2.5}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Falsch-Positive: Hier werden korrekterweise Rechtecke detektiert, die allerdings keine Tafeln und somit uninteressant für die weitere Verarbeitung sind.}}{9}{}\protected@file@percent }
+\newlabel{SC@7}{{3.2.5}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Detektion mittels adaptiven Ansatz: Aus allen gefunden Konturen (rot) werden die Rechtecke ausgewählt (grün).}}{11}{}\protected@file@percent }
+\newlabel{SC@8}{{3.2.5}{14}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Falsch-Positive beim Iterativen Ansatz. Hier wurden in 14 Iterationen die Holzbretter als Rechteck identifiziert.}}{14}{}\protected@file@percent }
+\newlabel{SC@9}{{3.2.5}{14}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Direkte Sonneneinstrahlung macht die Erkennung schwierig, vor allem, da sich der Rahmen nicht mehr stark vom Schiefer abhebt. Nur in 6 Iterationen wurde diese Tafel erkannt.}}{14}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.6}Rectangle Detection}{15}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.7}Hough}{17}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.8}Ergebnisse Kantenerkennung /Contours}{17}{}\protected@file@percent }
 \@setckpt{tafeln}{
-\setcounter{page}{6}
+\setcounter{page}{18}
 \setcounter{equation}{0}
-\setcounter{enumi}{0}
+\setcounter{enumi}{7}
 \setcounter{enumii}{0}
 \setcounter{enumiii}{0}
 \setcounter{enumiv}{0}
@@ -17,10 +41,13 @@
 \setcounter{mpfootnote}{0}
 \setcounter{part}{0}
 \setcounter{section}{3}
-\setcounter{subsection}{5}
-\setcounter{subsubsection}{0}
+\setcounter{subsection}{2}
+\setcounter{subsubsection}{8}
 \setcounter{paragraph}{0}
 \setcounter{subparagraph}{0}
-\setcounter{figure}{0}
+\setcounter{figure}{9}
 \setcounter{table}{0}
+\setcounter{SC@C}{9}
+\setcounter{lstnumber}{56}
+\setcounter{lstlisting}{0}
 }
