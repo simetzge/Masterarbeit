@@ -62,15 +62,27 @@ try:
                 cropimgs, restimg = cut(img, rects, masked = masked)
                 #perform OCR on cropped rectangles
                 imagedict = {"image": fileNames[i]}
+                bestguess = ""
                 for j, crop in enumerate(cropimgs):
                     textimg, text = ocr(crop)
                     boximg, boxtext = ocr(crop, mode = 'image_to_box')
+                    #delete spaces, check if box or txt are longer than bestguess, replace bestguess in this case
+                    box = boxtext.replace(" ", "")
+                    txt = text.replace(" ", "")
+                    if max(len(box),len(txt)) > len(bestguess):
+                        if len(box) > len(txt):
+                            bestguess = boxtext
+                        else:
+                            bestguess = text
+                    #output of rectimage and boximage
                     output('rect', textimg, fileNames[i], str(j))
                     output('box', boximg, fileNames[i], str(j))
                     #output('rect', crop, fileNames[i], str(j))
+                    #add rectdict to imagedict and imagedict to ocrlist
                     rectdict = {"rectangle": fileNames[i] + "_" + str(j), "textimage": text, "boximage": boxtext}
                     imagedict["rectangle " + str(j)] =  rectdict
-            
+                    imagedict["bestguess"] = bestguess
+                    
                 ocrlist.append(imagedict)
 
                 #write images without rectangles
@@ -515,7 +527,7 @@ try:
     def hough_rotate(img, rect, threshold):
         
         #debug flag
-        debug_hough = True
+        debug_hough = False
         
         #if threshold is too low, use simple crop
         if threshold < 100:
@@ -547,8 +559,9 @@ try:
         if debug_hough:
             cv2.imshow("test", binary)
             cv2.waitKey()
-        binary = cv2.GaussianBlur(binary,(3,3),15)           
-        #binary = skeleton (binary)
+        binary = cv2.GaussianBlur(binary,(3,3),15)    
+        if SIMPLE_CROP == False:
+            binary = skeleton (binary)
         binary = cv2.GaussianBlur(binary,(3,3),15)
         
         #get shape

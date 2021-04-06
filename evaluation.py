@@ -20,23 +20,30 @@ def evaluate(evaluationdict, ocrlist):
             if entry["Image"].lower() == dicts["image"].lower(): 
                 #ignore spaces
                 ground = entry["Content"].replace(" ","")
+                dicts["bestratio"] = None
                 #get ratio for comparison, add to dict
-                for i in range(len(dicts)-1):                    
+                for i in range(len(dicts)-3):                    
                     key = "rectangle " + str(i)
                     box = dicts[key]["boximage"].replace(" ", "")
                     txt = dicts[key]["textimage"].replace(" ", "")
+                    best = dicts["bestguess"].replace(" ", "")
                     sbox = difflib.SequenceMatcher(None, ground,box)
                     stxt = difflib.SequenceMatcher(None, ground,txt)
                     rbox = round(sbox.ratio(),2)
                     rtxt = round(stxt.ratio(),2)
+                    if box == best:
+                        dicts["bestratio"] = rbox
+                    if txt == best:
+                        dicts["bestratio"] = rtxt
                     dicts[key]["textratio"] = rtxt
                     dicts[key]["boxratio"] = rbox
+                
     return (ocrlist)
             
         
 def comparison(ocrlist):
     for dicts in ocrlist:
-        for i in range(len(dicts)-1):
+        for i in range(len(dicts)-2):
             key = "rectangle " + str(i)
             box = dicts[key]["boximage"].replace(" ", "")
             txt = dicts[key]["textimage"].replace(" ", "")
@@ -103,10 +110,10 @@ def csvOutput(outputlist, folder = "evaluation", name = "output"):
     with open(path + '\\' + folder + '\\' + name + '.csv', 'w') as file:
         #write column names
         writeHeader(file)
-        file.write("image,rectangle,textimage,boximage,comparison,textratio,boxratio\n")
+        file.write("image,rectangle,textimage,boximage,comparison,textratio,boxratio,bestguess,bestratio\n")
         #iterate through dictionaries in list and through subdictionaries
         for dicts in outputlist:
-            for i in range(len(dicts)-1):
+            for i in range(len(dicts)-3):
                 #write values in csv format
                 file.write(dicts["image"] + ",")
                 rect = "rectangle " + str(i)
@@ -116,9 +123,12 @@ def csvOutput(outputlist, folder = "evaluation", name = "output"):
                 #file.write(dicts[key]["textimage"] + ",")
                 #file.write(dicts[key]["boximage"] + ",")
                 #file.write(dicts[key]["comparison"])
+                if dicts["bestguess"] == dicts[rect]["boximage"] or dicts["bestguess"] == dicts[rect]["textimage"]:
+                    file.write(dicts["bestguess"] + ",")
+                    file.write(str(dicts["bestratio"]))
                 file.write("\n")
-        avg, txtavg, boxavg = getAverage(outputlist)
-        writeFooter(file, avg, txtavg, boxavg)
+        avg, txtavg, boxavg,bestavg = getAverage(outputlist)
+        writeFooter(file, avg, txtavg, boxavg,bestavg)
     
 def writeHeader(file):
     file.write("parameters:\n")
@@ -136,26 +146,29 @@ def writeHeader(file):
     file.write("CHECK_PICTURE," + str(CHECK_PICTURE) + "\n")
     file.write("\n")
 
-def writeFooter(file, overallaverage, txtaverage, boxaverage):
+def writeFooter(file, overallaverage, txtaverage, boxaverage,bestaverage):
     file.write("\n")
     file.write("average," + str(overallaverage) + ",")
     file.write("textaverage," + str(txtaverage) + ",")
     file.write("boxaverage," + str(boxaverage) + ",")
+    file.write("bestaverage," + str(bestaverage) + ",")
     
 def getAverage(dictlist):
     txtratio = []
     boxratio = []
+    bestguessratio = []
     for dicts in dictlist:
-        for i in range(len(dicts)-1):
+        for i in range(len(dicts)-3):
             rect = "rectangle " + str(i)
             for key in dicts[rect]:
                 if key == "textratio":
                     txtratio.append(dicts[rect]["textratio"])
                 if key == "boxratio":
                     boxratio.append(dicts[rect]["boxratio"])
-            
-            txtaverage = round(np.mean(txtratio),2)
-            boxaverage = round(np.mean(boxratio),2)
-            overallaverage = round(np.mean(txtratio + boxratio),2)
-    return(overallaverage, txtaverage, boxaverage)
+        bestguessratio.append(dicts["bestratio"])
+    txtaverage = round(np.mean(txtratio),2)
+    boxaverage = round(np.mean(boxratio),2)
+    overallaverage = round(np.mean(txtratio + boxratio),2)
+    bestaverage = round(np.mean(bestguessratio),2)
+    return(overallaverage, txtaverage, boxaverage,bestaverage)
             

@@ -26,15 +26,15 @@ MODIFY_THRESHOLD = False
 #search for a template to get aspect ratio
 USE_TEMPLATE = True
 #use simple crop instead of the more complex hough based crop
-SIMPLE_CROP = False
+SIMPLE_CROP = True
 #use cut based on contours instead of rects
-CONT_BASED_CUT = True
+CONT_BASED_CUT = False
 #use CNN: yolo, coco, both
 USE_CNN = ""
 #evaluate OCR
 EVALUATE = True
 #only use picture with this name(s)
-CHECK_PICTURE = "1059"
+CHECK_PICTURE = ""
 
 
 ################################################################
