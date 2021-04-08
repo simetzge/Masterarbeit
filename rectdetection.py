@@ -420,9 +420,9 @@ try:
             if SIMPLE_CROP:
                 #old version, works, but not perfect
                 if masked != None:
-                    crop = rotate_board (masked[i], rect)
+                    crop = simple_crop (masked[i], rect)
                 else:
-                    crop = rotate_board (img, rect)
+                    crop = simple_crop (img, rect)
             else:
                 # new version
                 if masked != None:
@@ -486,7 +486,7 @@ try:
 #
 #####################################################################################################################################################
 
-    def rotate_board(img, rect):
+    def simple_crop(img, rect):
         
         #get boxpoints
         box = cv2.boxPoints(rect)
@@ -503,20 +503,25 @@ try:
         #warp
         warped = cv2.warpPerspective(img, M, (int(w), int(h)))
         
-        if warped.shape[0] > warped.shape[1]:
+        #if warped.shape[0] > warped.shape[1]:
+        if h > w:
             #warped = np.rot90(warped)
             warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_CLOCKWISE)
         
         # dsize
-        if USE_TEMPLATE == True and 'aspectRatio' in globals():
-            dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE / aspectRatio))
-        else:
-            dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE * 0.8))
+        #if USE_TEMPLATE == True and 'aspectRatio' in globals():
+         #   dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE / aspectRatio))
+        #else:
+         #   dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE * 0.8))
 
         # resize image
-        warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_CUBIC)
+        #warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_CUBIC)
+        
+        #resizing while keeping the aspect ratio
+        warped = scaleImage(warped)
         
         return (warped)
+
 
 #####################################################################################################################################################
 #
@@ -531,13 +536,13 @@ try:
         
         #if threshold is too low, use simple crop
         if threshold < 100:
-            return (rotate_board(img, rect))
+            return (simple_crop(img, rect))
         
         (x, y), (w, h), angle = rect
 
         new_rect = (x,y), (int(w*1.3), int(h*1.3)), angle
 
-        crop_img = rotate_board(img, new_rect)
+        crop_img = simple_crop(img, new_rect)
         
         if crop_img.shape[0] > crop_img.shape[1]:
             #warped = np.rot90(warped)
@@ -657,7 +662,7 @@ try:
         if tl == None or tr == None or bl == None or br == None:
             global COUNTER
             COUNTER = COUNTER +1
-            #return (rotate_board(img, rect))
+            #return (simple_crop(img, rect))
             #perform hough rotate with lower threshold
             return(hough_rotate(img, rect, threshold-5))
             
