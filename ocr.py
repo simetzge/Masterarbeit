@@ -279,7 +279,9 @@ def image_to_text(img):
     textb = pytesseract.image_to_string(img, config=config)
     
     #take the version with more chars detected and send them to textsplit for proper text output, set rotate to True if necessary
-    if len(texta) >= len(textb):
+    comparea = texta.replace(" ", "")
+    compareb = textb.replace(" ", "")
+    if len(comparea) >= len(compareb):
         text = textsplit(texta)
     else:
         text = textsplit(textb)
