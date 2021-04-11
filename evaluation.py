@@ -141,6 +141,8 @@ def writeHeader(file):
     file.write("MODIFY_THRESHOLD," + str(MODIFY_THRESHOLD) + "\n")
     file.write("USE_TEMPLATE," + str(USE_TEMPLATE) + "\n")
     file.write("SIMPLE_CROP," + str(SIMPLE_CROP) + "\n")
+    file.write("CONT_BASED_CUT," + str(CONT_BASED_CUT) + "\n")
+    file.write("OCR," + str(OCR) + "\n")
     file.write("USE_CNN," + str(USE_CNN) + "\n")
     file.write("EVALUATE," + str(EVALUATE) + "\n")
     file.write("CHECK_PICTURE," + str(CHECK_PICTURE) + "\n")
