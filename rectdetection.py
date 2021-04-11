@@ -60,33 +60,40 @@ try:
                     masked = None
             
                 cropimgs, restimg = cut(img, rects, masked = masked)
-                #perform OCR on cropped rectangles
+                #perform OCR on cropped rectangles if flag is set
                 imagedict = {"image": fileNames[i]}
-                bestguess = ""
-                for j, crop in enumerate(cropimgs):
-                    textimg, text = ocr(crop)
-                    boximg, boxtext = ocr(crop, mode = 'image_to_box')
-                    #delete spaces, check if box or txt are longer than bestguess, replace bestguess in this case
-                    box = boxtext.replace(" ", "")
-                    txt = text.replace(" ", "")
-                    if max(len(box),len(txt)) > len(bestguess):
-                        if len(box) > len(txt):
-                            bestguess = boxtext
-                        else:
-                            bestguess = text
-                    #output of rectimage and boximage
-                    output('rect', textimg, fileNames[i], str(j))
-                    output('box', boximg, fileNames[i], str(j))
-                    #output('rect', crop, fileNames[i], str(j))
-                    #add rectdict to imagedict and imagedict to ocrlist
-                    rectdict = {"rectangle": fileNames[i] + "_" + str(j), "textimage": text, "boximage": boxtext}
-                    imagedict["rectangle " + str(j)] =  rectdict
-                    imagedict["bestguess"] = bestguess
+                if OCR:
+                    bestguess = ""
+                    for j, crop in enumerate(cropimgs):
+                        textimg, text = ocr(crop)
+                        boximg, boxtext = ocr(crop, mode = 'image_to_box')
+                        #delete spaces, check if box or txt are longer than bestguess, replace bestguess in this case
+                        box = boxtext.replace(" ", "")
+                        txt = text.replace(" ", "")
+                        if max(len(box),len(txt)) > len(bestguess):
+                            if len(box) > len(txt):
+                                bestguess = boxtext
+                            else:
+                                bestguess = text
+                        #output of rectimage and boximage
+                        output('rect', textimg, fileNames[i], str(j))
+                        output('box', boximg, fileNames[i], str(j))
+                        output('crop', crop, fileNames[i], str(j))
+                        #output('rect', crop, fileNames[i], str(j))
+                        #add rectdict to imagedict and imagedict to ocrlist
+                        rectdict = {"rectangle": fileNames[i] + "_" + str(j), "textimage": text, "boximage": boxtext}
+                        imagedict["rectangle " + str(j)] =  rectdict
+                        imagedict["bestguess"] = bestguess
                     
-                ocrlist.append(imagedict)
-
+                    ocrlist.append(imagedict)
+                else:
+                    #just print the crops if OCR flag is not set
+                    for j, crop in enumerate(cropimgs):
+                        output('crop', crop, fileNames[i], str(j))
+                
                 #write images without rectangles
                 output('imagecut', restimg, fileNames[i])
+            
             
             #use cnns to identify objects in the images
             if USE_CNN == "coco" or USE_CNN == "both":
@@ -565,7 +572,7 @@ try:
             cv2.imshow("test", binary)
             cv2.waitKey()
         binary = cv2.GaussianBlur(binary,(3,3),15)    
-        if SIMPLE_CROP == False:
+        if CONT_BASED_CUT == False:
             binary = skeleton (binary)
         binary = cv2.GaussianBlur(binary,(3,3),15)
         
@@ -576,7 +583,7 @@ try:
         dst = cannyThreshold(binary)
         #hough with canny edge
         lines = cv2.HoughLines(dst, 1, np.pi / 180, threshold, None, 0, 0)
-        
+        #lines = cv2.HoughLinesP(dst, 1, np.pi / 180, threshold, 30,10)
         cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
         
         # empty lineList to collect all lines        
@@ -689,7 +696,7 @@ try:
             dsize = (warped.shape[1], int(warped.shape[1] * 0.8))
 
         # resize image
-        warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_CUBIC)
+        warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_AREA)
         
         # visualization for debug
         cdst = crop_img

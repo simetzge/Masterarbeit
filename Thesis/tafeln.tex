@@ -92,7 +92,7 @@ alten Code raussuchen, aufbereiten und präsentieren\\
 
 Die \verb|Contours|-Funktion von OpenCV basiert darauf, dass alle benachbarten Punkte mit gleicher Farbe oder Intensität als Teil einer Kontur betrachtet werden (Quelle OpenCV doc). Der Algorithmus liefert also eine Liste von Punkten, die Grundlage einer Vektorgrafik sind. Der Parameter \verb|cv2.CHAIN_APPROX_SIMPLE| vereinfacht die Kontur, indem redundante Punkte entfernt werden. Als Input für Contours werden binarisierte Bilder empfohlen. Das sind Bilder, die in eine Grauskala umgewandelt  und anhand eines Thresholds, eines Grenzwertes, in ein reines Schwarz-Weiß-Bild transformiert wurden. Zur Binarisierung wurden im Verlauf der Entwicklung zwei Verfahren geschrieben, von denen eines de facto nicht mehr in Verwendung ist, der Vollständigkeit halber hier aber aufgeführt werden soll.
 Das Kernproblem, das zu der parallelen Entstehung zweier Konzepte führte, waren vor allem falsch-positive Detektionen von Tafeln, also Fälle, in denen korrekterweise Rechtecke erkannt wurden, die aber keine Tafeln waren.
-\begin{SCfigure}[0.5][h!]
+\begin{SCfigure}[1][h!]
 \caption{Falsch-Positive: Hier werden korrekterweise Rechtecke detektiert, die allerdings keine Tafeln und somit uninteressant für die weitere Verarbeitung sind.}
 \includegraphics[width=0.5\textwidth]{catacom_1023_adaptive.png}
 \end{SCfigure}
@@ -101,7 +101,7 @@ Das Kernproblem, das zu der parallelen Entstehung zweier Konzepte führte, waren
 Der adaptive Ansatz heißt so aufgrund der Verwendung eines adaptiven Thresholds, der auf Bildausschnitten vorher festgelegter Größe gewissermaßen lokale Thresholds festlegt und so gut geeignet ist, um Bilder mit großen Unterschieden in der Helligkeit zu binarisieren, ohne dass wichtige Informationen verloren gehen (Quelle OpenCV doc). Da es bei dem vorliegenden Material, vor allem aufgrund von Schatten und direktem Sonnenlicht, große Helligkeitsunterschiede sowohl zwischen den Bildern als auch innerhalb eines einzelnen Bildes gibt, ist die Arbeit mit einem fixen Threshold schwierig und dieser Ansatz bot sich an. Allerdings entstand dadurch eine relativ große Zahl an falsch-positiven, wie oben zu sehen. So kam es zur Entwicklung des zweitens Ansatzes.\\
 Die Umsetzung des adaptiven Ansatzes sieht wie folgt aus:
 Als Input für die entsprechende Funktion werden das zu bearbeitende Bild und der dazugehörige Dateiname übergeben, der für die Nachverfolgung und den Output wichtig ist. Das Bild wird in eine Grauskala umgewandelt und in mit der Funktion \verb|scaleImage| auf eine Größe von 1000 Pixeln skaliert. Dieser Schritt erfolgt, um die Detektion durch kleinere Datenmengen zu beschleunigen und um durch die dadurch einheitliche Größe der Bilder präzisere Kriterien für die Rechtecksdetektion formulieren zu können. Das skalierte Bild wird jetzt mittels adaptiven Threshold binarisiert. Es folgt die eigentliche Rechtecksdetektion durch den Aufruf der Funktion \verb|rect_detect|, auf die später genauer eingegangen wird. Die so gewonnenen Konturen und entdeckten Rechtecke werden auf das skalierte Bild übertragen und der \verb|output|-Funktion übergeben. Die Rechtecke selbst, im Code als \verb|rois| (region of interest) bezeichnet, werden auf die ursprüngliche Bildgröße zurückskaliert und in das Hauptprogramm übergeben, damit die Bilder in ihrer höheren Ursprungsauflösung weiter bearbeitet werden können.
-\begin{SCfigure}[0.5][h!]
+\begin{SCfigure}[1][h!]
 \caption{Detektion mittels adaptiven Ansatz: Aus allen gefunden Konturen (rot) werden die Rechtecke ausgewählt (grün).}
 \includegraphics[width=0.5\textwidth]{catacom_1020_adaptive.png}
 \end{SCfigure}
@@ -111,10 +111,11 @@ Der Iterative Ansatz ist danach benannt, dass durch ein Spektrum an Thresholds i
 Im Anschluss werden die Rechtecke in eine Liste von Dictionaries überführt. Das hat den Hintergrund, dass sich hier leicht und übersichtlich ein Keyword einfügen lässt, mit dem die Zahl ähnlicher Rechtecke gemessen werden kann. In zwei Schleifen wird diese Liste durchlaufen und so je zwei Rechtecke mittels \verb|intersection_over_union| miteinander verglichen. Wird ein Wert von über 0.9, also eine hohe Übereinstimmung, erzielt, wird das Keyword \verb|same| um eins erhöht.
 Schließlich wird das Rechteck mit dem höchsten \verb|same|-Wert als ein Tafelfund betrachtet. Das weitere Verfahren ist wie beim adaptiven Ansatz: Das gefundene Rechteck wird auf das Bild übertragen und ausgegeben und dann ins Hauptprogramm zurückgegeben. Im Gegensatz zum adaptiven Ansatz ist hier eine Rückgabe mehrerer Rechtecke nicht möglich; Es wird immer genau ein Rechteck übergeben.
 Tatsächlich können mit diesem Verfahren die Zahl der Falsch-Positiven reduziert werden, ohne das Problem allerdings ganz zu lösen. Generell lässt sich sagen, dass je öfter ein Rechteck in einer der Iterationen erkannt wird, desto größer ist die Wahrscheinlichkeit, dass es sich tatsächlich um eine Tafel handelt. Ab einem Wert von 20 liegt die Quote bei 100\%. Es gibt aber auch korrekt erkannte Tafeln, die nur in 6 der Iterationen detektiert werden und umgekehrt Falsch-Positive, die in bis zu 14 Iterationen vorkommen. Zwar handelt es sich hier jeweils um Ausreißer, das Problem bleibt jedoch bestehen. Empirisch hat sich gezeigt, dass alles unter 6 Iterationen mit Sicherheit keine Tafel ist und somit aussortiert werden kann. Wenige Ausreißer verhindern, dass diese Grenze nach oben gesetzt werden kann. Auch dieser Ansatz führte also nicht zum gewünschten Ergebnis.
-\begin{SCfigure}[0.5][h!]
+\begin{SCfigure}[1][h!]
 \caption{Falsch-Positive beim Iterativen Ansatz. Hier wurden in 14 Iterationen die Holzbretter als Rechteck identifiziert.}
 \includegraphics[width=0.5\textwidth]{catacom_1083_14.png}
-\end{SCfigure} \begin{SCfigure}[0.5][h!]
+\end{SCfigure}
+\begin{SCfigure}[1][h!]
 \caption{Direkte Sonneneinstrahlung macht die Erkennung schwierig, vor allem, da sich der Rahmen nicht mehr stark vom Schiefer abhebt. Nur in 6 Iterationen wurde diese Tafel erkannt.}
 \includegraphics[width=0.5\textwidth]{catacom_1162_6.png}
 \end{SCfigure}\\
@@ -135,13 +136,29 @@ Nach der Detektion der Tafeln besteht der nächste Schritt darin, sie aus dem Re
 \item Die Tafeln können entlang der drei Achsen rotiert sein. Durch die zweidimensionale Abbildung auf der Fotografie können die Formen letztlich eher einem Parallelogramm als einem Rechteck entsprechen. Diese Verzerrung sollte ausgeglichen werden.
 \end{enumerate}
 
+
 \subsubsection*{Simple Crop}
 
 Wie bereits zuvor wurde auch diese Problematik über mehrere Wege angegangen. Der erste und einfachste Weg, im Programm als \verb|simple_crop| bezeichnet, besteht in einer einfachen Transformation des gefundenen Rechtecks in eigenständiges Bild. Das Ergebnis ist also eine Rotation und Vergrößerung der Tafel. Erreicht wird das mittels \verb|cv2.getPerspectiveTransform|, einer Bibliotheksfunktion, die ein Set von Punkten auf neue Koordinaten projiziert und die Bereiche zwischen den Punkten entsprechen transformiert. Für diesen Ansatz werden aus bekannten Kennzahlen der Rechtecke (Koordinaten des Mittelpunkts, Breite, Höhe, Rotationswinkel) via die Eckpunkte berechnet. Als Zielkoordinaten wird ein Rechteck gewählt, das in Höhe und Breite dem gefundenen Rechteck entspricht. Das Ergebnis der Transformation ist letztlich vor allem die Rotation des Bildes.
 Das so erhaltene Bild wird um 90° gedreht, wenn die Höhe größer ist als die Breite des Bildes. So soll erreicht werden, dass die Tafeln alle richtig herum, d.h. mit der korrekten Leserichtung des Textes, ausgegeben werden.
-Schließlich werden die Images auf eine einheitliche Größe (1000px Breite) skaliert. Ursprünglich war hier vorgesehen, das aspect ratio mit einzubeziehen, um die Höhe passend zur Breite zu bemessen. Dieser Ansatz verschlechtert jedoch die spätere Texterkennung, da die Buchstaben gestaucht werden, wenn der Rechtecksausschnitt die Tafel nicht perfekt erkannt hat und daher über ein anderes Seitenverhältnis verfügt als die Idealvorlage.
+Schließlich werden die Images auf eine einheitliche Größe (1000px Breite) skaliert. Ursprünglich war hier vorgesehen, das aspect ratio mit einzubeziehen, um die Höhe passend zur Breite zu bemessen. Dieser Ansatz verschlechtert jedoch die spätere Texterkennung, da die Buchstaben gestaucht werden, wenn der Rechtecksausschnitt die Tafel nicht perfekt erkannt hat und daher über ein anderes Seitenverhältnis verfügt als die Idealvorlage. Daher wird das Seitenverhältnis des Ausschnitts beibehalten und die Höhe entsprechend berechnet.
+Eine Modifikation dieser Herangehensweise, bei der die gefundene Kontur innerhalb des Rechtecks in eine Maske umgewandelt wird, die wiederum als Basis für den Bildausschnitt dient und somit alle Elemente, die die Kontur umgeben, ausblendet, wurde verworfen. Das geschah aufgrund der schlechteren Ergebnisse bei der späteren Texterkennung.
+
+\begin{SCfigure}[1][h!]
+\caption{Nahezu perfekte Erkennung des Rechtecks und somit auch ein gutes Ergebnis bei simple crop. Es ist weder Rand noch Hintergrund zu sehen, die Form entspricht der eines Rechtecks.}
+\includegraphics[width=0.5\textwidth]{good_crop.png}
+\end{SCfigure}
+
+\begin{SCfigure}[1][h!]
+\caption{In diesem Beispiel hat cv2.contours den äußeren Rand des Rahmens als Kontur identifiziert. Bedingt durch die Rotation der Tafel bildet sie, zweidimensional abgebildet, eher ein Parallelogramm. Das kleinstmögliche Rechteck, das die Form umgibt, schließt somit auch Teile des Hintergrunds mit ein.}
+\includegraphics[width=0.5\textwidth]{bad_crop.png}
+\end{SCfigure}
 
 \subsubsection*{Hough Crop}
+
+Das bisher vorgestellte \verb|simple crop|-Verfahren muss als relativ grob betrachtet werden. Verbesserung sollte sich einstellen, wenn statt der Eckpunkte der Rechtecke die Eckpunkte der Tafeln selbst erkannt werden könnten. Würden diese dann für die Transformation mittels \verb|cv2.getPerspectiveTransform| verwendet, könnte die Rotation der Tafeln ausgeglichen werden.
+Zentral für diese Vorgehensweise ist die Hough\footnote{Gesprochen: [h\textturnv{}f]}-Transformation, ein Verfahren zur Erkennung geometrischer Figuren in binarisierten Bildern (Vgl. Hough 1962 \cite{houghpatent}). Mit diesem Verfahren -- bzw. mit der darauf basierenden Funktion \verb|cv2.HoughLines| -- könnten die einzelnen Seiten der Tafeln als Linien erkannt werden. 
+
 
 \subsubsection{Ergebnisse Kantenerkennung /Contours}
 Detaillierte Beschreibung des Vorgehens\\
