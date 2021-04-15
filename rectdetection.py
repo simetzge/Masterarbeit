@@ -51,14 +51,18 @@ try:
                 rects,conts = rect_detect_iterative(img, fileNames[i])
             else:
                 rects,conts = rect_detect_adaptive(img, fileNames[i])
+
                 rects = [rescaleRect(img, rect) for rect in rects]
+#########################################################################################
+            for rect in rects:
+                getCont(img, rect)
+#########################################################################################
             if len(rects) > 0:
                 #crop found rectangle
                 if CONT_BASED_CUT == True:
                     masked = contMask(img,conts)
                 else:
                     masked = None
-            
                 cropimgs, restimg = cut(img, rects, masked = masked)
                 #perform OCR on cropped rectangles if flag is set
                 imagedict = {"image": fileNames[i]}
@@ -160,6 +164,55 @@ try:
         rect = (x*scale, y*scale), (w*scale, h*scale), angle
         return (rect)
     
+##################################################################################################################################################### 
+#
+# input: image and rectangle
+# ouput: largest contour in this rectangle
+# purpose: find the contour that led to the rectangle again, necessary when the scaling changed
+#
+#####################################################################################################################################################
+   
+    def getCont(img, rect):
+        #debug flag
+        debugCont = False
+        #turn rect into mask and remove everything outside of this area
+        bl, br, tr , tl = cv2.boxPoints(rect).astype('int32')
+        (x,y),(w,h),angle = rect
+        mask  = np.zeros(img.shape,np.uint8)
+        cv2.drawContours(mask,[cv2.boxPoints(rect).astype('int32')],0,(255,255,255),-1)
+        mask = cv2.bitwise_not(mask)
+        newImg = img.copy()
+        newImg = cv2.bitwise_and(cv2.bitwise_not(mask), newImg)
+        #turn the modified image into grayscale and binarize it
+        gray = cv2.cvtColor(newImg, cv2.COLOR_BGR2GRAY)        
+        gray = normalizeImage(gray)
+        binary  = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
+        #apply findContours
+        contourList, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        #set variables for maximum values on default
+        maxArea =  0
+        maxCont = None
+        #iterate through contourList and get the areas
+        for i, contour in enumerate(contourList):
+            contArea = cv2.contourArea(contour)
+            #ignore contours larger than the rectangle
+            if contArea > w * h:
+                continue
+            #save area and contour if the area is larger than the previous maximum
+            if contArea > maxArea:
+                maxArea = contArea
+                maxCont = contour
+        #show the contour and it's cropped version for debug reasons
+        if debugCont:
+            newImg = cv2.drawContours(img, maxCont, -1, (0, 0, 230),2)
+            show(newImg)
+            cropImgs = contMask(img, [maxCont], rescale = False)
+            for crop in cropImgs:
+                show(crop)
+        #return largest contour
+        return(maxCont)
+        
+# gets an imagen and contours, returns an image where everything but the contour area is set to 0   
     def contMask(img,contours, rescale = not MODIFY_THRESHOLD):
         cropImgs = []
         if rescale == True:    
@@ -285,7 +338,7 @@ try:
     def rect_detect(binary):
         
         #findcontours
-        contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
         
         #creat array for regions of interest
         rois = []
@@ -336,6 +389,7 @@ try:
                 
             #if every condition is met, save the rectangle area in the array
             rois.append(rect)
+            #contour = cv2.convexHull(contour)
             rectConts.append(contour)
         
         return (contours, rois, rectConts)
@@ -562,8 +616,10 @@ try:
         blur = cv2.GaussianBlur(blur,(7,7),15)
         
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
-        gray = normalizeImage(gray)        
-        mean = np.mean(gray)
+        norm = normalizeImage(gray)        
+        mean = np.mean(norm)
+        if debug_hough:
+            print("threshold ist " + str(threshold) + " mean ist " + str(np.mean(gray)))
         #mean *1.2 bisher zweitbeste (31), beste mean+25 (27)
         
         ret, binary = cv2.threshold(gray, int(mean+30), THRESHOLD_MAX, cv2.THRESH_BINARY)
