@@ -621,8 +621,8 @@ try:
         blur = cv2.GaussianBlur(blur,(7,7),15)
         
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
-        norm = normalizeImage(gray)        
-        mean = ret, binary = cv2.threshold(gray, threshold, THRESHOLD_MAX, cv2.THRESH_BINARY) 
+        norm = normalizeImage(gray)    
+        mean = np.mean(norm)
         if debug_hough:
             print("threshold ist " + str(threshold) + " mean ist " + str(np.mean(gray)))
         #mean *1.2 bisher zweitbeste (31), beste mean+25 (27)
