@@ -145,8 +145,8 @@ def csvInput(inputFile, folder = "evaluation"):
     else:
         print(folder + ' nicht gefunden')
         
-def show(img):
-    cv2.namedWindow("show", cv2.WINDOW_NORMAL) 
+def show(img, name = "show"):
+    cv2.namedWindow(name, cv2.WINDOW_NORMAL) 
     img =cv2.resize(img, (1000,750))    
     cv2.imshow("show", img)
     cv2.waitKey(0)
