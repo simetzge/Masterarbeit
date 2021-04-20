@@ -221,30 +221,24 @@ try:
         #maxCont = cv2.approxPolyDP(maxCont,epsilon,True)
         return(maxCont)
         
-# gets an imagen and contours, returns an image where everything but the contour area is set to 0   
-    def contMask(img,contours, rescale = False):
+##################################################################################################################################################### 
+#
+# input: image and contours
+# ouput: cropped image where everything but the contour area is set to 0
+# purpose: remove everything but the contour are for better results in houghCrop
+#
+#####################################################################################################################################################
+  
+    def contMask(img,contours):
         cropImgs = []
-        if rescale == True:    
-            scaledImg = scaleImage(img)
-            for contour in contours:
-                mask = np.zeros(scaledImg.shape,np.uint8)
-                cv2.drawContours(mask,[contour],0,(255,255,255),-1)
-                #scaledArea = cv2.bitwise_and(mask, scaledImg)
-                scaledMask = scaleImage(mask, np.max(img.shape))
-                cut = cv2.bitwise_and(scaledMask, img)
-                cropImgs.append(cut)
-        else:
-            for contour in contours:
-                mask = np.zeros(img.shape,np.uint8)
-                #mask = img
-             
-                mask[:,:,:]=0
-             
-                cv2.drawContours(mask,[contour],0,(255,255,255),-1)
-                #show(mask)
-                cut = cv2.bitwise_and(mask, img)
-                #show(cut)
-                cropImgs.append(cut)
+        for contour in contours:
+            mask = np.zeros(img.shape,np.uint8)
+            mask[:,:,:]=0             
+            cv2.drawContours(mask,[contour],0,(255,255,255),-1)
+            #show(mask)
+            cut = cv2.bitwise_and(mask, img)
+            show(cut)
+            cropImgs.append(cut)
         return(cropImgs)    
             
 #####################################################################################################################################################
