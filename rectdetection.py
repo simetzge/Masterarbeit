@@ -52,7 +52,9 @@ try:
             else:
                 rects,conts = rect_detect_adaptive(img, fileNames[i])
                 rects = [rescaleRect(img, rect) for rect in rects]
+                #oldconts = conts
                 conts = [getCont(img,rect) for rect in rects]
+                #contCompare(conts, oldconts, img)
 
             if len(rects) > 0:
                 #crop found rectangle
@@ -181,9 +183,9 @@ try:
         newImg = img.copy()
         newImg = cv2.bitwise_and(cv2.bitwise_not(mask), newImg)
         #turn the modified image into grayscale and binarize it
-        gray = cv2.cvtColor(newImg, cv2.COLOR_BGR2GRAY)        
+        gray = cv2.cvtColor(newImg, cv2.COLOR_BGR2GRAY)
         #norm = normalizeImage(gray)
-        binary  = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,0)
+        binary  = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,25,0)
         #apply findContours
         contourList, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         #set variables for maximum values on default
@@ -215,6 +217,8 @@ try:
                 show(crop)
         #return largest contour
         #maxCont = cv2.convexHull(maxCont)
+        #epsilon = 0.1*cv2.arcLength(maxCont,True)
+        #maxCont = cv2.approxPolyDP(maxCont,epsilon,True)
         return(maxCont)
         
 # gets an imagen and contours, returns an image where everything but the contour area is set to 0   
@@ -950,6 +954,21 @@ try:
         out = mask
         cv2.imshow("rotate back", out)
         cv2.waitKey(0)
+        
+#####################################################################################################################################################
+#
+# input: new contours made by getCont, old contours made by rectDetect, image
+# ouput: none
+# purpose: draw both contours on the image, to compare the differences
+#
+#####################################################################################################################################################
+        
+    def contCompare(conts, oldconts, img):
+        for i,contour in enumerate(conts):
+            showimg = img.copy()
+            showimg = cv2.drawContours(showimg, contour, -1, (0, 230, 0),2)
+            showimg = cv2.drawContours(showimg, oldconts[i], -1, (230, 0, 0),2)
+            show(showimg)
         
 #####################################################################################################################################################
 #
