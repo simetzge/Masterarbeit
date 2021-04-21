@@ -185,9 +185,10 @@ try:
         #turn the modified image into grayscale and binarize it
         gray = cv2.cvtColor(newImg, cv2.COLOR_BGR2GRAY)
         #norm = normalizeImage(gray)
-        binary  = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,25,0)
+        binary  = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,25,-1)
         #apply findContours
-        contourList, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        #contourList, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contourList, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE, offset=(1,1))
         #set variables for maximum values on default
         maxArea =  0
         maxCont = None
