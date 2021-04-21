@@ -237,7 +237,7 @@ try:
             cv2.drawContours(mask,[contour],0,(255,255,255),-1)
             #show(mask)
             cut = cv2.bitwise_and(mask, img)
-            show(cut)
+            #show(cut)
             cropImgs.append(cut)
         return(cropImgs)    
             
@@ -757,13 +757,13 @@ try:
         # resize image
         warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_AREA)
         
-        # visualization for debug
-        cdst = crop_img
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-        cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
         if debug_hough:
+            # visualization for debug
+            cdst = crop_img
+            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
             cv2.imshow("test", cdst)
             cv2.waitKey()
         return (warped)
