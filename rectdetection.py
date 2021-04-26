@@ -185,7 +185,7 @@ try:
         #turn the modified image into grayscale and binarize it
         gray = cv2.cvtColor(newImg, cv2.COLOR_BGR2GRAY)
         #norm = normalizeImage(gray)
-        binary  = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,25,-1)
+        binary  = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,25,0)
         #apply findContours
         #contourList, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contourList, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE, offset=(1,1))
@@ -491,9 +491,9 @@ try:
             else:
                 # new version
                 if masked != None:
-                    crop = hough_rotate(masked[i],rect, CUT_THRESH)
+                    crop = hough_crop(masked[i],rect, CUT_THRESH)
                 else:
-                    crop = hough_rotate(img,rect, CUT_THRESH)
+                    crop = hough_crop(img,rect, CUT_THRESH)
             #end function if no crop image found (hough rotate returns [None] if something went wrong)
             if len(crop) < 2:
                 continue
@@ -594,7 +594,7 @@ try:
 #
 #####################################################################################################################################################
 
-    def hough_rotate(img, rect, threshold):
+    def hough_crop(img, rect, threshold):
         
         #debug flag
         debug_hough = False
@@ -731,7 +731,7 @@ try:
             COUNTER = COUNTER +1
             #return (simple_crop(img, rect))
             #perform hough rotate with lower threshold
-            return(hough_rotate(img, rect, threshold-5))
+            return(hough_crop(img, rect, threshold-5))
             
         
         tl = list(tl)     
