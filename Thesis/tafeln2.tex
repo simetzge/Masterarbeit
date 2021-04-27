@@ -71,9 +71,52 @@ Basierend auf dieser Annahme wird auf alle mögliche Tafeln immer paarweise die 
 \label{fig:jaccard}
 \end{figure}
 
-Zweispurigkeit der Ansätze: iterativ und adaptiv. Erklären warum.
-\verb|rect_detect| als Finale, in dem die beiden Ansätze wieder zusammengeführt werden
+Im Rahmen dieses Projekts gelten zwei Rechtecke dann als hinreichend ähnlich, wenn der Jaccard-Koeffizient über 0.9 liegt. Jedes Mal, wenn ein Rechteck im Vergleich mit einem anderen diesen Wert erzielt, wird für das Rechteck ein Zähler erhöht. Das Rechteck, welches am Ende der Vergleiche den höchsten Wert in diesem Zähler erzielt, wird als tatsächliche Tafel angenommen. Eine Ausnahme ergibt sich, wenn dieser Wert unter 6 liegt. In diesem Falle, so hat sich ergeben, handelt es sich ausschließlich um Falsch-Positive. Je höher der Wert, desto sicherer ist die Identifikation der Tafel. Unter guten Bedingungen erreicht er Werte um die 20.
 
+\subsubsection*{Rechteckserkennung}
+
+Ist die Binarisierung der Bilder nach einer der beiden vorgestellten Methoden erfolgt, können mittels \verb|cv2.findContours| die Konturen der Objekte darauf gefunden werden (Vgl. Abb. \ref{fig:adaptivecont}). Die Hierarchie der Konturen wird dabei außer Acht gelassen, da sich daraus keine verlässlichen Informationen gewinnen lassen.
+\begin{figure}[h!]
+\includegraphics[width =0.5\textwidth]{catacom_1111.JPG}
+\includegraphics[width =0.5\textwidth]{catacom_1111_adaptive_cont.png}
+\caption{Grabungsfoto im Original sowie nach der Anwendung der Konturerkennung.}
+\label{fig:adaptivecont}
+\end{figure}
+%Zweispurigkeit der Ansätze: iterativ und adaptiv. Erklären warum.
+%\verb|rect_detect| als Finale, in dem die beiden Ansätze wieder zusammengeführt werden
+Als nächstes müssen unter diesen Konturen die ausgewählt werden, die als Tafel in Frage kommen. Dazu wird die Tatsache genutzt, dass es sich bei den Tafeln um Gegenstände handelt, die auf den Fotos als Rechtecke abgebildet werden. Durch ihre Lage zur Kamera können sie zu einem gewissen Grad davon abweichen, grundsätzlich bleibt diese Form aber annähernd erhalten. Andere Rechtecke kommen zwar vor, wie Plakate, Fenster, Türen, Ziegel und Fliesen, unterscheiden sich jedoch meist signifikant in der tatsächlichen Form oder können im Zweifelsfall bei der späteren Texterkennung ausgeschlossen werden. Dementsprechend geht es in der weiteren Tafelerkennung darum, Rechtecke zu finden und diese durch verschiedene weitere Kriterien so zu sortieren, dass alle Tafeln und möglichst nur Tafeln erkannt werden. Das wird in mehreren Schritten erreicht:
+Zunächst wird die Fläche der Konturen berechnet. Genutzt wird hierfür die OpenCV-Funktion \verb|cv2.contourArea|. Ist diese Fläche zu klein, wird die Kontur aussortiert. Als Vergleichswert wird hier die Kantenlänge der längsten Kante des Bildes genommen, damit bei höherer Auflösung weiterhin korrekt sortiert werden kann(Vgl. Abb. ref{fig:adaptivecontsize}). Eine Größenbegrenzung ist sinnvoll, da die Tafeln in der Regeln eher prominent im Bild zu sehen sind. Sollte tatsächlich eine Tafel durch dieses Kriterium aussortiert werden, wäre der Text darauf nicht mehr lesbar und somit ohnehin nicht interessant für die weitere Verarbeitung.
+\begin{figure}[h!]
+\includegraphics[width =0.5\textwidth]{catacom_1111_adaptive_contred.png}
+\includegraphics[width =0.5\textwidth]{catacom_1111_adaptive_bigcont.png}
+\caption{Konturen vor und nach der Selektion nach Fläche.}
+\label{fig:adaptivecontsize}
+\end{figure}
+
+Der nächste Schritt besteht darin, das kleinstmögliche Rechteck um die Kontur zum bilden. Auch hier kommt mit \verb|cv2.minAreaRect| eine Bibliotheksfunktion zum Einsatz (Vgl. Abb. \ref{fig:adaptiverectangles}).
+\begin{figure}[h!]
+\includegraphics[width =0.5\textwidth]{catacom_1111_adaptive_bigcontred.png}
+\includegraphics[width =0.5\textwidth]{catacom_1111_adaptive_allrects.png}
+\caption{Konturen ohne und mit Rechtecken.}
+\label{fig:adaptiverectangles}
+\end{figure}
+
+Anschließend werden die bereits berechneten Flächen der Konturen mit denen der kleinstmöglichen Rechtecke verglichen. Die Annahme: Nähert sich der Flächeninhalt der Kontur dem des Rechtecks an, handelt es sich bei der Kontur selbst wahrscheinlich um ein Rechteck. Als Grenzwert hat sich ein Verhältnis von 0.85 bewährt. Ebenfalls ausgeschlossen wird ein Rechteck, wenn es die Fläche des gesamten Bildes ausmacht, da teilweise, wie auch bei diesem Beispiel, der Rand des Bildes als Kontur erkannt werden kann (Vgl. Abb. \ref{fig:adaptivrect}).
+\begin{figure}[h!]
+\includegraphics[width =0.5\textwidth]{catacom_1111_adaptive_allrectsred.png}
+\includegraphics[width =0.5\textwidth]{catacom_1111_adaptive_rectarea.png}
+\caption{Rechtecke aller Konturen und jene derer mit annähernd rechteckiger Fläche.}
+\label{fig:adaptivrect}
+\end{figure}
+
+Als letztes Kriterium wird das Seitenverhältnis herangezogen. Im Programm besteht die Möglichkeit, vor der Untersuchung aller Bilder ein Template zu hinterlegen, auf dem eine Tafel gut und eindeutig zu sehen ist. Aus diesem Template wird das Seitenverhältnis der Tafel berechnet. Findet dieser Schritt nicht statt, wird ein maximales Seitenverhältnis von 2:1 angenommen, da Tafeln selten in länglichen Formaten zu finden sind\footnote{Sollte das Format einer Tafel doch einmal von dieser Annahme abweichen, lässt sich das problemlos entsprechend anpassen.}. Mit einer deutlichen, aber bewährten Toleranz von 30\% in jede Richtung wird das Seitenverhältnis der verbliebenen Rechtecke mit dem des Templates verglichen. Sind die Werte sich ähnlich genug, wird das Rechteck als Tafel interpretiert und gilt als das Ergebnis des Algorithmus(Vgl. Abb. \ref{fig:aspectratio}).
+\begin{figure}[h!]
+\includegraphics[width =0.5\textwidth]{catacom_1111_adaptive_rectareared.png}
+\includegraphics[width =0.5\textwidth]{catacom_1111_adaptive_aspectratio.png}
+\caption{Die bisher verbliebenen Rechtecke und die mit dem richtigen Seitenverhältnis.}
+\label{fig:aspectratio}
+\end{figure}
+ 
 \subsection{Cropverfahren}
 
 Was ist die Aufgabe beim Crop?
@@ -91,6 +134,8 @@ Wo liegen die Probleme?
 Was ist die Idee?
 Wie wurde sie umgesetzt?
 Wo liegen die Probleme?
+
+\subsection{Experimentelles}
 
 \subsection{Zusammenfassung}
 evtl zusammenfassen wie vorgegangen wurde, warum dieser Weg gut ist und was das Wichtigste Ergebnis ist
