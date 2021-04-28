@@ -117,7 +117,7 @@ def main():
 #####################################################################################################################################################     
 
 def ocr(img, mode = 'image_to_text'):
-    
+  
     preimg = preprocessing(img)
     
     #preimg = getinnerrect(preimg)
@@ -273,6 +273,8 @@ def image_to_text(img):
     #try to read
     #config = ('board')
     config = ("board -l dic --oem 1 --psm 7")
+    #config = ("dic --oem 1 --psm 7")
+
     texta = pytesseract.image_to_string(img, config=config)
     #rotate and try again
     img = cv2.rotate(img, cv2.cv2.ROTATE_180)
