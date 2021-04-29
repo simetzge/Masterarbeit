@@ -161,7 +161,6 @@ try:
         
         #set threshold
         binary = cv2.adaptiveThreshold(scaled,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)       
-        #show(binary, name = "adaptive")
         
         #detect contours and rectangles
         contours, rois, roisConts = rect_detect(binary)
@@ -246,7 +245,7 @@ try:
             for crop in cropImgs:
                 show(crop)
         #return largest contour
-        #maxCont = cv2.convexHull(maxCont)
+        maxCont = cv2.convexHull(maxCont)
         #epsilon = 0.1*cv2.arcLength(maxCont,True)
         #maxCont = cv2.approxPolyDP(maxCont,epsilon,True)
         return(maxCont)
@@ -293,9 +292,7 @@ try:
             rois = []            
             contours = []            
             
-            ret, binary = cv2.threshold(gray, thresh, THRESHOLD_MAX, cv2.THRESH_BINARY)
-            
-            show(binary, name = str(thresh))
+            ret, binary = cv2.threshold(gray, thresh, THRESHOLD_MAX, cv2.THRESH_BINARY)    
             
             contours, rois, rectConts = rect_detect(binary)#img for debug
             
@@ -387,8 +384,8 @@ try:
             
             #throw out too small areas
             if not max(binary.shape[0],binary.shape[1]) < contArea:
-                continue
-                        
+                continue            
+            
             #create rectangle around contours
             (x, y), (w, h), angle = rect = cv2.minAreaRect(contour)
             
@@ -401,9 +398,8 @@ try:
             
             #ignore contours as big as the image
             if w > binary.shape[0] * 0.9 or h > binary.shape[1]*0.9:
-                continue   
+                continue
             
-            rectConts.append(rect)
             #compute if area is not empty
             if rectArea != 0:
                
@@ -426,7 +422,7 @@ try:
             #if every condition is met, save the rectangle area in the array
             rois.append(rect)
             #contour = cv2.convexHull(contour)
-            #rectConts.append(contour)
+            rectConts.append(contour)
         
         return (contours, rois, rectConts)
     
