@@ -516,17 +516,18 @@ try:
                     crop = simple_crop (masked[i], rect)
                 else:
                     crop = simple_crop (img, rect)
+                crops.append(crop)
             else:
                 # new version
                 if masked != None:
                     crop = hough_crop(masked[i],rect, CUT_THRESH)
                 else:
                     crop = hough_crop(img,rect, CUT_THRESH)
+                for entry in crop:
+                    crops.append(entry)
             #end function if no crop image found (hough rotate returns [None] if something went wrong)
             if len(crop) < 2:
-                continue
-            
-            crops.append(crop)
+                continue            
             
             # mask area sligtly bigger than detected rect to cut the complete board with its border
             mask[int(min(tl[1],br[1]) - 0.1 * w): int(max(tl[1],br[1]) + 0.1 * w),int(min(tl[0],br[0]) - 0.1 * h):int(max(tl[0],br[0]) + 0.1 * h)] = True
@@ -623,6 +624,26 @@ try:
 #####################################################################################################################################################
 
     def hough_crop(img, rect, threshold):
+        
+        imgb = img.copy()
+        imgg = img.copy()
+        imgr = img.copy()
+        imgb[:,:,1] = 0
+        imgb[:,:,2] = 0
+        imgg[:,:,0] = 0
+        imgg[:,:,2] = 0
+        imgr[:,:,0] = 0
+        imgr[:,:,1] = 0
+            
+        #show(imgb, "blue")
+        #show(imgg, "green")
+        #show(imgr, "red")
+        
+        warped_list = [hough(img, rect, threshold),hough(imgb, rect, threshold),hough(imgg, rect, threshold),hough(imgr, rect, threshold)]
+        
+        return(warped_list)
+        
+    def hough(img, rect, threshold):
         
         #debug flag
         debug_hough = False
@@ -759,7 +780,7 @@ try:
             COUNTER = COUNTER +1
             #return (simple_crop(img, rect))
             #perform hough rotate with lower threshold
-            return(hough_crop(img, rect, threshold-5))
+            return(hough(img, rect, threshold-5))
             
         
         tl = list(tl)     
@@ -774,6 +795,7 @@ try:
         print (src)
         #get rotation matrix
         M = cv2.getPerspectiveTransform(np.float32(src), dst) 
+        #M, mask = cv2.findHomography(np.float32(src), dst, cv2.RANSAC,5.0)
         #warp
         warped = cv2.warpPerspective(crop_img, M, (int(width), int(height)))
         
