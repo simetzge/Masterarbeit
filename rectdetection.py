@@ -540,7 +540,7 @@ try:
         return(crops, imgcut)   
 
     #cannyedge from opencv doc
-    def cannyThreshold(img):
+    def cannyThresholdNonBinary(img):
         max_lowThreshold = 100
         ratio = 3
         kernel_size = 3
@@ -548,6 +548,17 @@ try:
         img_blur = cv2.blur(img, (5,5))
         #detected_edges = cv2.Canny(img_blur, low_threshold, low_threshold*ratio, kernel_size)
         detected_edges = cv2.Canny(img_blur, 10, 25, kernel_size)
+        mask = detected_edges != 0
+        dst = img * (mask[:,:].astype(img.dtype))
+        return (dst)
+    #cannyedge from opencv doc
+    def cannyThreshold(img):
+        max_lowThreshold = 100
+        ratio = 3
+        kernel_size = 3
+        low_threshold = 1
+        img_blur = cv2.blur(img, (3,3))
+        detected_edges = cv2.Canny(img_blur, low_threshold, low_threshold*ratio, kernel_size)
         mask = detected_edges != 0
         dst = img * (mask[:,:].astype(img.dtype))
         return (dst)
@@ -655,14 +666,13 @@ try:
         debug_hough = False
         
         #if threshold is too low, use simple crop
-        if threshold < 110:
+        if threshold < 100:
             return (simple_crop(img, rect))
         
         (x, y), (w, h), angle = rect
 
-        #new_rect = (x,y), (int(w*1.3), int(h*1.3)), angle
-        new_rect = rect
-        
+        new_rect = (x,y), (int(w*1.3), int(h*1.3)), angle
+
         crop_img = simple_crop(img, new_rect)
         
         if crop_img.shape[0] > crop_img.shape[1]:
@@ -671,9 +681,9 @@ try:
         
         #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
         #crop_img = scaleImage(crop_img)
-        #blur = cv2.bilateralFilter(crop_img,9,75,75)
-        blur = cv2.fastNlMeansDenoising(crop_img,7,7,75)        
-        blur = cv2.GaussianBlur(blur,(7,7),75)
+        blur = cv2.bilateralFilter(crop_img,9,75,75)
+        blur = cv2.fastNlMeansDenoising(blur,7,7,15)        
+        blur = cv2.GaussianBlur(blur,(7,7),15)
         
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
         norm = normalizeImage(gray)    
@@ -685,31 +695,28 @@ try:
         ret, binary = cv2.threshold(gray, int(mean+30), THRESHOLD_MAX, cv2.THRESH_BINARY)
         
         if debug_hough:
-            show(norm, "norm")
-            
-        #if CONT_BASED_CUT == False:
-            #binary = cv2.GaussianBlur(binary,(3,3),15)
-            #binary = skeleton (binary)
-            #binary = cv2.GaussianBlur(binary,(3,3),15)
+            cv2.imshow("test", binary)
+            cv2.waitKey()
+        binary = cv2.GaussianBlur(binary,(3,3),15)    
+        if CONT_BASED_CUT == False:
+            binary = skeleton (binary)
+        binary = cv2.GaussianBlur(binary,(3,3),15)
         
         #get shape
         height, width = binary.shape
         
         # cannyedge        
-        dst = cannyThreshold(norm)
-        if debug_hough:
-            show(dst, "canny")
+        dst = cannyThreshold(binary)
         #hough with canny edge
         lines = cv2.HoughLines(dst, 1, np.pi / 180, threshold, None, 0, 0)
         #lines = cv2.HoughLinesP(dst, 1, np.pi / 180, threshold, 30,10)
-        cdst = cv2.cvtColor(norm, cv2.COLOR_GRAY2BGR)
-
+        cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
         
         # empty lineList to collect all lines        
         lineList = []
         interList = []
         
-        if lines is not None and len(lines) < 150:            
+        if lines is not None:            
             # go through lines, calculate the coordinates
             for i in range(0, len(lines)):
                 rho = lines[i][0][0]
@@ -723,10 +730,7 @@ try:
                 cv2.line(cdst, pt1, pt2, (0,0,255), 1, cv2.LINE_AA)
                 # add lines to List
                 line =[pt1,pt2]
-                
-                if getLength(pt1, pt2) > height/2:
-                
-                    lineList.append(line)                
+                lineList.append(line)                
                 
             # calculate every intersection between lines 
             for i in range(0, len(lineList)):    
@@ -743,21 +747,16 @@ try:
                     #if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
                     if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
                         continue
-                    aa = difflib.SequenceMatcher(None, quia,quib)
-                    bb = difflib.SequenceMatcher(None, quja,qujb)
-                    #if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
-                    if aa.ratio() < 0.5 or bb.ratio() < 0.5:
-                        continue
                     
                     # call intersection calculation
                     inter = intersection(lineList[i], lineList[j])
                     #ignor if the intersection is on the corners
                     
-                    if not ((inter[0] < 1 or inter [0] > width) or inter[1] < 1 or inter[1] > height):
+                    #if not ((inter[0] < 1 or inter [0] > width) or inter[1] < 1 or inter[1] > height):
                         
-                    #heightdiff = int((height - height / 1.1) / 2)
-                    #widthdiff = int((width - width / 1.1) / 2)
-                    #if not ((inter[0] < widthdiff or inter [0] > width-widthdiff) or inter[1] < heightdiff or inter[1] > height - heightdiff):    
+                    heightdiff = int((height - height / 1.1) / 2)
+                    widthdiff = int((width - width / 1.1) / 2)
+                    if not ((inter[0] < widthdiff or inter [0] > width-widthdiff) or inter[1] < heightdiff or inter[1] > height - heightdiff):    
                         interList.append(inter)
                         # add intersections as dots to output image for visualization
                         cdst = cv2.circle(cdst, inter, 4, (0,255,0), 4)
