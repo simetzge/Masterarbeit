@@ -687,7 +687,7 @@ try:
         
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
         norm = normalizeImage(gray)    
-        mean = np.mean(norm)
+        mean = np.mean(gray)
         if debug_hough:
             print("threshold ist " + str(threshold) + " mean ist " + str(np.mean(gray)))
         #mean *1.2 bisher zweitbeste (31), beste mean+25 (27)
@@ -695,18 +695,23 @@ try:
         ret, binary = cv2.threshold(gray, int(mean+30), THRESHOLD_MAX, cv2.THRESH_BINARY)
         
         if debug_hough:
+            output("pics4thesis", binary, "1073.png", "binary")
+        
+        if debug_hough:
             cv2.imshow("test", binary)
             cv2.waitKey()
-        binary = cv2.GaussianBlur(binary,(3,3),15)    
-        if CONT_BASED_CUT == False:
-            binary = skeleton (binary)
-        binary = cv2.GaussianBlur(binary,(3,3),15)
+        #binary = cv2.GaussianBlur(binary,(3,3),15)    
+        #if CONT_BASED_CUT == False:
+         #   binary = skeleton (binary)
+        #binary = cv2.GaussianBlur(binary,(3,3),15)
         
         #get shape
         height, width = binary.shape
         
         # cannyedge        
         dst = cannyThreshold(binary)
+        if debug_hough:
+            output("pics4thesis", binary, "1073.png", "dst")
         #hough with canny edge
         lines = cv2.HoughLines(dst, 1, np.pi / 180, threshold, None, 0, 0)
         #lines = cv2.HoughLinesP(dst, 1, np.pi / 180, threshold, 30,10)
@@ -727,11 +732,16 @@ try:
                 y0 = b * rho
                 pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
                 pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-                cv2.line(cdst, pt1, pt2, (0,0,255), 1, cv2.LINE_AA)
-                # add lines to List
+                #cdst = cv2.circle(cdst, pt1, 4, (255,0,0), 2)
+                #cdst = cv2.circle(cdst, pt2, 4, (255,0,0), 2)
+                # add lines to List                
                 line =[pt1,pt2]
-                lineList.append(line)                
-                
+                newLine = getPictureLine(cdst, line)    
+                if len(newLine) == 2:
+                    cv2.line(cdst, newLine[0], newLine[1], (0,0,255), 1, cv2.LINE_AA)
+                    lineList.append(newLine)                
+        if debug_hough:
+            output("pics4thesis", cdst, "1073.png", "lines")                
             # calculate every intersection between lines 
             for i in range(0, len(lineList)):    
                 for j in range(0, len(lineList)):
@@ -743,14 +753,17 @@ try:
                     quia = getQuadrant(binary, lineList[i][0])
                     quib = getQuadrant(binary, lineList[i][1])
                     quja = getQuadrant(binary, lineList[j][0])
-                    qujb = getQuadrant(binary, lineList[j][1]) 
+                    qujb = getQuadrant(binary, lineList[j][1])
+                    if quia == quib or quja == qujb:
+                        continue
                     #if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
                     if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
                         continue
-                    
+                    if difflib.SequenceMatcher(None, quia,quib).ratio() == 0 or difflib.SequenceMatcher(None, quja,qujb).ratio() == 0 :
+                        continue
                     # call intersection calculation
                     inter = intersection(lineList[i], lineList[j])
-                    #ignor if the intersection is on the corners
+                    #ignor if the intersection is in the corners
                     
                     #if not ((inter[0] < 1 or inter [0] > width) or inter[1] < 1 or inter[1] > height):
                         
@@ -759,9 +772,11 @@ try:
                     if not ((inter[0] < widthdiff or inter [0] > width-widthdiff) or inter[1] < heightdiff or inter[1] > height - heightdiff):    
                         interList.append(inter)
                         # add intersections as dots to output image for visualization
-                        cdst = cv2.circle(cdst, inter, 4, (0,255,0), 4)
+                        cdst = cv2.circle(cdst, inter, 4, (0,255,0), 2)
                     else:
-                        cdst = cv2.circle(cdst, inter, 4, (0,0,255), 4)
+                        cdst = cv2.circle(cdst, inter, 4, (0,0,255), 2)
+            if debug_hough:
+                output("pics4thesis", cdst, "1073.png", "intersection")
             if debug_hough:       
                 cv2.imshow("test", cdst)
                 cv2.waitKey()
@@ -797,7 +812,7 @@ try:
             COUNTER = COUNTER +1
             #return (simple_crop(img, rect))
             #perform hough rotate with lower threshold
-            return(hough(img, rect, threshold-5))
+            return(hough(img, rect, threshold-10))
             
         
         tl = list(tl)     
@@ -834,6 +849,7 @@ try:
             cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
             cv2.imshow("test", cdst)
             cv2.waitKey()
+            output("pics4thesis", binary, "1073.png", "binary")
         return (warped)
         
 #####################################################################################################################################################
@@ -949,13 +965,13 @@ try:
     def getQuadrant(img, coordinate):
         
         height, width = img.shape
-        if coordinate[0] < width / 2 and coordinate[1] < height / 2:
+        if coordinate[0] <= width / 2 and coordinate[1] <= height / 2:
             return("tl")
                 
-        if coordinate[0] > width / 2 and coordinate[1] < height / 2:
+        if coordinate[0] > width / 2 and coordinate[1] <= height / 2:
             return("tr")
                 
-        if coordinate[0] < width / 2 and coordinate[1] > height / 2:
+        if coordinate[0] <= width / 2 and coordinate[1] > height / 2:
             return("bl")
                 
         if coordinate[0] > width / 2 and coordinate[1] > height / 2:
@@ -1106,6 +1122,79 @@ try:
         x2, y2 = point2
         length = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
         return (length)
+    
+#####################################################################################################################################################
+#
+# input: image (to get the shape) and line
+# ouput: new line segment, both points on the image's border
+# purpose: get the intersection of the image border and a line to use this intersection points as new line
+#
+#####################################################################################################################################################
+    
+    def getPictureLine(img, line):
+        
+        height, width, channels  = img.shape
+        #define the border lines
+        topLine = [(0,0),(width, 0)]
+        leftLine = [(0,0),(0, height)]
+        bottomLine = [(0,height),(width, height)]
+        rightLine = [(width, 0),(width, height)]
+        #cv2.line(img, topLine[0], topLine[1], (255,0,255), 5, cv2.LINE_AA)
+        #cv2.line(img, leftLine[0], leftLine[1], (255,0,255), 5, cv2.LINE_AA)
+        #cv2.line(img, bottomLine[0], bottomLine[1], (255,0,255), 5, cv2.LINE_AA)
+        #cv2.line(img, rightLine[0], rightLine[1], (255,0,255), 5, cv2.LINE_AA)
+        #get intersections of border lines and input line
+        pt1 = intersection(topLine, line)
+        pt2 = intersection(leftLine, line)
+        pt3 = intersection(bottomLine, line)
+        pt4 = intersection(rightLine, line)
+        #cdst = cv2.circle(img, pt1, 4, (255,0,0), 2)
+        #cdst = cv2.circle(cdst, pt2, 4, (255,0,0), 2)
+        #cdst = cv2.circle(cdst, pt3, 4, (255,0,0), 2)
+        #cdst = cv2.circle(cdst, pt4, 4, (255,0,0), 2)
+        newline = []
+        #validity check for each intersection, two of them should pass
+        if validCheck(img, pt1):
+            newline.append(pt1)
+        if validCheck(img, pt2):
+            newline.append(pt2)
+        if validCheck(img, pt3):
+            newline.append(pt3)
+        if validCheck(img, pt4):
+            newline.append(pt4)            
+        
+        #debug
+        if not len(newline) == 2:
+            cv2.line(img, line[0], line[1], (255,255,0), 1, cv2.LINE_AA)
+            cdst = cv2.circle(img, pt1, 4, (255,0,0), 2)
+            cdst = cv2.circle(cdst, pt2, 4, (255,0,0), 2)
+            cdst = cv2.circle(cdst, pt3, 4, (255,0,0), 2)
+            cdst = cv2.circle(cdst, pt4, 4, (255,0,0), 2)
+            print ("point 1 " + str(pt1) + "\n")
+            print ("point 2 " + str(pt2) + "\n")
+            print ("point 3 " + str(pt3) + "\n")
+            print ("point 4 " + str(pt4) + "\n")
+            show (img, "rand")
+            print("stop")
+        return(newline)
+    
+#####################################################################################################################################################
+#
+# input: image (to get the shape) and point
+# ouput: True if this is a valid Point, False, if not
+# purpose: validity check for intersections of image border and lines
+#
+#####################################################################################################################################################
+
+    def validCheck(img, pt):
+        height, width, channels  = img.shape
+        #point is not valid if it's not on the image
+        if (pt[0] < 0 or pt[0] > width) or (pt[1] < 0 or pt[1] > height):
+            return(False)
+        #point is not valid if it's in the corners
+        if pt == (0,0) or pt == (width, 0) or pt == (width, height) or pt == (0, height):
+            return(False)
+        return(True)
         
 #####################################################################################################################################################
 #
