@@ -557,8 +557,9 @@ try:
         ratio = 3
         kernel_size = 3
         low_threshold = 1
-        img_blur = cv2.blur(img, (3,3))
-        detected_edges = cv2.Canny(img_blur, low_threshold, low_threshold*ratio, kernel_size)
+        img_blur = cv2.blur(img, (5,5))
+        #detected_edges = cv2.Canny(img_blur, low_threshold, low_threshold*ratio, kernel_size)
+        detected_edges = cv2.Canny(img_blur, 10, 30, kernel_size)
         mask = detected_edges != 0
         dst = img * (mask[:,:].astype(img.dtype))
         return (dst)
@@ -681,9 +682,9 @@ try:
         
         #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
         #crop_img = scaleImage(crop_img)
-        blur = cv2.bilateralFilter(crop_img,9,75,75)
-        blur = cv2.fastNlMeansDenoising(blur,7,7,15)        
-        blur = cv2.GaussianBlur(blur,(7,7),15)
+        #blur = cv2.bilateralFilter(crop_img,9,75,75)
+        #blur = cv2.fastNlMeansDenoising(blur,7,7,15)        
+        blur = cv2.GaussianBlur(crop_img,(7,7),75)
         
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
         norm = normalizeImage(gray)    
@@ -694,8 +695,8 @@ try:
         
         ret, binary = cv2.threshold(gray, int(mean+30), THRESHOLD_MAX, cv2.THRESH_BINARY)
         
-        if debug_hough:
-            output("pics4thesis", binary, "1073.png", "binary")
+       # if debug_hough:
+        #    output("pics4thesis", binary, "1073.png", "binary")
         
         if debug_hough:
             cv2.imshow("test", binary)
@@ -709,9 +710,13 @@ try:
         height, width = binary.shape
         
         # cannyedge        
-        dst = cannyThreshold(binary)
+        #dst = cannyThreshold(binary)
+        dst = cannyThreshold(norm)
+        
         if debug_hough:
-            output("pics4thesis", binary, "1073.png", "dst")
+            show(dst, "canny")
+        #if debug_hough:
+            #output("pics4thesis", binary, "1073.png", "dst")
         #hough with canny edge
         lines = cv2.HoughLines(dst, 1, np.pi / 180, threshold, None, 0, 0)
         #lines = cv2.HoughLinesP(dst, 1, np.pi / 180, threshold, 30,10)
@@ -740,8 +745,8 @@ try:
                 if len(newLine) == 2:
                     cv2.line(cdst, newLine[0], newLine[1], (0,0,255), 1, cv2.LINE_AA)
                     lineList.append(newLine)                
-        if debug_hough:
-            output("pics4thesis", cdst, "1073.png", "lines")                
+        #if debug_hough:
+            #output("pics4thesis", cdst, "1073.png", "lines")                
             # calculate every intersection between lines 
             for i in range(0, len(lineList)):    
                 for j in range(0, len(lineList)):
@@ -775,8 +780,8 @@ try:
                         cdst = cv2.circle(cdst, inter, 4, (0,255,0), 2)
                     else:
                         cdst = cv2.circle(cdst, inter, 4, (0,0,255), 2)
-            if debug_hough:
-                output("pics4thesis", cdst, "1073.png", "intersection")
+            #if debug_hough:
+             #   output("pics4thesis", cdst, "1073.png", "intersection")
             if debug_hough:       
                 cv2.imshow("test", cdst)
                 cv2.waitKey()
