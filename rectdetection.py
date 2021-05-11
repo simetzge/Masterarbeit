@@ -660,7 +660,7 @@ try:
         
         #return(warped_list)
         return([hough(img,rect,threshold)])
-        
+
     def hough(img, rect, threshold):
         
         #debug flag
@@ -683,8 +683,9 @@ try:
         #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
         #crop_img = scaleImage(crop_img)
         #blur = cv2.bilateralFilter(crop_img,9,75,75)
-        #blur = cv2.fastNlMeansDenoising(blur,7,7,15)        
-        blur = cv2.GaussianBlur(crop_img,(7,7),75)
+        blur = crop_img
+        blur = cv2.fastNlMeansDenoising(blur,7,7,75)        
+        blur = cv2.GaussianBlur(blur,(7,7),75)
         
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
         norm = normalizeImage(gray)    
@@ -718,10 +719,9 @@ try:
         #if debug_hough:
             #output("pics4thesis", binary, "1073.png", "dst")
         #hough with canny edge
-        lines = cv2.HoughLines(dst, 1, np.pi / 180, threshold, None, 0, 0)
+        lines = cv2.HoughLines(dst, 1, np.pi / 180, threshold)
         #lines = cv2.HoughLinesP(dst, 1, np.pi / 180, threshold, 30,10)
         cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
-        
         # empty lineList to collect all lines        
         lineList = []
         interList = []
@@ -741,10 +741,213 @@ try:
                 #cdst = cv2.circle(cdst, pt2, 4, (255,0,0), 2)
                 # add lines to List                
                 line =[pt1,pt2]
-                newLine = getPictureLine(cdst, line)    
+                newLine = getImageLine(cdst, line)    
                 if len(newLine) == 2:
                     cv2.line(cdst, newLine[0], newLine[1], (0,0,255), 1, cv2.LINE_AA)
                     lineList.append(newLine)                
+        #if debug_hough:
+            #output("pics4thesis", cdst, "1073.png", "lines")                
+            # calculate every intersection between lines 
+            for i in range(0, len(lineList)):    
+                for j in range(0, len(lineList)):
+                    # skip intersection of line with itself
+                    if lineList[i] == lineList[j]:
+                        continue
+                    
+                    #skip if lines are in the same direction
+                    quia = getQuadrant(binary, lineList[i][0])
+                    quib = getQuadrant(binary, lineList[i][1])
+                    quja = getQuadrant(binary, lineList[j][0])
+                    qujb = getQuadrant(binary, lineList[j][1])
+                    if quia == quib or quja == qujb:
+                        continue
+                    #if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
+                    if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
+                        continue
+                    if difflib.SequenceMatcher(None, quia,quib).ratio() == 0 or difflib.SequenceMatcher(None, quja,qujb).ratio() == 0 :
+                        continue
+                    # call intersection calculation
+                    inter = intersection(lineList[i], lineList[j])
+                    #ignor if the intersection is in the corners
+                    
+                    #if not ((inter[0] < 1 or inter [0] > width) or inter[1] < 1 or inter[1] > height):
+                        
+                    heightdiff = int((height - height / 1.1) / 2)
+                    widthdiff = int((width - width / 1.1) / 2)
+                    if not ((inter[0] < widthdiff or inter [0] > width-widthdiff) or inter[1] < heightdiff or inter[1] > height - heightdiff):    
+                        interList.append(inter)
+                        # add intersections as dots to output image for visualization
+                        cdst = cv2.circle(cdst, inter, 4, (0,255,0), 2)
+                    else:
+                        cdst = cv2.circle(cdst, inter, 4, (0,0,255), 2)
+            #if debug_hough:
+             #   output("pics4thesis", cdst, "1073.png", "intersection")
+            if debug_hough:       
+                cv2.imshow("test", cdst)
+                cv2.waitKey()
+        
+        tlList = []
+        trList = []
+        blList = []
+        brList = []
+        
+        #sort inter
+        for inters in interList:
+            if getQuadrant(binary, inters) == "tl":
+                tlList.append(inters)
+
+            if getQuadrant(binary, inters) == "tr":
+                trList.append(inters)
+                
+            if getQuadrant(binary, inters) == "bl":
+                blList.append(inters)
+                
+            if getQuadrant(binary, inters) == "br":
+                brList.append(inters)
+        
+        #cast tuple to list
+        tl = getCorner(tlList, "tl")   
+        tr = getCorner(trList, "tr")
+        bl = getCorner(blList, "bl")
+        br = getCorner(brList, "br")
+        
+        #when no corner detected return simple cropped image
+        if tl == None or tr == None or bl == None or br == None:
+            global COUNTER
+            COUNTER = COUNTER +1
+            #return (simple_crop(img, rect))
+            #perform hough rotate with lower threshold
+            return(hough(img, rect, threshold-10))
+            
+        
+        tl = list(tl)     
+        tr = list(tr)
+        bl = list(bl)
+        br = list(br)
+        
+        #put points in array
+        src = [bl, tl, tr, br]
+        #get array for destination
+        dst = np.array([[0, height],[0, 0],[width, 0],[width, height]], dtype="float32")
+        print (src)
+        #get rotation matrix
+        M = cv2.getPerspectiveTransform(np.float32(src), dst) 
+        #M, mask = cv2.findHomography(np.float32(src), dst, cv2.RANSAC,5.0)
+        #warp
+        warped = cv2.warpPerspective(crop_img, M, (int(width), int(height)))
+        
+        # dsize
+        if USE_TEMPLATE == True:
+            dsize = (warped.shape[1], int(warped.shape[1] / aspectRatio))
+        else:
+            dsize = (warped.shape[1], int(warped.shape[1] * 0.8))
+
+        # resize image
+        warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_AREA)
+        
+        if debug_hough:
+            # visualization for debug
+            cdst = crop_img
+            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
+            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
+            cv2.imshow("test", cdst)
+            cv2.waitKey()
+            output("pics4thesis", binary, "1073.png", "binary")
+        return (warped)
+        
+    def houghP(img, rect, threshold):
+        
+        #debug flag
+        debug_hough = True
+        
+        #if threshold is too low, use simple crop
+        if threshold < 100:
+            return (simple_crop(img, rect))
+        
+        (x, y), (w, h), angle = rect
+
+        new_rect = (x,y), (int(w*1.3), int(h*1.3)), angle
+
+        crop_img = simple_crop(img, new_rect)
+        
+        if crop_img.shape[0] > crop_img.shape[1]:
+            #warped = np.rot90(warped)
+            crop_img = cv2.rotate(crop_img, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
+        
+        #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
+        #crop_img = scaleImage(crop_img)
+        blur = cv2.bilateralFilter(crop_img,9,75,75)
+        blur = cv2.fastNlMeansDenoising(blur,7,7,15)        
+        blur = cv2.GaussianBlur(blur,(7,7),15)
+        
+        gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
+        norm = normalizeImage(gray)    
+        mean = np.mean(gray)
+        if debug_hough:
+            print("threshold ist " + str(threshold) + " mean ist " + str(np.mean(gray)))
+        #mean *1.2 bisher zweitbeste (31), beste mean+25 (27)
+        
+        ret, binary = cv2.threshold(gray, int(mean+30), THRESHOLD_MAX, cv2.THRESH_BINARY)
+        
+       # if debug_hough:
+        #    output("pics4thesis", binary, "1073.png", "binary")
+        
+        if debug_hough:
+            cv2.imshow("test", binary)
+            cv2.waitKey()
+        #binary = cv2.GaussianBlur(binary,(3,3),15)    
+        #if CONT_BASED_CUT == False:
+         #   binary = skeleton (binary)
+        #binary = cv2.GaussianBlur(binary,(3,3),15)
+        
+        #get shape
+        height, width = binary.shape
+        
+        # cannyedge        
+        #dst = cannyThreshold(binary)
+        dst = cannyThreshold(norm)
+        
+        if debug_hough:
+            show(dst, "canny")
+        #if debug_hough:
+            #output("pics4thesis", binary, "1073.png", "dst")
+        #hough with canny edge
+        lines = cv2.HoughLines(dst, 1, np.pi / 180, threshold)
+        #lines = cv2.HoughLinesP(dst, 1, np.pi / 180, threshold, 30,10)
+        cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
+        
+        linesP = cv.HoughLinesP(dst, 1, np.pi / 180, threshold, minLineLength = 100, maxLineGap = 25)
+        # empty lineList to collect all lines        
+        lineList = []
+        interList = []
+        
+        if lines is not None:            
+            # go through lines, calculate the coordinates
+            for i in range(0, len(linesP)):
+                #rho = lines[i][0][0]
+                #theta = lines[i][0][1]
+                #a = math.cos(theta)
+                #b = math.sin(theta)
+                #x0 = a * rho
+                #y0 = b * rho
+                #pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
+                #pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+                #cdst = cv2.circle(cdst, pt1, 4, (255,0,0), 2)
+                #cdst = cv2.circle(cdst, pt2, 4, (255,0,0), 2)
+                # add lines to List                
+                #line =[pt1,pt2]
+                #newLine = getPictureLine(cdst, line)    
+                #if len(newLine) == 2:
+                    #cv2.line(cdst, newLine[0], newLine[1], (0,0,255), 1, cv2.LINE_AA)
+                x1 = linesP[i][0][0]
+                y1 = linesP[i][0][1]
+                x2 = linesP[i][0][2]
+                y2 = linesP[i][0][3]
+                newLine = [(x1,y1), (x2,y2)]
+                cv2.line(cdst, newLine[0], newLine[1], (0,0,255), 1, cv2.LINE_AA)
+                lineList.append(newLine)                
         #if debug_hough:
             #output("pics4thesis", cdst, "1073.png", "lines")                
             # calculate every intersection between lines 
@@ -1136,7 +1339,7 @@ try:
 #
 #####################################################################################################################################################
     
-    def getPictureLine(img, line):
+    def getImageLine(img, line):
         
         height, width, channels  = img.shape
         #define the border lines
