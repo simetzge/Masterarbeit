@@ -682,10 +682,12 @@ try:
         
         #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
         #crop_img = scaleImage(crop_img)
-        #blur = cv2.bilateralFilter(crop_img,9,75,75)
         blur = crop_img
-        blur = cv2.fastNlMeansDenoising(blur,7,7,75)        
-        blur = cv2.GaussianBlur(blur,(7,7),75)
+        blur = cv2.GaussianBlur(blur,(7,7),15)
+        blur = cv2.bilateralFilter(blur,9,75,75)
+        
+        blur = cv2.fastNlMeansDenoising(blur,7,7,15)        
+        blur = cv2.GaussianBlur(blur,(7,7),15)
         
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
         norm = normalizeImage(gray)    
@@ -1382,7 +1384,7 @@ try:
             print ("point 2 " + str(pt2) + "\n")
             print ("point 3 " + str(pt3) + "\n")
             print ("point 4 " + str(pt4) + "\n")
-            show (img, "rand")
+            #show (img, "rand")
             print("stop")
         return(newline)
     
