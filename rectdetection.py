@@ -65,59 +65,8 @@ try:
                     masked = None
                 cropimgs, restimg = cut(img, rects, masked = masked)
                 #perform OCR on cropped rectangles if flag is set
-                imagedict = {"image": fileNames[i]}
                 if OCR:
-                    bestguess = ""
-                    for j, crop in enumerate(cropimgs):
-                        timgs = []
-                        bimgs = []
-                        t = []
-                        b = []
-                        for k in range(3):
-                            onechannel = crop.copy()
-                            if not k == 0 :onechannel[:,:,0] = 0
-                            if not k == 1 :onechannel[:,:,1] = 0
-                            if not k == 2 :onechannel[:,:,2] = 0
-                            textimg, text = ocr(onechannel)
-                            boximg, boxtext = ocr(onechannel, mode = 'image_to_box')
-                            t.append(text)
-                            b.append(boxtext)
-                            timgs.append(textimg)
-                            bimgs.append(boximg)
-                            
-                        textimg, text = ocr(crop)
-                        boximg, boxtext = ocr(crop, mode = 'image_to_box')
-                        t.append(text)
-                        b.append(boxtext)
-                        timgs.append(textimg)
-                        bimgs.append(boximg)
-                        
-                        for n, txt in enumerate(t):
-                            tx = txt.replace(" ", "")
-                            tex = text.replace(" ", "")
-                            if len (tx) > len(tex):
-                                text = txt
-                                textimg = timgs[n]
-                        
-                        #delete spaces, check if box or txt are longer than bestguess, replace bestguess in this case
-                        box = boxtext.replace(" ", "")
-                        txt = text.replace(" ", "")
-                        if max(len(box),len(txt)) > len(bestguess):
-                            if len(box) > len(txt):
-                                bestguess = boxtext
-                            else:
-                                bestguess = text
-                        #output of rectimage and boximage
-                        output('rect', textimg, fileNames[i], str(j))
-                        output('box', boximg, fileNames[i], str(j))
-                        output('crop', crop, fileNames[i], str(j))
-                        #output('rect', crop, fileNames[i], str(j))
-                        #add rectdict to imagedict and imagedict to ocrlist
-                        rectdict = {"rectangle": fileNames[i] + "_" + str(j), "textimage": text, "boximage": boxtext}
-                        imagedict["rectangle " + str(j)] =  rectdict
-                        imagedict["bestguess"] = bestguess
-                    
-                    ocrlist.append(imagedict)
+                    ocrlist.append(ocr(cropimgs, fileNames[i]))
                 else:
                     #just print the crops if OCR flag is not set
                     for j, crop in enumerate(cropimgs):
@@ -135,10 +84,13 @@ try:
         
         #csvOutput(outputlist)
         if EVALUATE:
-            evaluation = csvInput("evaluationlist.csv")
-            compared = comparison(ocrlist)
-            evaluated = evaluate(evaluation, compared)
-            csvOutput(evaluated)
+            if OCR:
+                evaluation = csvInput("evaluationlist.csv")
+                compared = comparison(ocrlist)
+                evaluated = evaluate(evaluation, compared)
+                csvOutput(evaluated)
+            else:
+                print("no OCR no evaluation")
         print(COUNTER)
 
     

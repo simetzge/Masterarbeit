@@ -12,103 +12,74 @@ from basics import *
 
 def main():
     #main function for direct testing and comparison of OCR methods, for debug only
+    filePaths, fileNames = searchfiles(".png", "crop")
     
-    filePaths, fileNames = searchFiles('.png', 'recttest')
+    #open the files in cv2
     images = []
-    
+        
+    ocrlist =[]
+        
     #images = [cv2.imread(files, cv2.IMREAD_GRAYSCALE) for files in filePaths]
     images = [cv2.imread(files) for files in filePaths]
-    for i, img  in enumerate(images):
-        #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        #img = normalizeImage(img)
-        imga = new_preprocessing(img)
-        imgc = sharpening(imga)
-        imgb = preprocessing(img)
-        imgd = sharp_kernel(imga)
-        imge = unsharp_mask(imga)
-        text, rotate = image_to_text(imga)
-        if rotate == True:
-            imga = cv2.rotate(imga, cv2.cv2.ROTATE_180)
-        #write text on image
-        cv2.putText(imga, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
-        output('recttest_out', imga, "img " + str(i) + ".jpg",'new')
+ 
+    #for i, img  in enumerate(images):
         
-        text, rotate = image_to_text(imgb)
-        if rotate == True:
-            imgb = cv2.rotate(imgb, cv2.cv2.ROTATE_180)
-        #write text on image
-        #cv2.putText(imgb, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
-        output('recttest_out', imgb, "img " + str(i) + ".jpg",'old')
-        text, rotate = image_to_text(imgc)
-        cv2.putText(imgc, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
-        output('recttest_out', imgc, "img " + str(i) + ".jpg",'new_sharp')
-        text, rotate = image_to_text(imgd)
-        cv2.putText(imgd, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
-        output('recttest_out', imgd, "img " + str(i) + ".jpg",'new_kernel')
-        
-        
-        #binary = cv2.adaptiveThreshold(imgb,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,1)
-        ret, binary = cv2.threshold(imgb, 120, 255, cv2.THRESH_BINARY) 
-        rois = []
-        #findcontours
-        #contours, rois = rect_detect(binary)
-        contours, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-        #create rectangle around contours
-        global aspectRatio
-        aspectRatio = 0
-        for contour in contours:
-            (x, y), (w, h), angle = rect = cv2.minAreaRect(contour)
-            contArea = cv2.contourArea(contour)
-            if not 1000 < contArea:
-                continue  
-        #compute area of this rectangle
-            rectArea = w * h
-        #compare the areas to each other, make sure they don't differ too much
-            if contArea / rectArea < 0.85:
-                continue
-            #compute if area is not empty
-            if rectArea != 0:
-               
-                #if template is used, check for aspect ratio
-                if USE_TEMPLATE == True and aspectRatio != 0:
-                    
-                    #get aspect ratios of rect and approx
-                    asra = max(w,h)/min(w,h)
-                    
-                    #ignore this shape if aspect ratio doesn't fit
-                    if not (asra < aspectRatio * 1.3 and asra > aspectRatio *0.7):
-                        continue                 
-                
-                #else aspect ratio should be max 2:1
-                else:
-                    #make sure the aspect ratio is max 2:1
-                    if max(w,h) > 2 * min(w,h):
-                        continue
-                                #ignore contours as big as the image
-                if w < binary.shape[0] * 0.5 or h < binary.shape[1]*0.5:
-                    continue
-                w = 0.95*w
-                h = 0.95 *h
-                rect = (x, y), (w, h), angle
-            rois.append(rect)
-        
-        gray = cv2.cvtColor(imgb, cv2.COLOR_GRAY2BGR)
-        
-        #add contours in red to image
-        roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
-        
-        #add the found rectangles in green to image
-        roisImg = cv2.drawContours(roisImg, [cv2.boxPoints(rect).astype('int32') for rect in rois], -1, (0, 230, 0))
-        
-        for rect in rois:
-            img = rotate_board(img, rect)
-            cv2.putText(img, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
-            output('recttest_out', img, "img " + str(i) + ".jpg",'old')
-        
-        cv2.imshow("roi", img)
-        cv2.waitKey()
-    cv2.destroyAllWindows()
 
+
+def ocr(cropimgs, fileName):
+    imagedict = {"image": fileName}
+    bestguess = ""
+    for j, crop in enumerate(cropimgs):
+        timgs = []
+        bimgs = []
+        t = []
+        b = []
+        for k in range(3):
+            onechannel = crop.copy()
+            if not k == 0 :onechannel[:,:,0] = 0
+            if not k == 1 :onechannel[:,:,1] = 0
+            if not k == 2 :onechannel[:,:,2] = 0
+            textimg, text = get_text(onechannel)
+            boximg, boxtext = get_text(onechannel, mode = 'image_to_box')
+            t.append(text)
+            b.append(boxtext)
+            timgs.append(textimg)
+            bimgs.append(boximg)
+                            
+        textimg, text = get_text(crop)
+        boximg, boxtext = get_text(crop, mode = 'image_to_box')
+        t.append(text)
+        b.append(boxtext)
+        timgs.append(textimg)
+        bimgs.append(boximg)
+                        
+        for n, txt in enumerate(t):
+            tx = txt.replace(" ", "")
+            tex = text.replace(" ", "")
+            if len (tx) > len(tex):
+                text = txt
+                textimg = timgs[n]
+                        
+        #delete spaces, check if box or txt are longer than bestguess, replace bestguess in this case
+        box = boxtext.replace(" ", "")
+        txt = text.replace(" ", "")
+        if max(len(box),len(txt)) > len(bestguess):
+            if len(box) > len(txt):
+                bestguess = boxtext
+            else:
+                bestguess = text
+        #output of rectimage and boximage
+        output('rect', textimg, fileName, str(j))
+        output('box', boximg, fileName, str(j))
+        output('crop', crop, fileName, str(j))
+        #output('rect', crop, fileNames[i], str(j))
+        #add rectdict to imagedict and imagedict to ocrlist
+        rectdict = {"rectangle": fileName + "_" + str(j), "textimage": text, "boximage": boxtext}
+        imagedict["rectangle " + str(j)] =  rectdict
+        imagedict["bestguess"] = bestguess
+        
+        return(imagedict)            
+               
             
 #####################################################################################################################################################
 #
@@ -116,7 +87,7 @@ def main():
 #
 #####################################################################################################################################################     
 
-def ocr(img, mode = 'image_to_text'):
+def get_text(img, mode = 'image_to_text'):
   
     preimg = preprocessing(img)
     
@@ -128,7 +99,7 @@ def ocr(img, mode = 'image_to_text'):
     
     preimg = normalizeImage(preimg)
     
-    preimg = (255-preimg)
+    #preimg = (255-preimg)
     
     text, rotate = image_to_text(preimg)
     if rotate == True:
