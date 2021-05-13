@@ -9,21 +9,41 @@ import cv2
 import numpy as np
 from basics import *
 
+########################
+#for debug only
+from evaluation import *
+
 
 def main():
     #main function for direct testing and comparison of OCR methods, for debug only
-    filePaths, fileNames = searchfiles(".png", "crop")
+    filePaths, fileNames = searchFiles(".png", "crop")
     
     #open the files in cv2
     images = []
-        
+    cropImages = []
+    sameImages = []
+    cropNames = []    
     ocrlist =[]
-        
+    fileNames = [(fileName[0:-6] + ".JPG") for fileName in fileNames]  
+    fileNames.append("end")
     #images = [cv2.imread(files, cv2.IMREAD_GRAYSCALE) for files in filePaths]
     images = [cv2.imread(files) for files in filePaths]
  
-    #for i, img  in enumerate(images):
+    for i, img  in enumerate(images):
+        if fileNames[i] == fileNames[i+1]:
+            sameImages.append(img)
+        else:
+            sameImages.append(img)
+            cropImages.append(sameImages)
+            cropNames.append(fileNames[i])
+            sameImages = []
+    for j, crops in enumerate(cropImages):    
+        ocrlist.append(ocr(crops, cropNames[j]))
         
+    evaluation = csvInput("evaluationlist.csv")
+    compared = comparison(ocrlist)
+    evaluated = evaluate(evaluation, compared)
+    csvOutput(evaluated)
 
 
 def ocr(cropimgs, fileName):
@@ -71,7 +91,7 @@ def ocr(cropimgs, fileName):
         #output of rectimage and boximage
         output('rect', textimg, fileName, str(j))
         output('box', boximg, fileName, str(j))
-        output('crop', crop, fileName, str(j))
+        #output('crop', crop, fileName, str(j))
         #output('rect', crop, fileNames[i], str(j))
         #add rectdict to imagedict and imagedict to ocrlist
         rectdict = {"rectangle": fileName + "_" + str(j), "textimage": text, "boximage": boxtext}
@@ -99,7 +119,7 @@ def get_text(img, mode = 'image_to_text'):
     
     preimg = normalizeImage(preimg)
     
-    #preimg = (255-preimg)
+    preimg = (255-preimg)
     
     text, rotate = image_to_text(preimg)
     if rotate == True:
