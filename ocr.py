@@ -16,7 +16,7 @@ from evaluation import *
 
 def main():
     #main function for direct testing and comparison of OCR methods, for debug only
-    filePaths, fileNames = searchFiles(".png", "crop")
+    filePaths, fileNames = searchFiles(".png", "crop_hough_and_simple")
     
     #open the files in cv2
     images = []
@@ -98,7 +98,7 @@ def ocr(cropimgs, fileName):
         imagedict["rectangle " + str(j)] =  rectdict
         imagedict["bestguess"] = bestguess
         
-        return(imagedict)            
+    return(imagedict)            
                
             
 #####################################################################################################################################################
