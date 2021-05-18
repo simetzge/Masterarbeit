@@ -16,34 +16,34 @@ from evaluation import *
 
 def main():
     #main function for direct testing and comparison of OCR methods, for debug only
-    filePaths, fileNames = searchFiles(".png", "crop_hough_and_simple")
-    
+    filePaths, fileNames = searchFiles(".png", "crop_simple")
+
     #open the files in cv2
     images = []
     cropImages = []
     sameImages = []
-    cropNames = []    
+    cropNames = []
     ocrlist =[]
-    fileNames = [(fileName[0:-6] + ".JPG") for fileName in fileNames]  
+    fileNames = [(fileName[0:-6] + ".JPG") for fileName in fileNames]
     fileNames.append("end")
     #images = [cv2.imread(files, cv2.IMREAD_GRAYSCALE) for files in filePaths]
     images = [cv2.imread(files) for files in filePaths]
- 
-    for i, img  in enumerate(images):
-        if fileNames[i] == fileNames[i+1]:
-            sameImages.append(img)
-        else:
-            sameImages.append(img)
-            cropImages.append(sameImages)
-            cropNames.append(fileNames[i])
-            sameImages = []
-    for j, crops in enumerate(cropImages):    
-        ocrlist.append(ocr(crops, cropNames[j]))
-        
-    evaluation = csvInput("evaluationlist.csv")
-    compared = comparison(ocrlist)
-    evaluated = evaluate(evaluation, compared)
-    csvOutput(evaluated)
+    for j in range(13):        
+        for i, img  in enumerate(images):
+            if fileNames[i] == fileNames[i+1]:
+                sameImages.append(img)
+            else:
+                sameImages.append(img)
+                cropImages.append(sameImages)
+                cropNames.append(fileNames[i])
+                sameImages = []
+        for j, crops in enumerate(cropImages):
+            ocrlist.append(ocr(crops, cropNames[j]))
+
+        evaluation = csvInput("evaluationlist.csv")
+        compared = comparison(ocrlist)
+        evaluated = evaluate(evaluation, compared)
+        csvOutput(evaluated)
 
 
 def ocr(cropimgs, fileName):
@@ -65,7 +65,7 @@ def ocr(cropimgs, fileName):
             b.append(boxtext)
             timgs.append(textimg)
             bimgs.append(boximg)
-                            
+
         textimg, text = get_text(crop)
         boximg, boxtext = get_text(crop, mode = 'image_to_box')
         t.append(text)
@@ -263,7 +263,7 @@ def image_to_text(img):
     
     #try to read
     #config = ('board')
-    config = ("board -l dic --oem 1 --psm 7")
+    config = ("board -l dic --oem 1 --psm 3")
     #config = ("dic --oem 1 --psm 7")
 
     texta = pytesseract.image_to_string(img, config=config)
@@ -349,7 +349,7 @@ def image_to_box(img):
     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
     #config = ('board')
-    config = ("board -l dic --oem 1 --psm 7")
+    config = ("board -l dic --oem 1 --psm 3")
     #get characters with bounding boxes
     boxes = pytesseract.image_to_boxes(img, config=config)
     
@@ -404,20 +404,51 @@ def preprocessing(img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
     # multiple blurring and normalization to get better contours
-    for i in range (10):#chenged from 10 to 1 for evaluation test
-            
-        blur = cv2.medianBlur(gray, 3)
+    #for i in range (10):#chenged from 10 to 1 for evaluation test
+    #gray = cv2.GaussianBlur(gray, (9,9), 50)       
+    #gray = cv2.medianBlur(gray, 3)
+    gray = cv2.GaussianBlur(gray, (9,9), 50)
         #blur = cv2.GaussianBlur(img, (3,3), 1)
  
-        gray = normalizeImage(blur)
-            
+               
         # set everything lower than 50 to 0
-        #gray = np.where(gray < 60, 0, gray)
-            
-        if i % 10 == 0:
+        #gray = np.where(gray < 60, 0, gray)            
+        #if i % 10 == 0:
                 
-            gray = cv2.fastNlMeansDenoising(gray,7,7,7)
+    gray = cv2.fastNlMeansDenoising(gray,9,9,50)
+    gray = normalizeImage(gray)
+    
+    #gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, -5)
+    #gray = laplace(gray)
+    #gray = normalizeImage(gray)
+    #ret, gray = cv2.threshold(gray, 100, THRESHOLD_MAX, cv2.THRESH_BINARY)  
     #gray = (255-gray)
+    #show (gray)
+    #mean = np.mean(gray)
+    #gray = np.where(gray < (mean/2), mean, gray)
+    #gray = normalizeImage(gray)  
+    ######### failed atempt with contours etc
+    #gray = cannyThreshold(gray)
+    #show(gray)
+    #contours, hierarchy  = cv2.findContours(gray, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    #contours = [cv2.convexHull(contour) for contour in contours]
+    #contAreas = [cv2.contourArea(contour) for contour in contours]   
+    #gray = contMask(gray, convex)
+    #color = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+    #newImg = np.zeros(img.shape,np.uint8)
+    #newImg[:,:,:] = 2550
+    #newImg = cv2.drawContours(mask, contours, -1, (0, 0, 0), 2)
+    #for i, contour in enumerate(contours):
+        #if contAreas[i] < 10:
+            #continue
+    #    newImg = cv2.drawContours(newImg, contour, -1, (0, 0, 0), 2)
+    #newImg = cv2.drawContours(mask, convex, -1, (0, 0, 0), 2)
+    #gray = cv2.cvtColor(newImg, cv2.COLOR_BGR2GRAY)
+    #show(gray)
+    #gray = (255-gray)
+    
+    ######### erosion
+    #gray = erosion(gray)
     return(gray)
 
 def new_preprocessing(img):
@@ -494,6 +525,69 @@ def sharp_kernel(img):
     dst = normalizeImage(dst)
 
     return(dst)
+
+
+    #skeleton from opencv doc
+
+def skeleton(img):
+        # Step 1: Create an empty skeleton
+        size = np.size(img)
+        skel = np.zeros(img.shape, np.uint8)
+        
+        # Get a Cross Shaped Kernel
+        element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3))
+        
+        # Repeat steps 2-4
+        #while True:
+            #Step 2: Open the image
+        open = cv2.morphologyEx(img, cv2.MORPH_OPEN, element)
+            #Step 3: Substract open from the original image
+        temp = cv2.subtract(img, open)
+            #Step 4: Erode the original image and refine the skeleton
+        eroded = cv2.erode(img, element)
+        skel = cv2.bitwise_or(skel,temp)
+        img = eroded.copy()
+            # Step 5: If there are no white pixels left ie.. the image has been completely eroded, quit the loop
+            #if cv2.countNonZero(img)==0:
+             #   break
+        return(skel)
+    
+def erosion(img):
+    
+
+    kernel = np.ones((5,5),np.uint8)
+    erosion = cv2.erode(img,kernel,iterations = 1)
+    return(erosion)    
+
+def cannyThreshold(img):
+        max_lowThreshold = 100
+        ratio = 3
+        kernel_size = 3
+        low_threshold = 1
+        img_blur = cv2.blur(img, (5,5))
+        #detected_edges = cv2.Canny(img_blur, low_threshold, low_threshold*ratio, kernel_size)
+        detected_edges = cv2.Canny(img_blur, 10, 30, kernel_size)
+        mask = detected_edges != 0
+        dst = img * (mask[:,:].astype(img.dtype))
+        return (dst)
+def contMask(img,contours):
+        cropImgs = []
+        for contour in contours:
+            mask = np.zeros(img.shape,np.uint8)
+            cv2.drawContours(mask,[contour],0,(0),-1)
+            #show(mask)
+            cut = cv2.bitwise_and(mask, img)
+            #show(cut)
+            cropImgs.append(cut)
+        return(cropImgs)  
+def laplace(img):
+    
+    
+    ddepth = cv2.CV_16S
+    kernel_size = 3
+    
+    dst = cv2.Laplacian(img, ddepth, ksize=kernel_size)
+    return(cv2.convertScaleAbs(dst))
     
 if __name__ == "__main__":
     main() 
