@@ -37,21 +37,15 @@ def main():
             cropImages.append(sameImages)
             cropNames.append(fileNames[i])
             sameImages = []
-    for k in range(13):
-        ocrlist =[]
-        print("mode =" + str(k))
-        #if k == 0 or k == 1 or k ==3 or k == 2:
-         #   continue
-        global MODE
-        MODE = str(k)
-        for j, crops in enumerate(cropImages):
-            print (str(j) + "/" + str(len(cropImages)))
-            ocrlist.append(ocr(crops, cropNames[j]))
-        print("evaluation" + MODE)
-        evaluation = csvInput("evaluationlist.csv")
-        compared = comparison(ocrlist)
-        evaluated = evaluate(evaluation, compared)
-        csvOutput(evaluated)
+
+    for j, crops in enumerate(cropImages):
+        print (str(j) + "/" + str(len(cropImages)))
+        ocrlist.append(ocr(crops, cropNames[j]))
+        
+    evaluation = csvInput("evaluationlist.csv")
+    compared = comparison(ocrlist)
+    evaluated = evaluate(evaluation, compared)
+    csvOutput(evaluated)
 
 
 def ocr(cropimgs, fileName):
