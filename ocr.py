@@ -28,18 +28,26 @@ def main():
     fileNames.append("end")
     #images = [cv2.imread(files, cv2.IMREAD_GRAYSCALE) for files in filePaths]
     images = [cv2.imread(files) for files in filePaths]
-    for j in range(13):        
-        for i, img  in enumerate(images):
-            if fileNames[i] == fileNames[i+1]:
-                sameImages.append(img)
-            else:
-                sameImages.append(img)
-                cropImages.append(sameImages)
-                cropNames.append(fileNames[i])
-                sameImages = []
+           
+    for i, img  in enumerate(images):
+        if fileNames[i] == fileNames[i+1]:
+            sameImages.append(img)
+        else:
+            sameImages.append(img)
+            cropImages.append(sameImages)
+            cropNames.append(fileNames[i])
+            sameImages = []
+    for k in range(13):
+        ocrlist =[]
+        print("mode =" + str(k))
+        #if k == 0 or k == 1 or k ==3 or k == 2:
+         #   continue
+        global MODE
+        MODE = str(k)
         for j, crops in enumerate(cropImages):
+            print (str(j) + "/" + str(len(cropImages)))
             ocrlist.append(ocr(crops, cropNames[j]))
-
+        print("evaluation" + MODE)
         evaluation = csvInput("evaluationlist.csv")
         compared = comparison(ocrlist)
         evaluated = evaluate(evaluation, compared)
@@ -263,7 +271,7 @@ def image_to_text(img):
     
     #try to read
     #config = ('board')
-    config = ("board -l dic --oem 1 --psm 3")
+    config = ("board -l dic --oem 1 --psm 7")
     #config = ("dic --oem 1 --psm 7")
 
     texta = pytesseract.image_to_string(img, config=config)
@@ -349,7 +357,7 @@ def image_to_box(img):
     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
     #config = ('board')
-    config = ("board -l dic --oem 1 --psm 3")
+    config = ("board -l dic --oem 1 --psm 7")
     #get characters with bounding boxes
     boxes = pytesseract.image_to_boxes(img, config=config)
     
