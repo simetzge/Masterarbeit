@@ -56,11 +56,12 @@ def ocr(cropimgs, fileName):
         bimgs = []
         t = []
         b = []
-        for k in range(3):
+        for k in range(4):
             onechannel = crop.copy()
             if not k == 0 :onechannel[:,:,0] = 0
             if not k == 1 :onechannel[:,:,1] = 0
             if not k == 2 :onechannel[:,:,2] = 0
+            if k == 3: onechannel = crop.copy()
             textimg, text = get_text(onechannel)
             boximg, boxtext = get_text(onechannel, mode = 'image_to_box')
             t.append(text)
@@ -145,7 +146,7 @@ def get_text(img, mode = 'image_to_text'):
                 #rows[1] = 0
     
     cv2.putText(textimg, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 230, 0), 3)
-    
+    image_to_data(preimg)
     if mode == 'image_to_box':
         return(boximg, boxtext)
     else:
@@ -348,8 +349,8 @@ def image_to_box(img):
     rotate = False
     
     #convert to colored img for output
-    img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-
+    #img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    img = preprocessing(img)
     #config = ('board')
     config = ("board -l dic --oem 1 --psm 7")
     #get characters with bounding boxes
