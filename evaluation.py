@@ -22,11 +22,14 @@ def evaluate(evaluationdict, ocrlist):
                 ground = entry["Content"].replace(" ","")
                 dicts["bestratio"] = None
                 #get ratio for comparison, add to dict
-                for i in range(len(dicts)-3):                    
+                for i in range(len(dicts)-3):
                     key = "rectangle " + str(i)
                     box = dicts[key]["boximage"].replace(" ", "")
                     txt = dicts[key]["textimage"].replace(" ", "")
                     best = dicts["bestguess"].replace(" ", "")
+                    
+                    getMeasures(ground, txt)                   
+
                     sbox = difflib.SequenceMatcher(None, ground,box)
                     stxt = difflib.SequenceMatcher(None, ground,txt)
                     rbox = round(sbox.ratio(),2)
@@ -173,4 +176,53 @@ def getAverage(dictlist):
     overallaverage = round(np.mean(txtratio + boxratio),2)
     bestaverage = round(np.mean(bestguessratio),2)
     return(overallaverage, txtaverage, boxaverage,bestaverage)
+
+##################################################################################################################################################### 
+#
+# input: 2 strings (ground truth and detected text)
+# ouput: true positives (tp), false positives (fp), false negatives (fn)
+# purpose: get tp, fp, fn to calculate precision, recall and f-score
+#
+#####################################################################################################################################################
             
+def getMeasures(ground, text):
+    grounddict ={}
+    textdict ={}    
+    tp = 0
+    fp = 0
+    fn = 0
+    #count letters in ground, save in dict
+    for letter in ground:
+        if letter in grounddict: 
+            grounddict[letter] = grounddict[letter]+1
+        else:
+            grounddict[letter] = 1
+            textdict[letter] = 0
+            
+    #count letters in text, save in dict         
+    for letter in text:
+        if letter in textdict: 
+            textdict[letter] = textdict[letter]+1
+        else:
+            textdict[letter] = 1
+        if letter not in grounddict:
+            grounddict[letter] = 0
+    #print("ground\n")
+    #print(grounddict)
+    #print("text\n")
+    #print(textdict)
+    if len(grounddict) > 0 and len(textdict) > 0:
+        for key in grounddict:
+            g = grounddict[key]
+            t = textdict[key]
+            if g <= t:
+                tp = tp + g
+            if t > g:
+                fp = fp + (t - g)
+            if g > t:
+                tp = tp + t
+                fn = fn + (g -t)
+    #print("tp: " + str(tp))
+    #print("fp: " + str(fp))
+    #print("fn: " + str(fn))            
+    return(tp,fp,fn)
