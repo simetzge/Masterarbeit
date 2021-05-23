@@ -30,11 +30,13 @@ SIMPLE_CROP = True
 #use cut based on contours instead of rects
 CONT_BASED_CUT = False
 #use OCR
-OCR = False
+OCR = True
 #use CNN: yolo, coco, both
 USE_CNN = ""
 #evaluate OCR
 EVALUATE = True
+#simple OCR output
+OCR_OUTPUT = True
 #only use picture with this name(s)
 CHECK_PICTURE = ""
 #1110 crasht

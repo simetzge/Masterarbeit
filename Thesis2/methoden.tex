@@ -201,8 +201,12 @@ Das Preprocessing für die Texterkennung folgte gängigen Verfahren\footnote{War
 
 \subsubsection{OCR}
 
-Pro gefundener Tafel waren jetzt vier Bilder vorhanden, die der Texterkennung unterzogen werden konnten. 
+Pro gefundener Tafel waren jetzt vier Bilder vorhanden, die der Texterkennung unterzogen werden konnten. Für jedes dieser Bilder wurde diese doppelt ausgeführt: Einmal mit \verb|image_to_string| und einmal mit \verb|image_to_boxes|. Ersteres liest den Text Zeilenweise ein, letzteres jeden Buchstaben einzeln. \verb|Image_to_string| wurde zusätzlich auf das um 180\degree rotierte Bild angewendet, um die Orientierung zu ermitteln: Die Ergebnisse der Texterkennung beider Orientierung wurden, nach der Bereinigung von Leerzeichen und Zeilenumbrüchen, anhand der Länge miteinander verglichen. Die Version, bei der mehr Text gefunden wurde, wurde als korrekt orientiert angenommen. Eine solche Funktion ist zwar in Tesseract bereits grundsätzlich implementiert, da die Texterkennung hier aber ohnehin unter erschwerten Bedingungen und ohne erkennbare Wörter stattfand, wurde auf diesen Ansatz zurückgegriffen\footnote{U.a. liefert die Funktion image\_to\_osd von Pytesseract die Orientierung des gefundenen Textes. Für die Anwendung derselben befindet sich auf den Tafeln zu wenig Text.}.
+Die Ergebnisse der beiden Pytesseract-Funktionen aus den je vier Bildern wurden im Anschluss untereinander verglichen. Der längste gefundene Text wurde als Ergebnis übernommen.
+Beide Befehle wurden mit folgender Konfiguration ausgeführt: (1) Es wurde eine Whitelist verwendet, die auf das Schema der Tafeln zugeschnitten wurde. Gelistet wurden die Ziffern \textit{0-9}, die Buchstaben \textit{G,O,T,U} und \textit{S} sowie das Sonderzeichen \textit{/}. (2) Als Sprache wurde ein eigenes Wörterbuch angegeben, das entsprechend der Tafeln nur wenige Worte enthält (\textit{US, GOT}. (3) Der \textit{OCR Engine Mode} (oem) wurde auf ein Neurales Netzwerk mit \textit{Long Short-term Memory}\cite{hochreitersepp} festgelegt. (4) Für die \texit{Page Segmentation} (psm) wurde ein vollautomatischer Modus, ohne weitere Vorgaben, gewählt.
+
 %\subsection{Experimentelles}
 
 %\subsection{Zusammenfassung}
 %evtl zusammenfassen wie vorgegangen wurde, warum dieser Weg gut ist und was das Wichtigste Ergebnis ist
+\subsection{Evaluation}

@@ -28,8 +28,11 @@ def evaluate(evaluationdict, ocrlist):
                     txt = dicts[key]["textimage"].replace(" ", "")
                     best = dicts["bestguess"].replace(" ", "")
                     
-                    getMeasures(ground, txt)                   
-
+                    #tpt, fpt, fnt = getMeasures(ground, txt)                   
+                    #precisiont, recallt, fscoret = getScores(tpt, fpt, fnt)
+                    #tpb, fpb, fnb = getMeasures(ground, txt)                   
+                    #precisionb, recallb, fscoreb = getScores(tpb, fpb, fnb)
+                                        
                     sbox = difflib.SequenceMatcher(None, ground,box)
                     stxt = difflib.SequenceMatcher(None, ground,txt)
                     rbox = round(sbox.ratio(),2)
@@ -116,6 +119,7 @@ def csvOutput(outputlist, folder = "evaluation", name = "output"):
         file.write("image,rectangle,textimage,boximage,comparison,textratio,boxratio,bestguess,bestratio\n")
         #iterate through dictionaries in list and through subdictionaries
         for dicts in outputlist:
+            printed = False
             for i in range(len(dicts)-3):
                 #write values in csv format
                 file.write(dicts["image"] + ",")
@@ -126,9 +130,10 @@ def csvOutput(outputlist, folder = "evaluation", name = "output"):
                 #file.write(dicts[key]["textimage"] + ",")
                 #file.write(dicts[key]["boximage"] + ",")
                 #file.write(dicts[key]["comparison"])
-                if dicts["bestguess"] == dicts[rect]["boximage"] or dicts["bestguess"] == dicts[rect]["textimage"]:
+                if (dicts["bestguess"] == dicts[rect]["boximage"] or dicts["bestguess"] == dicts[rect]["textimage"]) and printed == False:
                     file.write(dicts["bestguess"] + ",")
                     file.write(str(dicts["bestratio"]))
+                    printed = True
                 file.write("\n")
         avg, txtavg, boxavg,bestavg = getAverage(outputlist)
         writeFooter(file, avg, txtavg, boxavg,bestavg)
@@ -226,3 +231,10 @@ def getMeasures(ground, text):
     #print("fp: " + str(fp))
     #print("fn: " + str(fn))            
     return(tp,fp,fn)
+
+def getScores(tp,fp,fn):
+    precision = round(tp / (tp + fp),3)
+    recall = round(tp / (tp + fn),3)
+    fscore = round(tp / (tp + 0.5 * (fp + fn)),3)
+    print ("precision: " + str(precision) + " recall: " + str(recall) + " fscore: " + str(fscore))        
+    return (precision, recall, fscore)

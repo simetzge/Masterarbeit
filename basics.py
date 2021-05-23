@@ -144,6 +144,49 @@ def csvInput(inputFile, folder = "evaluation"):
             return(csvdict)
     else:
         print(folder + ' nicht gefunden')
+
+def ocrOutput(ocrList, folder = "OCR", name = "output"):
+    
+    #check wich patch should be used    
+    if USE_ABSOLUTE_PATH == True:
+        path = ABSOLUTE_PATH
+    else:
+        path = os.getcwd()
+    #list all files in path
+    dirs = os.listdir(path)
+    #if folder doesn't exist create it
+    if folder in dirs:
+        print(folder + '-Ordner vorhanden')
+    else:
+        os.makedirs(path + '\\' + folder)
+    
+    #get time and date for output name
+    if name =="output":
+        now = datetime.now()
+        name = now.strftime("%Y_%m_%d_%H_%M")
+    
+    #open output file
+    with open(path + '\\' + folder + '\\' + name + '.csv', 'w') as file:
+        #write column names
+        file.write("image,textimage,boximage,bestguess\n")
+        #iterate through dictionaries in list and through subdictionaries
+        for dicts in ocrList:
+            printed = False
+            for i in range(len(dicts)-2):
+                #write values in csv format
+                file.write(dicts["image"] + ",")
+                rect = "rectangle " + str(i)
+                file.write(str(dicts[rect]["textimage"]) + ",")
+                file.write(str(dicts[rect]["boximage"]) + ",")
+                #file.write(dicts[key]["rectangle"] + ",")
+                #file.write(dicts[key]["textimage"] + ",")
+                #file.write(dicts[key]["boximage"] + ",")
+                #file.write(dicts[key]["comparison"])
+                if (dicts["bestguess"] == dicts[rect]["boximage"] or dicts["bestguess"] == dicts[rect]["textimage"]) and printed == False:
+                    file.write(dicts["bestguess"])
+                    printed = True
+                file.write("\n")
+
         
 def show(img, name = "show"):
     cv2.namedWindow(name, cv2.WINDOW_NORMAL) 

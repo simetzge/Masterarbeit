@@ -12,7 +12,7 @@ from basics import *
 ########################
 #for debug only
 from evaluation import *
-
+from flags import *
 
 def main():
     #main function for direct testing and comparison of OCR methods, for debug only
@@ -30,6 +30,9 @@ def main():
     images = [cv2.imread(files) for files in filePaths]
            
     for i, img  in enumerate(images):
+        if CHECK_PICTURE != "":
+            if not CHECK_PICTURE in fileNames[i]:
+                continue   
         if fileNames[i] == fileNames[i+1]:
             sameImages.append(img)
         else:
@@ -41,7 +44,9 @@ def main():
     for j, crops in enumerate(cropImages):
         print (str(j) + "/" + str(len(cropImages)))
         ocrlist.append(ocr(crops, cropNames[j]))
-        
+    
+    ocrOutput(ocrlist)
+    
     evaluation = csvInput("evaluationlist.csv")
     compared = comparison(ocrlist)
     evaluated = evaluate(evaluation, compared)
@@ -52,6 +57,7 @@ def ocr(cropimgs, fileName):
     imagedict = {"image": fileName}
     bestguess = ""
     for j, crop in enumerate(cropimgs):
+        data = []
         timgs = []
         bimgs = []
         t = []
@@ -63,26 +69,28 @@ def ocr(cropimgs, fileName):
             if not k == 2 :onechannel[:,:,2] = 0
             textimg, text = get_text(onechannel)
             boximg, boxtext = get_text(onechannel, mode = 'image_to_box')
-            #data = get_text(onechannel, mode = "image_to_data")
+            #data.append(get_text(onechannel, mode = "image_to_data"))
             t.append(text)
             b.append(boxtext)
             timgs.append(textimg)
             bimgs.append(boximg)
-
+        
+        #data.append(get_text(onechannel, mode = "image_to_data"))
         textimg, text = get_text(crop)
         boximg, boxtext = get_text(crop, mode = 'image_to_box')
         t.append(text)
         b.append(boxtext)
         timgs.append(textimg)
         bimgs.append(boximg)
-                        
+        
+        #find longest text                
         for n, txt in enumerate(t):
             tx = txt.replace(" ", "")
             tex = text.replace(" ", "")
             if len (tx) > len(tex):
                 text = txt
                 textimg = timgs[n]
-                
+        #find longest boxtext        
         for n, box in enumerate(b):
             bx = box.replace(" ", "")
             boxtex = boxtext.replace(" ", "")
@@ -133,7 +141,7 @@ def get_text(img, mode = 'image_to_text'):
     
     text, rotate = image_to_text(preimg)
     if rotate == True:
-
+        
         preimg = cv2.rotate(preimg, cv2.cv2.ROTATE_180)
     
     if mode == 'image_to_box':
@@ -274,7 +282,7 @@ def image_to_text(img):
     
     #try to read
     #config = ('board')
-    config = ("board -l dic --oem 1 --psm 7")
+    config = ("board -l dic --oem 1 --psm 3")
     #config = ("dic --oem 1 --psm 7")
 
     texta = pytesseract.image_to_string(img, config=config)
@@ -284,7 +292,9 @@ def image_to_text(img):
     
     #take the version with more chars detected and send them to textsplit for proper text output, set rotate to True if necessary
     comparea = texta.replace(" ", "")
+    comparea = comparea.replace("\n", "")
     compareb = textb.replace(" ", "")
+    compareb = compareb.replace("\n", "")
     if len(comparea) >= len(compareb):
         text = textsplit(texta)
     else:
@@ -360,7 +370,7 @@ def image_to_box(img):
     #img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
     img = preprocessing(img)
     #config = ('board')
-    config = ("board -l dic --oem 1 --psm 7")
+    config = ("board -l dic --oem 1 --psm 3")
     #get characters with bounding boxes
     boxes = pytesseract.image_to_boxes(img, config=config)
     
@@ -599,6 +609,7 @@ def laplace(img):
     
     dst = cv2.Laplacian(img, ddepth, ksize=kernel_size)
     return(cv2.convertScaleAbs(dst))
+
     
 if __name__ == "__main__":
     main() 
