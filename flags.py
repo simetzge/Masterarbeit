@@ -13,6 +13,8 @@ Created on Thu Mar  4 16:08:34 2021
 
 #size for downscaling
 IMG_TARGET_SIZE = 1000
+#min size of rectangle
+MIN_RECT_AREA = 5000
 #thresholds for modifiy threshold
 THRESHOLD_MIN = 20
 THRESHOLD_MAX = 255
@@ -35,8 +37,10 @@ OCR = True
 USE_CNN = ""
 #evaluate OCR
 EVALUATE = True
-#simple OCR output
-OCR_OUTPUT = True
+#add recall, precision to evaluation
+ALL_MEASURES = False
+#add optmimum value to evaluation
+OPTIMUM = True
 #only use picture with this name(s)
 CHECK_PICTURE = ""
 #1110 crasht

@@ -22,17 +22,17 @@ def evaluate(evaluationdict, ocrlist):
                 ground = entry["Content"].replace(" ","")
                 dicts["bestratio"] = None
                 #get ratio for comparison, add to dict
-                for i in range(len(dicts)-3):
+                #number of subdictionaries, depending on how many other values are stored in a dict
+                subdicts = len(dicts)-3
+                for i in range(subdicts):
                     key = "rectangle " + str(i)
                     box = dicts[key]["boximage"].replace(" ", "")
+                    box = box.replace(",","")
                     txt = dicts[key]["textimage"].replace(" ", "")
+                    txt = txt.replace(",","")
                     best = dicts["bestguess"].replace(" ", "")
+                    best = best.replace(",","")
                     
-                    #tpt, fpt, fnt = getMeasures(ground, txt)                   
-                    #precisiont, recallt, fscoret = getScores(tpt, fpt, fnt)
-                    #tpb, fpb, fnb = getMeasures(ground, txt)                   
-                    #precisionb, recallb, fscoreb = getScores(tpb, fpb, fnb)
-                                        
                     sbox = difflib.SequenceMatcher(None, ground,box)
                     stxt = difflib.SequenceMatcher(None, ground,txt)
                     rbox = round(sbox.ratio(),2)
@@ -43,7 +43,19 @@ def evaluate(evaluationdict, ocrlist):
                         dicts["bestratio"] = rtxt
                     dicts[key]["textratio"] = rtxt
                     dicts[key]["boxratio"] = rbox
-                
+                    
+                    if ALL_MEASURES:
+                        tpt, fpt, fnt = getMeasures(ground, txt)                   
+                        precisiont, recallt, fscoret = getScores(tpt, fpt, fnt)
+                        tpb, fpb, fnb = getMeasures(ground, box)                   
+                        precisionb, recallb, fscoreb = getScores(tpb, fpb, fnb)
+                    
+                        dicts[key]["precisiont"] = precisiont
+                        dicts[key]["recallt"] = recallt
+                        dicts[key]["fscoret"] = fscoret
+                        dicts[key]["precisionb"] = precisionb
+                        dicts[key]["recallb"] = recallb
+                        dicts[key]["fscoreb"] = fscoreb
     return (ocrlist)
             
         
@@ -116,24 +128,50 @@ def csvOutput(outputlist, folder = "evaluation", name = "output"):
     with open(path + '\\' + folder + '\\' + name + '.csv', 'w') as file:
         #write column names
         writeHeader(file)
-        file.write("image,rectangle,textimage,boximage,comparison,textratio,boxratio,bestguess,bestratio\n")
+        file.write("image,rectangle,textimage,boximage,comparison,textratio,boxratio,bestguess,bestratio")
+        if ALL_MEASURES:
+            file.write(",precision_text, recall_text, f-score_text, precision_box, recall_box, f-score_box")
+        if OPTIMUM:
+            file.write(",optimum")
+        file.write("\n")
         #iterate through dictionaries in list and through subdictionaries
         for dicts in outputlist:
             printed = False
-            for i in range(len(dicts)-3):
+            #number of subdictionaries, depending on how many other values are stored in a dict
+            
+            subdicts = len(dicts)-3
+            for i in range(subdicts):
                 #write values in csv format
                 file.write(dicts["image"] + ",")
                 rect = "rectangle " + str(i)
-                for key in dicts[rect]:
-                    file.write(str(dicts[rect][key]) + ",")
-                #file.write(dicts[key]["rectangle"] + ",")
-                #file.write(dicts[key]["textimage"] + ",")
-                #file.write(dicts[key]["boximage"] + ",")
-                #file.write(dicts[key]["comparison"])
+                #for key in dicts[rect]:
+                    #file.write(str(dicts[rect][key]) + ",")
+                file.write(dicts[rect]["rectangle"] + ",")
+                file.write(dicts[rect]["textimage"] + ",")
+                file.write(dicts[rect]["boximage"] + ",")
+                file.write(dicts[rect]["comparison"] + ",")
+                file.write(str(dicts[rect]["textratio"]) + ",")
+                file.write(str(dicts[rect]["boxratio"]) + ",")
                 if (dicts["bestguess"] == dicts[rect]["boximage"] or dicts["bestguess"] == dicts[rect]["textimage"]) and printed == False:
                     file.write(dicts["bestguess"] + ",")
-                    file.write(str(dicts["bestratio"]))
+                    file.write(str(dicts["bestratio"]) + ",")
                     printed = True
+                else:
+                    file.write(",,")
+                if ALL_MEASURES:
+                    file.write(str(dicts[rect]["precisiont"]) + ",")
+                    file.write(str(dicts[rect]["recallt"]) + ",")
+                    file.write(str(dicts[rect]["fscoret"]) + ",")
+                    file.write(str(dicts[rect]["precisionb"]) + ",")
+                    file.write(str(dicts[rect]["recallb"]) + ",")
+                    file.write(str(dicts[rect]["fscoreb"]) + ",")
+                if OPTIMUM:
+                    if i == 0:
+                        optimum = max(dicts[rect]["textratio"],dicts[rect]["boxratio"])
+                    else:
+                        optimum = max(dicts[rect]["textratio"],dicts[rect]["boxratio"], optimum)
+                    if i == subdicts-1:
+                        file.write(str(optimum) + ",")
                 file.write("\n")
         avg, txtavg, boxavg,bestavg = getAverage(outputlist)
         writeFooter(file, avg, txtavg, boxavg,bestavg)
@@ -233,8 +271,11 @@ def getMeasures(ground, text):
     return(tp,fp,fn)
 
 def getScores(tp,fp,fn):
-    precision = round(tp / (tp + fp),3)
-    recall = round(tp / (tp + fn),3)
-    fscore = round(tp / (tp + 0.5 * (fp + fn)),3)
-    print ("precision: " + str(precision) + " recall: " + str(recall) + " fscore: " + str(fscore))        
-    return (precision, recall, fscore)
+    if tp + fp != 0 and tp + fn != 0:
+        precision = round(tp / (tp + fp),2)
+        recall = round(tp / (tp + fn),2)
+        fscore = round(tp / (tp + 0.5 * (fp + fn)),2)
+        #print ("precision: " + str(precision) + " recall: " + str(recall) + " fscore: " + str(fscore))        
+        return (precision, recall, fscore)
+    else:
+        return (0,0,0)

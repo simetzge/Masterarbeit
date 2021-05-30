@@ -168,7 +168,7 @@ Durch unterschiedlichen Perspektiven, aus denen die Fotos aufgenommen wurden, is
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width =0.5\textwidth]{catacom_1073_0.png}
+\includegraphics[width =0.5\textwidth]{catacom_1073_simple.png}
 \caption{Diskrepanz zwischen den Eckpunkten der gefundenen Rechtecke und den Eckpunkten der Tafel.}
 \label{fig:parallelogramm}
 \end{figure}
@@ -183,12 +183,46 @@ Zunächst musste dazu ein passender Bildausschnitt gewählt werden. Auf den Tafe
 \label{fig:tafelrechteck}
 \end{figure}
 
-Diese Bildausschnitte wurden mit mehreren Filtern bearbeitet, um das meist stark vorhandene Rauschen zu reduzieren. Es folgte die Umwandlung in ein Graustufenbild, das normalisiert wurde. Beim Prozess der Normalisierung werden Farbskalen, in diesem Fall also die Graustufen, auf ihre maximalen Werte gestreckt. Der niedrigste wird also auf 0, der höchste auf 255 gesetzt und alle Werte dazwischen entsprechend angepasst. Auf die normalisierten Bilder wurde die \textit{Canny Edge Detection} (Kantenerkennung) angewendet \cite{cannyedge}. Dieser Algorithmus berechnet die Gradienten der einzelnen Pixel, wodurch Kantenverläufe im Bild erkennbar werden. Auf diese wird eine \textit{non-maximum supression} angewendet, d.h., die Gradienten der Pixel werden mit ihren Nachbarn verglichen und jeweils nur das Maximum weiterverwendet. Die Kantenstärke wird somit auf die Breite von einem Pixel reduziert. Aus den so erhaltenen Gradienten werden mittels zweier Schwellwerte durch Hysterese die gewünschten Kanten bestimmt: Enthält ein Pixel einer Kante den zweiten, höheren Schwellwert, gilt sie als eine der gesuchten Kanten. Von dort ausgehend werden alle Pixel der Kante, die den niedrigeren Schwellwert übertreffen, ebenfalls als Teil dieser Kante.
-Dieses Gradientenbild wiederum wurde mittels Hough\footnote{Gesprochen: [h\textturnv{}f]}-Transformation \cite{houghpatent} einer Linienerkennung unterzogen. Die vorher detektierten Kanten, die einen beliebigen Verlauf nehmen können, wurden also jetzt darauf geprüft, ob sie eine gerade Linie bilden. Das erfolgt, indem mit der hesseschen Normalform jede mögliche Gerade durch jeden Kantenpunkt berechnet wird. Jeder Kantenpixel, durch den die Geraden verlaufen, erhält einen \textit{upvote}, es wird also ein Zähler inkrementiert. Durch die Bereiche mit den meisten \textit{Upvotes} laufen die gesuchten Linien auf dem Bild. Ist eine Linie gefunden, ist sie wahrscheinlich Teil des Rahmens der Tafel und somit für die Erkennung der Eckpunkte relevant.
-Im nächsten Schritt wurden die Geraden mit dem Bildrahmen geschnitten. Die Schnittpunkte wurden als neue Endpunkte des Liniensegments für die weiteren Berechnungen genutzt. Die Endpunkte wurden, entsprechend ihrer Position im Bild, den vier Ecken zugeteilt. Anschließend wurden die Schnittpunkte der Linien untereinander berechnet, aber nur, wenn sie 1) nicht in die gleiche Richtung und 2) nicht diagonal durchs Bild verliefen. Beide Kriterien konnte durch die Einordnung der Eckpunkte bestimmt werden. Damit war sichergestellt, dass nur Linien miteinander geschnitten wurden, die annähernd senkrecht zueinander verlaufen, wie es bei den Tafelrändern der Fall ist.
-Die Gruppe der Schnittpunkte wurde wiederum in die vier Ecken aufgeteilt. In jeder Ecke wurde jetzt der Punkt bestimmt, der am weitesten Richtung Bildmitte liegt. Dieser wurde als der wahrscheinlichste Eckpunkt angenommen.
-Das weitere Verfahren entsprach dem des \verb|simple crop|-Ansatzes: Mit den Eckpunkte wurde eine Transformationsmatrix berechnet, durch die der Bildausschnitt innerhalb der vier Eckpunkte auf eine Rechtecksform übertragen werden konnte.
+Diese Bildausschnitte wurden mit mehreren Filtern bearbeitet, um das meist stark vorhandene Rauschen zu reduzieren. Es folgte die Umwandlung in ein Graustufenbild, das normalisiert wurde. Beim Prozess der Normalisierung werden Farbskalen, in diesem Fall also die Graustufen, auf ihre maximalen Werte gestreckt. Der niedrigste wird also auf 0, der höchste auf 255 gesetzt und alle Werte dazwischen entsprechend angepasst (\ref{fig:norm}.
 
+\begin{figure}[h!]
+\centering
+\includegraphics[width =0.5\textwidth]{1073_norm.png}
+\caption{Graustufenbild, gefiltert und normalisiert.}
+\label{fig:norm}
+\end{figure}
+
+Auf die normalisierten Bilder wurde die \textit{Canny Edge Detection} (Kantenerkennung) angewendet \cite{cannyedge}. Dieser Algorithmus berechnet die Gradienten der einzelnen Pixel, wodurch Kantenverläufe im Bild erkennbar werden. Auf diese wird eine \textit{non-maximum supression} angewendet, d.h., die Gradienten der Pixel werden mit ihren Nachbarn verglichen und jeweils nur das Maximum weiterverwendet. Die Kantenstärke wird somit auf die Breite von einem Pixel reduziert. Aus den so erhaltenen Gradienten werden mittels zweier Schwellwerte durch Hysterese die gewünschten Kanten bestimmt: Enthält ein Pixel einer Kante den zweiten, höheren Schwellwert, gilt sie als eine der gesuchten Kanten. Von dort ausgehend werden alle Pixel der Kante, die den niedrigeren Schwellwert übertreffen, ebenfalls als Teil dieser Kante (\ref{fig:canny}.
+\begin{figure}[h!]
+\centering
+\includegraphics[width =0.5\textwidth]{1073_canny.png}
+\caption{Kantendetektion mit dem Canny-Algorithmus.}
+\label{fig:canny}
+\end{figure}
+
+Dieses Gradientenbild wiederum wurde mittels Hough\footnote{Gesprochen: [h\textturnv{}f]}-Transformation \cite{houghpatent} einer Linienerkennung unterzogen. Die vorher detektierten Kanten, die einen beliebigen Verlauf nehmen können, wurden also jetzt darauf geprüft, ob sie eine gerade Linie bilden. Das erfolgt, indem mit der hesseschen Normalform jede mögliche Gerade durch jeden Kantenpunkt berechnet wird. Jeder Kantenpixel, durch den die Geraden verlaufen, erhält einen \textit{upvote}, es wird also ein Zähler inkrementiert. Durch die Bereiche mit den meisten \textit{Upvotes} laufen die gesuchten Linien auf dem Bild. Ist eine Linie gefunden, ist sie wahrscheinlich Teil des Rahmens der Tafel und somit für die Erkennung der Eckpunkte relevant (\ref{fig:lines}.
+\begin{figure}[h!]
+\centering
+\includegraphics[width =0.5\textwidth]{1073_lines.png}
+\caption{Linienerkennung mit dem Hough-Algorithmus.}
+\label{fig:lines}
+\end{figure}
+
+Im nächsten Schritt wurden die Geraden mit dem Bildrahmen geschnitten. Die Schnittpunkte wurden als neue Endpunkte des Liniensegments für die weiteren Berechnungen genutzt, um etwaige Schnittpunkte außerhalb des Bildes ausschließen zu können. Die Endpunkte wurden, entsprechend ihrer Position im Bild, den vier Ecken zugeteilt. Anschließend wurden die Schnittpunkte der Linien untereinander berechnet, aber nur, wenn sie 1) nicht in die gleiche Richtung und 2) nicht diagonal durchs Bild verliefen. Beide Kriterien konnte durch die Einordnung der Eckpunkte bestimmt werden. Damit war sichergestellt, dass nur Linien miteinander geschnitten wurden, die annähernd senkrecht zueinander verlaufen, wie es bei den Tafelrändern der Fall ist. Schnittpunkte am Rand wurden ausgeschlossen, um die Detektion des Bildrandes oder Störobjekte zu auszuschließen.
+Die Gruppe der Schnittpunkte wurde wiederum in die vier Ecken aufgeteilt. In jeder Ecke wurde jetzt der Punkt bestimmt, der am weitesten Richtung Bildmitte liegt. Dieser wurde als der wahrscheinlichste Eckpunkt angenommen (\ref{fig:intersection}.
+\begin{figure}[h!]
+\centering
+\includegraphics[width =0.5\textwidth]{1073_intersection.png}
+\caption{Die Schnittpunkte der Linien nach der Berechnung. Die roten Punkte liegen zu nahe am Rand und wurden daher ausgeschlossen.}
+\label{fig:intersection}
+\end{figure}
+Das weitere Verfahren entsprach dem des \verb|simple crop|-Ansatzes: Mit den Eckpunkte wurde eine Transformationsmatrix berechnet, durch die der Bildausschnitt innerhalb der vier Eckpunkte auf eine Rechtecksform übertragen werden konnte (\ref{fig:houghcrop}.
+\begin{figure}[h!]
+\centering
+\includegraphics[width =0.5\textwidth]{catacom_1073_hough.png}
+\caption{Die Tafel, in ein Rechteck transformiert.}
+\label{fig:houghcrop}
+\end{figure}
 
 \subsection{Texterkennung}
 
@@ -197,16 +231,19 @@ Folgende Probleme müssen bei der Texterkennung adressiert werden: (1) Komplexit
 
 \subsubsection{Preprocessing}
 
-Das Preprocessing für die Texterkennung folgte gängigen Verfahren\footnote{Warum übliche Schritte im Preprocessing, wie das Thresholding, hier unterblieben, wird im weiteren Verlauf dieser Arbeit ausführlich diskutiert werden.} \cite{jenilshah}, \cite{sumedhahallale}. Zunächst mussten die Bilder in Graustufen umgewandelt werden. Nacheinander wurden zwei Filter angewendet, \verb|cv2.GaussianBlur| und \verb|cv2.fastNlMeansDenoising|. Damit sollten die Störeffekte durch verwischte Kreide auf der Tafel ausgeglichen werden. Das Bild wurde invertiert, sodass die eigentliche weiße Kreide schwarz dargestellt und der Hintergrund hell wurde, was den Empfehlungen für Tesseract entspricht \cite{tesseractoptimum}. Der letzte Schritt bestand in der Normalisierung der Bilder. Alle diese Schritte wurden auf das Grundbild sowie die daraus extrahierten 3 Farbkanäle angewendet.
+Das Preprocessing für die Texterkennung folgte gängigen Verfahren\footnote{Warum übliche Schritte im Preprocessing, wie das Thresholding, hier unterblieben, wird im weiteren Verlauf dieser Arbeit ausführlich diskutiert werden.} \cite{jenilshah}, \cite{sumedhahallale}. Zunächst mussten die Bilder in Graustufen umgewandelt werden. Nacheinander wurden zwei Filter angewendet, \verb|cv2.GaussianBlur| und \verb|cv2.fastNlMeansDenoising|. Damit sollten die Störeffekte durch verwischte Kreide auf der Tafel ausgeglichen werden. Das Bild wurde invertiert, sodass die eigentliche weiße Kreide schwarz dargestellt und der Hintergrund hell wurde, was den Empfehlungen für Tesseract entspricht \cite{tesseractoptimum}. Der letzte Schritt bestand in der Normalisierung der Bilder. Alle diese Schritte wurden auf das Grundbild sowie die daraus extrahierten 3 Farbkanäle angewendet \cite{xilinchen}.
 
 \subsubsection{OCR}
 
-Pro gefundener Tafel waren jetzt vier Bilder vorhanden, die der Texterkennung unterzogen werden konnten. Für jedes dieser Bilder wurde diese doppelt ausgeführt: Einmal mit \verb|image_to_string| und einmal mit \verb|image_to_boxes|. Ersteres liest den Text Zeilenweise ein, letzteres jeden Buchstaben einzeln. \verb|Image_to_string| wurde zusätzlich auf das um 180\degree rotierte Bild angewendet, um die Orientierung zu ermitteln: Die Ergebnisse der Texterkennung beider Orientierung wurden, nach der Bereinigung von Leerzeichen und Zeilenumbrüchen, anhand der Länge miteinander verglichen. Die Version, bei der mehr Text gefunden wurde, wurde als korrekt orientiert angenommen. Eine solche Funktion ist zwar in Tesseract bereits grundsätzlich implementiert, da die Texterkennung hier aber ohnehin unter erschwerten Bedingungen und ohne erkennbare Wörter stattfand, wurde auf diesen Ansatz zurückgegriffen\footnote{U.a. liefert die Funktion image\_to\_osd von Pytesseract die Orientierung des gefundenen Textes. Für die Anwendung derselben befindet sich auf den Tafeln zu wenig Text.}.
+Pro gefundener Tafel waren jetzt vier Bilder vorhanden, die der Texterkennung unterzogen werden konnten. Für jedes dieser Bilder wurde diese zweifach ausgeführt: Einmal mit \verb|image_to_string| und einmal mit \verb|image_to_boxes|. Ersteres liest den Text Zeilenweise ein, letzteres jeden Buchstaben einzeln, wodurch die Ergebnisse variieren. \verb|Image_to_string| wurde zusätzlich auf das um 180\degree rotierte Bild angewendet, um die Orientierung zu ermitteln: Die Ergebnisse der Texterkennung beider Orientierung wurden, nach der Bereinigung von Leerzeichen und Zeilenumbrüchen, anhand der Länge miteinander verglichen. Die Version, bei der mehr Text gefunden wurde, wurde als korrekt orientiert angenommen. Eine solche Funktion ist zwar in Tesseract bereits grundsätzlich implementiert, da die Texterkennung hier aber ohnehin unter erschwerten Bedingungen und ohne erkennbare Wörter stattfand, wurde auf diesen Ansatz zurückgegriffen\footnote{U.a. liefert die Funktion image\_to\_osd von Pytesseract die Orientierung des gefundenen Textes. Für die Anwendung derselben befindet sich auf den Tafeln zu wenig Text.}.
 Die Ergebnisse der beiden Pytesseract-Funktionen aus den je vier Bildern wurden im Anschluss untereinander verglichen. Der längste gefundene Text wurde als Ergebnis übernommen.
-Beide Befehle wurden mit folgender Konfiguration ausgeführt: (1) Es wurde eine Whitelist verwendet, die auf das Schema der Tafeln zugeschnitten wurde. Gelistet wurden die Ziffern \textit{0-9}, die Buchstaben \textit{G,O,T,U} und \textit{S} sowie das Sonderzeichen \textit{/}. (2) Als Sprache wurde ein eigenes Wörterbuch angegeben, das entsprechend der Tafeln nur wenige Worte enthält (\textit{US, GOT}. (3) Der \textit{OCR Engine Mode} (oem) wurde auf ein Neurales Netzwerk mit \textit{Long Short-term Memory}\cite{hochreitersepp} festgelegt. (4) Für die \texit{Page Segmentation} (psm) wurde ein vollautomatischer Modus, ohne weitere Vorgaben, gewählt.
+Beide Befehle wurden mit folgender Konfiguration ausgeführt: (1) Es wurde eine Whitelist verwendet, die auf das Schema der Tafeln zugeschnitten wurde. Gelistet wurden die Ziffern \textit{0-9}, die Buchstaben \textit{G,O,T,U} und \textit{S} sowie das Sonderzeichen \textit{/}. (2) Als Sprache wurde ein eigenes Wörterbuch angegeben, das entsprechend der Tafeln nur wenige Worte enthält (\textit{US, GOT}. (3) Der \textit{OCR Engine Mode} (oem) wurde auf ein Neurales Netzwerk mit \textit{Long Short-term Memory}\cite{hochreitersepp} festgelegt. (4) Für die \textit{Page Segmentation} (psm) wurde ein vollautomatischer Modus, ohne weitere Vorgaben, gewählt.
 
 %\subsection{Experimentelles}
 
 %\subsection{Zusammenfassung}
 %evtl zusammenfassen wie vorgegangen wurde, warum dieser Weg gut ist und was das Wichtigste Ergebnis ist
 \subsection{Evaluation}
+
+Die Ergebnisse sowohl bei Tafelerkennung und -ausschnitt als auch bei der Texterkennung wurden durch statistische Analyse des erkannten Textes evaluiert. Dazu wurden die Texte auf einer Auswahl von 79 Tafeln transkribiert und in einer Liste abgelegt. Diese Liste wurde dann als Referenz (Grundwahrheit) für die Auswertung der erkannten Texte eingelesen.
+Als Maße für die Genauigkeit der Erkennung wurden die Maße \textit{recall}, \textit{precision} und \textit{f-score} verwendet\cite{haraldklinke} \cite{qixiangye}. \textit{Recall} gibt dabei an, wie viele der Buchstaben auf der Tafel tatsächlich erkannt wurden ($Recall = \frac{True Positives}{True Positives + False Negatives}$). Die \textit{Precision} gibt an, wie viele der erkannten Buchstaben tatsächlich Teil der Grundwahrheit sind ($Precision = \frac{True Positives}{True Positives + False Positives}$). Der F-Score erzeugt einen gewichteten, harmonischen Mittelwert aus diesen beiden Maßen, um die Qualität der Texterkennung in einem Wert zusammen zu fassen ($F = 2 \times \frac{precision \times recall}{precision + recall}$). Der F-Score wurde dabei als bevorzugtes Maß verwendet, die beiden anderen können optional mit ausgegeben werden. Aus den F-Scores wurden mehrere Durchschnittswerte gebildet, um das Gesamtergebnis zu evaluieren: (1) Der Mittelwert der zeilenweisen Erkennung, (2) der Mittelwert der buchstabenweisen Erkennung, (3) der Mittelwert aus diesen beiden Werten, (4) der Mittelwert der als bestes Ergebnis eines Bildes ermittelten Textzeilen.

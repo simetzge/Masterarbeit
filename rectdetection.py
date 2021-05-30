@@ -47,7 +47,7 @@ try:
             if CHECK_PICTURE != "":
                 if not CHECK_PICTURE in fileNames[i]:
                     continue      
-            print("the next image is " + fileNames[i])
+            print("the next image is " + fileNames[i] + " (" + str(i) + "/" + str(len(images)) + ")")
             if MODIFY_THRESHOLD:
                 rects,conts = rect_detect_iterative(img, fileNames[i])
             else:
@@ -67,10 +67,10 @@ try:
                 #perform OCR on cropped rectangles if flag is set
                 if OCR:
                     ocrlist.append(ocr(cropimgs, fileNames[i]))
-                else:
+                
                     #just print the crops if OCR flag is not set
-                    for j, crop in enumerate(cropimgs):
-                        output('crop', crop, fileNames[i], str(j))
+                for j, crop in enumerate(cropimgs):
+                    output('crop', crop, fileNames[i], str(j))
                 
                 #write images without rectangles
                 output('imagecut', restimg, fileNames[i])
@@ -81,7 +81,7 @@ try:
                 output('coco', coco(img), fileNames[i])
             if USE_CNN == "yolo" or USE_CNN == "both":
                 output('yolo', yolo(img), fileNames[i])
-        
+        if OCR: ocrOutput(ocrlist)
         #csvOutput(outputlist)
         if EVALUATE:
             if OCR:
@@ -123,7 +123,7 @@ try:
         scaled = cv2.cvtColor(scaled, cv2.COLOR_GRAY2BGR)
         
         #add contours in red to image
-        #roisImg = cv2.drawContours(scaled, contours, -1, (0, 0, 230))
+        roisImg = cv2.drawContours(scaled, contours, -1, (0, 0, 230))
         
         #rescale rois
         #scaledrois = [rescaleRect(gray, rect) for rect in rois]
@@ -336,7 +336,7 @@ try:
             contArea = cv2.contourArea(contour)
             
             #throw out too small areas
-            if not max(binary.shape[0],binary.shape[1]) < contArea:
+            if contArea < MIN_RECT_AREA:
                 continue            
             
             #create rectangle around contours
@@ -566,8 +566,9 @@ try:
         #if warped.shape[0] > warped.shape[1]:
         if h > w:
             #warped = np.rot90(warped)
-            warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_CLOCKWISE)
-        
+            #show(warped)
+            warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
+            #show(warped)
         # dsize
         #if USE_TEMPLATE == True and 'aspectRatio' in globals():
          #   dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE / aspectRatio))
@@ -591,15 +592,15 @@ try:
 
     def hough_crop(img, rect, threshold):
         
-        imgb = img.copy()
-        imgg = img.copy()
-        imgr = img.copy()
-        imgb[:,:,1] = 0
-        imgb[:,:,2] = 0
-        imgg[:,:,0] = 0
-        imgg[:,:,2] = 0
-        imgr[:,:,0] = 0
-        imgr[:,:,1] = 0
+        #imgb = img.copy()
+        #imgg = img.copy()
+        #imgr = img.copy()
+        #imgb[:,:,1] = 0
+        #imgb[:,:,2] = 0
+        #imgg[:,:,0] = 0
+        #imgg[:,:,2] = 0
+        #imgr[:,:,0] = 0
+        #imgr[:,:,1] = 0
             
         #show(imgb, "blue")
         #show(imgg, "green")
@@ -650,8 +651,8 @@ try:
         
         ret, binary = cv2.threshold(gray, int(mean+30), THRESHOLD_MAX, cv2.THRESH_BINARY)
         
-       # if debug_hough:
-        #    output("pics4thesis", binary, "1073.png", "binary")
+        if debug_hough:
+            output("pics4thesis", norm, "1073.png", "norm")
         
         if debug_hough:
             cv2.imshow("test", binary)
@@ -670,12 +671,12 @@ try:
         
         if debug_hough:
             show(dst, "canny")
-        #if debug_hough:
-            #output("pics4thesis", binary, "1073.png", "dst")
+        if debug_hough:
+            output("pics4thesis", dst, "1073.png", "canny")
         #hough with canny edge
         lines = cv2.HoughLines(dst, 1, np.pi / 180, threshold)
         #lines = cv2.HoughLinesP(dst, 1, np.pi / 180, threshold, 30,10)
-        cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
+        cdst = cv2.cvtColor(norm, cv2.COLOR_GRAY2BGR)
         # empty lineList to collect all lines        
         lineList = []
         interList = []
@@ -699,8 +700,8 @@ try:
                 if len(newLine) == 2:
                     cv2.line(cdst, newLine[0], newLine[1], (0,0,255), 1, cv2.LINE_AA)
                     lineList.append(newLine)                
-        #if debug_hough:
-            #output("pics4thesis", cdst, "1073.png", "lines")                
+            if debug_hough:
+                output("pics4thesis", cdst, "1073.png", "lines")                
             # calculate every intersection between lines 
             for i in range(0, len(lineList)):    
                 for j in range(0, len(lineList)):
@@ -734,8 +735,8 @@ try:
                         cdst = cv2.circle(cdst, inter, 4, (0,255,0), 2)
                     else:
                         cdst = cv2.circle(cdst, inter, 4, (0,0,255), 2)
-            #if debug_hough:
-             #   output("pics4thesis", cdst, "1073.png", "intersection")
+            if debug_hough:
+                output("pics4thesis", cdst, "1073.png", "intersection")
             if debug_hough:       
                 cv2.imshow("test", cdst)
                 cv2.waitKey()
@@ -791,13 +792,15 @@ try:
         warped = cv2.warpPerspective(crop_img, M, (int(width), int(height)))
         
         # dsize
-        if USE_TEMPLATE == True:
+        if USE_TEMPLATE == True and aspectRatio != 0:
             dsize = (warped.shape[1], int(warped.shape[1] / aspectRatio))
         else:
             dsize = (warped.shape[1], int(warped.shape[1] * 0.8))
 
         # resize image
         warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_AREA)
+        
+        #warped = addborder(warped)
         
         if debug_hough:
             # visualization for debug
@@ -814,7 +817,7 @@ try:
     def houghP(img, rect, threshold):
         
         #debug flag
-        debug_hough = True
+        debug_hough = False
         
         #if threshold is too low, use simple crop
         if threshold < 100:
@@ -1011,7 +1014,7 @@ try:
             cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
             cv2.imshow("test", cdst)
             cv2.waitKey()
-            output("pics4thesis", binary, "1073.png", "binary")
+            output("pics4thesis", warped, "1073.png", "warped")
         return (warped)
         
 #####################################################################################################################################################
@@ -1357,6 +1360,19 @@ try:
         if pt == (0,0) or pt == (width, 0) or pt == (width, height) or pt == (0, height):
             return(False)
         return(True)
+    
+
+    def addborder(img):
+        #show(img)
+        height, width, channels  = img.shape
+        offset = 10
+        thickness = 3
+        cv2.line(img, (offset,offset), (offset, height-offset), (255,255,255), thickness, cv2.LINE_AA)
+        cv2.line(img, (offset,offset), (width-offset, offset), (255,255,255), thickness, cv2.LINE_AA)
+        cv2.line(img, (offset, height-offset), (width-offset, height-offset), (255,255,255), thickness, cv2.LINE_AA)
+        cv2.line(img, (width-offset, offset), (width-offset, height-offset), (255,255,255), thickness, cv2.LINE_AA)
+        #show(img)
+        return(img)
         
 #####################################################################################################################################################
 #

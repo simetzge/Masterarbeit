@@ -15,8 +15,16 @@ from evaluation import *
 from flags import *
 
 def main():
+    #indiOCR(folder = "hough only")
+    #indiOCR(folder = "crop adaptive simple")
+    #indiOCR(folder = "simple only")
+    #indiOCR(folder = "iterative only")
+    indiOCR(folder = "crop")
+    #indiOCR(folder = "collection")
+
+def indiOCR(folder = "crop"):
     #main function for direct testing and comparison of OCR methods, for debug only
-    filePaths, fileNames = searchFiles(".png", "crop_simple")
+    filePaths, fileNames = searchFiles(".png", folder)
 
     #open the files in cv2
     images = []
@@ -45,12 +53,12 @@ def main():
         print (str(j) + "/" + str(len(cropImages)))
         ocrlist.append(ocr(crops, cropNames[j]))
     
-    ocrOutput(ocrlist)
+    #ocrOutput(ocrlist)
     
     evaluation = csvInput("evaluationlist.csv")
     compared = comparison(ocrlist)
     evaluated = evaluate(evaluation, compared)
-    csvOutput(evaluated)
+    csvOutput(evaluated, name = folder)
 
 
 def ocr(cropimgs, fileName):
@@ -140,9 +148,9 @@ def get_text(img, mode = 'image_to_text'):
     preimg = (255-preimg)
     
     text, rotate = image_to_text(preimg)
-    if rotate == True:
+    #if rotate == True:
         
-        preimg = cv2.rotate(preimg, cv2.cv2.ROTATE_180)
+     #  preimg = cv2.rotate(preimg, cv2.cv2.ROTATE_180)
     
     if mode == 'image_to_box':
         boximg, boxtext = image_to_box(preimg)
@@ -283,7 +291,7 @@ def image_to_text(img):
     #try to read
     #config = ('board')
     config = ("board -l dic --oem 1 --psm 3")
-    #config = ("dic --oem 1 --psm 7")
+    #config = ("newboard --oem 1 --psm 7")
 
     texta = pytesseract.image_to_string(img, config=config)
     #rotate and try again
@@ -329,8 +337,8 @@ def image_to_data(img):
     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
     #try to read
     #config = ('board')
-    config = ("board -l dic --oem 1 --psm 7")
-    boxes = pytesseract.image_to_boxes(img, config=config)
+    config = ("newboard --oem 1 --psm 7")
+    data = pytesseract.image_to_boxes(img, config=config)
     
     #for box in boxes:
      #   for item in box:
@@ -343,13 +351,6 @@ def image_to_data(img):
     
     from pytesseract import Output
     d = pytesseract.image_to_data(img, config=config, output_type=Output.DICT)
-    n_boxes = len(d['level'])
-    for i in range(n_boxes):
-        if(d['text'][i] != ""):
-            (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
-            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(img, d['text'][i], (x+w, y+h),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 3)
-
     cv2.imshow("box", img)
     cv2.waitKey()
     
@@ -371,6 +372,7 @@ def image_to_box(img):
     img = preprocessing(img)
     #config = ('board')
     config = ("board -l dic --oem 1 --psm 3")
+    #config = ("newboard --oem 1 --psm 7")
     #get characters with bounding boxes
     boxes = pytesseract.image_to_boxes(img, config=config)
     
@@ -428,7 +430,7 @@ def preprocessing(img):
     #for i in range (10):#chenged from 10 to 1 for evaluation test
     #gray = cv2.GaussianBlur(gray, (9,9), 50)       
     #gray = cv2.medianBlur(gray, 3)
-    gray = cv2.GaussianBlur(gray, (9,9), 50)
+    gray = cv2.GaussianBlur(gray, (9,9), 50)#############
         #blur = cv2.GaussianBlur(img, (3,3), 1)
  
                
@@ -436,7 +438,7 @@ def preprocessing(img):
         #gray = np.where(gray < 60, 0, gray)            
         #if i % 10 == 0:
                 
-    gray = cv2.fastNlMeansDenoising(gray,9,9,50)
+    gray = cv2.fastNlMeansDenoising(gray,9,9,50)#########
     gray = normalizeImage(gray)
     
     #gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, -5)
