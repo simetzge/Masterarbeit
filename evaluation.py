@@ -33,10 +33,24 @@ def evaluate(evaluationdict, ocrlist):
                     best = dicts["bestguess"].replace(" ", "")
                     best = best.replace(",","")
                     
-                    sbox = difflib.SequenceMatcher(None, ground,box)
-                    stxt = difflib.SequenceMatcher(None, ground,txt)
-                    rbox = round(sbox.ratio(),2)
-                    rtxt = round(stxt.ratio(),2)
+                    #sbox = difflib.SequenceMatcher(None, ground,box)
+                    #stxt = difflib.SequenceMatcher(None, ground,txt)
+                    #rbox = round(sbox.ratio(),2)
+                    #rtxt = round(stxt.ratio(),2)
+                    if FSCORE == True:
+                        tp, fp, fn = (getMeasures(ground, txt))
+                        pre, rec, f = getScores(tp, fp, fn)
+                        rtxt = round(f,2)
+                    
+                        tp, fp, fn = (getMeasures(ground, box))
+                        pre, rec, f = getScores(tp, fp, fn)
+                        rbox = round(f,2)
+                    else:
+                        sbox = difflib.SequenceMatcher(None, ground,box)
+                        stxt = difflib.SequenceMatcher(None, ground,txt)
+                        rbox = round(sbox.ratio(),2)
+                        rtxt = round(stxt.ratio(),2)   
+                        
                     if box == best:
                         dicts["bestratio"] = rbox
                     if txt == best:
@@ -128,7 +142,10 @@ def csvOutput(outputlist, folder = "evaluation", name = "output"):
     with open(path + '\\' + folder + '\\' + name + '.csv', 'w') as file:
         #write column names
         writeHeader(file)
-        file.write("image,rectangle,textimage,boximage,comparison,textratio,boxratio,bestguess,bestratio")
+        if FSCORE == True:
+            file.write("image,rectangle,textimage,boximage,comparison,f-score_text,f-score_box,bestguess,bestscore")
+        else:
+            file.write("image,rectangle,textimage,boximage,comparison,textratio,boxratio,bestguess,bestratio")
         if ALL_MEASURES:
             file.write(",precision_text, recall_text, f-score_text, precision_box, recall_box, f-score_box")
         if OPTIMUM:
@@ -274,7 +291,7 @@ def getScores(tp,fp,fn):
     if tp + fp != 0 and tp + fn != 0:
         precision = round(tp / (tp + fp),2)
         recall = round(tp / (tp + fn),2)
-        fscore = round(tp / (tp + 0.5 * (fp + fn)),2)
+        fscore = round(2 * ((precision * recall) / (precision + recall)),2)
         #print ("precision: " + str(precision) + " recall: " + str(recall) + " fscore: " + str(fscore))        
         return (precision, recall, fscore)
     else:

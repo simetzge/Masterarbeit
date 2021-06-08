@@ -240,12 +240,12 @@ try:
         gray = normalizeImage(gray)
         
         #search for rectangles with increasing threshold, max 200
-        while thresh <= 200:
+        while thresh <= THRESHOLD_MAX:
             
             rois = []            
             contours = []            
             
-            ret, binary = cv2.threshold(gray, thresh, THRESHOLD_MAX, cv2.THRESH_BINARY)    
+            ret, binary = cv2.threshold(gray, thresh, 255, cv2.THRESH_BINARY)    
             
             contours, rois, rectConts = rect_detect(binary)#img for debug
             
@@ -637,7 +637,7 @@ try:
         #crop_img = scaleImage(crop_img)
         blur = crop_img
         blur = cv2.GaussianBlur(blur,(7,7),15)
-        blur = cv2.bilateralFilter(blur,9,75,75)
+        blur = cv2.bilateralFilter(blur,9,15,15)
         
         blur = cv2.fastNlMeansDenoising(blur,7,7,15)        
         blur = cv2.GaussianBlur(blur,(7,7),15)

@@ -15,12 +15,17 @@ from evaluation import *
 from flags import *
 
 def main():
-    #indiOCR(folder = "hough only")
-    #indiOCR(folder = "crop adaptive simple")
-    #indiOCR(folder = "simple only")
-    #indiOCR(folder = "iterative only")
-    indiOCR(folder = "crop")
-    #indiOCR(folder = "collection")
+    
+    indiOCR(folder = "crop adaptive simple")
+    indiOCR(folder = "crop adaptive hough")
+    indiOCR(folder = "crop iterative simple")
+    indiOCR(folder = "crop iterative hough")
+    indiOCR(folder = "hough only")
+    indiOCR(folder = "simple only")
+    indiOCR(folder = "adaptive only")
+    indiOCR(folder = "iterative only")
+    #indiOCR(folder = "crop")
+    indiOCR(folder = "collection")
 
 def indiOCR(folder = "crop"):
     #main function for direct testing and comparison of OCR methods, for debug only
@@ -58,7 +63,7 @@ def indiOCR(folder = "crop"):
     evaluation = csvInput("evaluationlist.csv")
     compared = comparison(ocrlist)
     evaluated = evaluate(evaluation, compared)
-    csvOutput(evaluated, name = folder)
+    csvOutput(evaluated)
 
 
 def ocr(cropimgs, fileName):
@@ -148,9 +153,9 @@ def get_text(img, mode = 'image_to_text'):
     preimg = (255-preimg)
     
     text, rotate = image_to_text(preimg)
-    #if rotate == True:
+    if rotate == True:
         
-     #  preimg = cv2.rotate(preimg, cv2.cv2.ROTATE_180)
+       preimg = cv2.rotate(preimg, cv2.cv2.ROTATE_180)
     
     if mode == 'image_to_box':
         boximg, boxtext = image_to_box(preimg)
@@ -441,6 +446,7 @@ def preprocessing(img):
     gray = cv2.fastNlMeansDenoising(gray,9,9,50)#########
     gray = normalizeImage(gray)
     
+    gray = unsharp_mask(gray, threshold = 3)
     #gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, -5)
     #gray = laplace(gray)
     #gray = normalizeImage(gray)

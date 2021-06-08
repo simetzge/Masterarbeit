@@ -55,7 +55,6 @@ def searchFiles(extension,folder):
         #print note and end skript if no input dir
         else:
             print(folder + ' fehlt')
-            exit()
         #return all found files
         return(files, names)
 

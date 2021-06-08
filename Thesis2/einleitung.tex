@@ -1,16 +1,29 @@
 \section{Einleitung}
 
-Einleitung und Fragestellung\\
-\cite{houghpatent}
+%Einleitung und Fragestellung
+
+In der Archäologie, wie auch in anderen, \glqq grabenden\grqq  Wissenschaften, werden Fotografien zur Dokumentation von Grabungen und Befunden eingesetzt. Diese werden durch die Positionierung von beschrifteten Tafeln im Bild mit Metadaten angereichert. Sowohl für die Digitalisierung von Altbeständen als auch für die Verwaltung von bereits digital aufgenommenen Fotos ist es notwendig, diese Metadaten auszulesen und in Datenbanken oder in die Metadaten der Bilddateien selbst einzupflegen.\\
+Diese Aufgabe stellt sich auch im Kapitol-Projekt am Deutschen Archäologischen Institut in Rom. Gegenstand es Projektes sind Grabungen auf dem Gebiet des historischen römischen Staatsheiligtums unter Einbezug der in der Vergangenheit durch bereits durchgeführten Grabungen. Dementsprechend liegen zahlreiche Fotos vor, die Metadaten in Form von Schrifttafeln enthalten. In der Auseinandersetzung mit diesem Material stellt sich die Frage, ob der Aufwand durch eine automatisierte Erkennung der Tafeln und der Schrift darauf reduziert werden kann. Erforderlich wären dazu zwei Schritte: Die Lokalisation der Tafeln und die Erkennung des Textes darauf.\\
+% Einführung Tafelerkennung: Shape detection, Objekterkennung CNNs 
+Die Detektion bestimmter Formen und Objekten gehört zu den klassischen Anwendungen der Computer Vision. Die Verwendung der Konturen zur Erkennung eines Objektes ist erprobt und entsprechende Funktionen sind fester Bestandteil der Computer Vision-Bibliothek OpenCV. Grundlegend für diese Anwendungsbereiche sind Kanten- und Linienerkennung wie die von Canny\cite{cannyedge} bzw. Hough\cite{houghpatent} so wie Template-Matching-Verfahren\cite{opencvtemplatematching} zur Identifikation von Bildausschnitten in einem größeren Gesamtbild. Die praktischen Anwendungsbereiche sind vielfältig, so z.B. zur Buchstabenerkennung- und Mustererkennung\cite{adamek} oder als Orientierungshilfe für autonome Roboter \cite{shaw}. Auch wenn für komplexere Aufgaben inzwischen vor allem auf Neuronale Netzwerke zurückgegriffen wird \cite{introduction}, werden auch Objekte wie AR-Marker und QR-Codes auch heute noch mit diesen Methoden erfasst\cite{armarker}.\\
+%Einführung Texterkennung: Feature detection bis Neural Networks, Herausforderungen vor allem Handschrift und natural scenes, selten beides zusammen
+Auch an und mit der Optical Character Recognition (OCR) wird seit der Entwicklung digitaler Computer gearbeitet. Die ersten kommerziellen Produkte waren bereits in den 50er Jahren verfügbar \cite{eikvil} und werden seitdem stetig verbessert. Der letzte große Schritt war die Einführung von Neuronalen Netzwerken auch in diesem Bereich. Die im Rahmen dieser Arbeit verwendete Tesseract-OCR-Engine vollzog diesen Schritt 2018 \cite{tesseractrelease}.
+In der OCR wird zwischen offline und online Texterkennung unterschieden, wobei online das Tracking des Schreibprozesses meint und sich offline-Texterkennung mit bereits geschriebenen Text befasst \cite{feldmann}. Im Bereich der offline-Erkennung wird unterschieden, ob der Text als Scan oder vergleichbares Ausgangsmaterial in einer kontrollierten Umgebung vorliegt, oder ob es sich um Text in einer natürlichen Umgebung (\textit{natural scenes}) handelt. Bei letzterem muss der Text erst gefunden und Faktoren, wie der Winkel zur Kamera oder die Lichtverhältnisse, ausgeglichen werden \cite{forsberg} \cite{qixiangye} \cite{xilinchen}.
+Eine weitere große Herausforderung im Bereich offline-OCR ist die Erkennung von Handschriften. Handschriften verschiedener Personen unterscheiden sich stark voneinander \cite{sumedhahallale}, aber auch die Handschrift einer Person ist unregelmäßig und voller Variation \cite{feldmann}. Druckbuchstaben können dabei von herkömmlichen textit{Engines} deutlich besser erkannt werden als Schreibschrift. In den Geisteswissenschaften wird dieses Thema vor allem in Bezug auf historische Quellen interessant. Programme wie Transkribus\footnote{https://readcoop.eu/de/transkribus/} bieten die Möglichkeit, Texte zu Transkribieren und auf dieser Basis ein Neuronales Netzwerk auf spezifische (Hand-)Schriften zu trainieren. Entscheidend für den Erfolg dieses Vorgehens ist das Vorliegen ausreichender Datenmengen. 
+
+%\subsection{Theorie}
 
 \subsection{Grabung Kapitol}
-Grabungsverlauf bis 2014 (recherchieren)\\
-Übernahme durch DAI (recherchieren)\\
+%Grabungsverlauf bis 2014 (recherchieren)\\
+%Übernahme durch DAI (recherchieren)\\
+Seit den späten 90er Jahren führte die \textit{Sovraintendenza ai beni culturali del Comune di Roma} Grabungen im Gebiet des antiken römischen Staatsheiligtums auf dem Kapitolinischen Hügel in Rom durch \cite{danti}. In den Jahren 2011-2014 wurde verstärkt auch auf dem Gebiet um das ehemalige preußischen Hospitals gegraben. Seit 2018 wird das Projekt vom Deutschen Archäologischen Institut und den Musei Capitolini weitergeführt \cite{kapitol}. Dabei sollen Fragen zur \glqq kulturgeschichtlichen Entwicklung des Kapitolhügels in Antike, Mittelalter und Neuzeit\grqq  \cite{kapitol} beantwortet werden.
+Im Rahmen des Projektes sollen digitale Methoden zur Dokumentation und Erkenntnisgewinn eingesetzt werden. Das bedeutet einerseits die Erfassung aktueller Befunde mittels Bodenradar, Fotogrammetrie oder 3D-Modellen \cite{kapitol}. Andererseits sollen historische Quellen und Dokumentationen von Altgrabungen digitalisiert und zugänglich gemacht werden. Dazu gehören auch die Grabungsfotos, die Gegenstand dieser Arbeit sind.
 
-\subsection{Datensatz vorstellen}
-Herkunft\\
-Umfang\\
-Fragestellungen des Projektes\\
+%\subsection{Datensatz}
+%Herkunft\\
+%Umfang\\
+%Fragestellungen des Projektes\\
+
 
 
 %\subsubsection{Tafelvergleiche}

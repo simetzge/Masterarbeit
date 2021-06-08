@@ -14,15 +14,15 @@ Created on Thu Mar  4 16:08:34 2021
 #size for downscaling
 IMG_TARGET_SIZE = 1000
 #min size of rectangle
-MIN_RECT_AREA = 5000
+MIN_RECT_AREA = 2000
 #thresholds for modifiy threshold
 THRESHOLD_MIN = 20
-THRESHOLD_MAX = 255
+THRESHOLD_MAX = 200
 #threshold for hough based crop
 CUT_THRESH = 120
 #change input path (default = same path as pyhon files)
 USE_ABSOLUTE_PATH = True
-ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
+ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours" #"D:\Arbeit\Grabungsfotos"#
 #use iterative instead of adaptive threshold
 MODIFY_THRESHOLD = False
 #search for a template to get aspect ratio
@@ -32,15 +32,17 @@ SIMPLE_CROP = True
 #use cut based on contours instead of rects
 CONT_BASED_CUT = False
 #use OCR
-OCR = True
+OCR = False
 #use CNN: yolo, coco, both
 USE_CNN = ""
 #evaluate OCR
-EVALUATE = True
+EVALUATE = False
 #add recall, precision to evaluation
 ALL_MEASURES = False
 #add optmimum value to evaluation
 OPTIMUM = True
+#F-Score based
+FSCORE = True
 #only use picture with this name(s)
 CHECK_PICTURE = ""
 #1110 crasht
