@@ -32,19 +32,19 @@ SIMPLE_CROP = True
 #use cut based on contours instead of rects
 CONT_BASED_CUT = False
 #use OCR
-OCR = False
+OCR = True
 #use CNN: yolo, coco, both
 USE_CNN = ""
 #evaluate OCR
-EVALUATE = False
+EVALUATE = True
 #add recall, precision to evaluation
 ALL_MEASURES = False
 #add optmimum value to evaluation
 OPTIMUM = True
 #F-Score based
-FSCORE = True
+FSCORE = False
 #only use picture with this name(s)
-CHECK_PICTURE = ""
+CHECK_PICTURE = "_1130592"
 #1110 crasht
 #1073
 

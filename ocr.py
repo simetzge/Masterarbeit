@@ -17,15 +17,15 @@ from flags import *
 def main():
     
     indiOCR(folder = "crop adaptive simple")
-    indiOCR(folder = "crop adaptive hough")
-    indiOCR(folder = "crop iterative simple")
-    indiOCR(folder = "crop iterative hough")
-    indiOCR(folder = "hough only")
-    indiOCR(folder = "simple only")
-    indiOCR(folder = "adaptive only")
-    indiOCR(folder = "iterative only")
+    #indiOCR(folder = "crop adaptive hough")
+    #indiOCR(folder = "crop iterative simple")
+    #indiOCR(folder = "crop iterative hough")
+    #indiOCR(folder = "hough only")
+    #indiOCR(folder = "simple only")
+    #indiOCR(folder = "adaptive only")
+    #indiOCR(folder = "iterative only")
     #indiOCR(folder = "crop")
-    indiOCR(folder = "collection")
+    #indiOCR(folder = "collection")
 
 def indiOCR(folder = "crop"):
     #main function for direct testing and comparison of OCR methods, for debug only
@@ -173,7 +173,7 @@ def get_text(img, mode = 'image_to_text'):
                 #rows[0] = 0
                 #rows[1] = 0
     
-    cv2.putText(textimg, text, (50, 50),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 230, 0), 3)
+    cv2.putText(textimg, text, (15, 600),cv2.FONT_HERSHEY_SIMPLEX, 3.8, (0, 230, 0), 3)
     if mode == 'image_to_data':
         return(data)
     if mode == 'image_to_box':
@@ -295,7 +295,7 @@ def image_to_text(img):
     
     #try to read
     #config = ('board')
-    config = ("board -l dic --oem 1 --psm 3")
+    config = ("board -l dict --oem 1 --psm 3")
     #config = ("newboard --oem 1 --psm 7")
 
     texta = pytesseract.image_to_string(img, config=config)
@@ -376,7 +376,7 @@ def image_to_box(img):
     #img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
     img = preprocessing(img)
     #config = ('board')
-    config = ("board -l dic --oem 1 --psm 3")
+    config = ("board -l dict --oem 1 --psm 3")
     #config = ("newboard --oem 1 --psm 7")
     #get characters with bounding boxes
     boxes = pytesseract.image_to_boxes(img, config=config)
