@@ -1,30 +1,25 @@
-\contentsline {section}{\numberline {1}Allgemeines}{2}{}%
-\contentsline {subsection}{\numberline {1.1}Unterpunkt}{2}{}%
-\contentsline {section}{\numberline {2}Einleitung}{3}{}%
-\contentsline {subsection}{\numberline {2.1}Datenlage Archäologie}{3}{}%
-\contentsline {subsection}{\numberline {2.2}Grabung Kapitol}{3}{}%
-\contentsline {subsection}{\numberline {2.3}Datengrundlage und Vorhaben}{3}{}%
-\contentsline {subsubsection}{\numberline {2.3.1}Datensatz vorstellen}{3}{}%
-\contentsline {section}{\numberline {3}Tafeldetektierung}{4}{}%
-\contentsline {subsection}{\numberline {3.1}Die Tafeln und ihre Tücken}{4}{}%
-\contentsline {subsubsection}{\numberline {3.1.1}Die Tafeln}{4}{}%
-\contentsline {subsubsection}{\numberline {3.1.2}Tafelvergleiche}{5}{}%
-\contentsline {subsection}{\numberline {3.2}Detektierungsmöglichkeiten}{6}{}%
-\contentsline {subsubsection}{\numberline {3.2.1}CNN}{6}{}%
-\contentsline {subsubsection}{\numberline {3.2.2}Ergebnisse CNN}{6}{}%
-\contentsline {subsubsection}{\numberline {3.2.3}Ergebnisse Feature Detection}{7}{}%
-\contentsline {subsubsection}{\numberline {3.2.4}Ergebnisse Feature Detection}{8}{}%
-\contentsline {subsubsection}{\numberline {3.2.5}Contours}{8}{}%
-\contentsline {subsubsection}{\numberline {3.2.6}Rectangle Detection}{15}{}%
-\contentsline {subsubsection}{\numberline {3.2.7}Hough}{17}{}%
-\contentsline {subsubsection}{\numberline {3.2.8}Ergebnisse Kantenerkennung /Contours}{17}{}%
-\contentsline {section}{\numberline {4}Texterkennung}{18}{}%
-\contentsline {subsection}{\numberline {4.1}Texterkennung allgemein}{18}{}%
-\contentsline {subsection}{\numberline {4.2}Das Ausgangsmaterial}{18}{}%
-\contentsline {subsection}{\numberline {4.3}Tesseract}{18}{}%
-\contentsline {subsection}{\numberline {4.4}Vorgehen}{18}{}%
-\contentsline {section}{\numberline {5}SIFT}{19}{}%
-\contentsline {subsection}{\numberline {5.1}SIFT allgemein}{19}{}%
-\contentsline {subsection}{\numberline {5.2}Ausgangsmaterial und Probleme}{19}{}%
-\contentsline {subsection}{\numberline {5.3}Vorgehen}{19}{}%
-\contentsline {section}{\numberline {6}Fazit}{20}{}%
+\contentsline {section}{\numberline {1}Einleitung}{2}{}%
+\contentsline {subsection}{\numberline {1.1}Grabung Kapitol}{3}{}%
+\contentsline {section}{\numberline {2}Material und Methoden}{5}{}%
+\contentsline {subsection}{\numberline {2.1}Fotos}{5}{}%
+\contentsline {subsection}{\numberline {2.2}Software}{7}{}%
+\contentsline {subsection}{\numberline {2.3}Tafeldetektion}{7}{}%
+\contentsline {subsubsection}{\numberline {2.3.1}CNN-basierter Ansatz}{7}{}%
+\contentsline {subsubsection}{\numberline {2.3.2}Kontur-basierter Ansatz}{8}{}%
+\contentsline {subsection}{\numberline {2.4}Cropverfahren}{15}{}%
+\contentsline {subsubsection}{\numberline {2.4.1}Simple Crop}{17}{}%
+\contentsline {subsubsection}{\numberline {2.4.2}Hough\footnote {Gesprochen: [h\textturnv {}f]} Crop}{17}{}%
+\contentsline {subsection}{\numberline {2.5}Texterkennung}{22}{}%
+\contentsline {subsubsection}{\numberline {2.5.1}Preprocessing}{22}{}%
+\contentsline {subsubsection}{\numberline {2.5.2}OCR}{23}{}%
+\contentsline {subsection}{\numberline {2.6}Evaluation}{24}{}%
+\contentsline {section}{\numberline {3}Ergebnisse}{26}{}%
+\contentsline {subsection}{\numberline {3.1}Gesamtergebnis}{26}{}%
+\contentsline {subsection}{\numberline {3.2}Tafelerkennung}{27}{}%
+\contentsline {subsection}{\numberline {3.3}Texterkennung}{29}{}%
+\contentsline {subsection}{\numberline {3.4}Weitere Tafeln}{30}{}%
+\contentsline {section}{\numberline {4}Diskussion}{32}{}%
+\contentsline {subsection}{\numberline {4.1}Tafelerkennung}{32}{}%
+\contentsline {subsection}{\numberline {4.2}Texterkennung}{33}{}%
+\contentsline {subsection}{\numberline {4.3}Empfehlung}{38}{}%
+\contentsline {section}{\numberline {5}Fazit}{39}{}%

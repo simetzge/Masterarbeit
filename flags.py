@@ -44,7 +44,7 @@ OPTIMUM = True
 #F-Score based
 FSCORE = False
 #only use picture with this name(s)
-CHECK_PICTURE = "_1130592"
+CHECK_PICTURE = ""
 #1110 crasht
 #1073
 

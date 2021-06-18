@@ -435,18 +435,22 @@ def preprocessing(img):
     #for i in range (10):#chenged from 10 to 1 for evaluation test
     #gray = cv2.GaussianBlur(gray, (9,9), 50)       
     #gray = cv2.medianBlur(gray, 3)
+ 
     gray = cv2.GaussianBlur(gray, (9,9), 50)#############
         #blur = cv2.GaussianBlur(img, (3,3), 1)
  
-               
+             
         # set everything lower than 50 to 0
         #gray = np.where(gray < 60, 0, gray)            
         #if i % 10 == 0:
                 
     gray = cv2.fastNlMeansDenoising(gray,9,9,50)#########
+
     gray = normalizeImage(gray)
     
-    gray = unsharp_mask(gray, threshold = 3)
+    #vielleicht nötig?
+    #gray = unsharp_mask(gray, threshold = 3)
+    
     #gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, -5)
     #gray = laplace(gray)
     #gray = normalizeImage(gray)
