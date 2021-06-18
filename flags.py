@@ -2,11 +2,7 @@
 """
 Created on Thu Mar  4 16:08:34 2021
 
-@author: Simon Metzger
-
-licensend under Attribution-NonCommercial-ShareAlike 3.0 Germany
-
-CC BY-NC-SA 3.0 DE
+@author: Simon
 """
 
 #####################################################################################################################################################
@@ -26,7 +22,7 @@ THRESHOLD_MAX = 200
 CUT_THRESH = 120
 #change input path (default = same path as pyhon files)
 USE_ABSOLUTE_PATH = True
-ABSOLUTE_PATH = ""
+ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
 #use iterative instead of adaptive threshold
 MODIFY_THRESHOLD = False
 #search for a template to get aspect ratio
