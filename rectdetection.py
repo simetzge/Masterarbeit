@@ -2,7 +2,11 @@
 """
 Created on Mon Nov 30 12:39:38 2020
 
-@author: Simon
+@author: Simon Metzger
+
+licensend under Attribution-NonCommercial-ShareAlike 3.0 Germany
+
+CC BY-NC-SA 3.0 DE
 """
 
 import numpy as np
@@ -22,22 +26,15 @@ try:
         
         #get paths and names of all images in folder input
         filePaths, fileNames = searchFiles('.jpg', 'input')
-    
         #open the files in cv2
         images = []
-        
-        ocrlist =[]
-        
+        ocrlist =[]        
         #images = [cv2.imread(files, cv2.IMREAD_GRAYSCALE) for files in filePaths]
-        images = [cv2.imread(files) for files in filePaths]
-        
-        #scale images to 1000px -> moved to rect_detect_adaptive
-        #images = [scaleImage(img) for img in images]
-        
+        images = [cv2.imread(files) for files in filePaths]              
         #get aspect ratio from template if flag is set
+        
         if USE_TEMPLATE == True:
-            getAspectRatio(images, fileNames)
-            
+            getAspectRatio(images, fileNames)            
         #detect rectangles in every image, adaptive or iterative
         for i, img  in enumerate(images):
             #skip template
@@ -74,7 +71,6 @@ try:
                 
                 #write images without rectangles
                 output('imagecut', restimg, fileNames[i])
-            
             
             #use cnns to identify objects in the images
             if USE_CNN == "coco" or USE_CNN == "both":
@@ -125,19 +121,21 @@ try:
         #add contours in red to image
         roisImg = cv2.drawContours(scaled, contours, -1, (0, 0, 230))
         
-        #rescale rois
-        #scaledrois = [rescaleRect(gray, rect) for rect in rois]
-        
         #add the found rectangles in green to image
         roisImg = cv2.drawContours(scaled, [cv2.boxPoints(rect).astype('int32') for rect in rois], -1, (0, 230, 0), 2)
         
         #send the modified images in the output function
         output('output', roisImg, fileName, 'adaptive')
-        #rescaleCont(img, scaled, rectConts)
-        #return(scaledrois)
+        
         return(rois, roisConts)
     
-    #rescale rectangles based on the size of the original image and the flag IMG_TARGET_SIZE which is used to downscale images at first
+    
+##################################################################################################################################################### 
+#
+# rescales rectangles based on the size of the original image and the flag IMG_TARGET_SIZE which is used to downscale images at first
+#
+#####################################################################################################################################################
+    
     def rescaleRect(img, rect):
         scale = np.max(img.shape) / IMG_TARGET_SIZE
         (x,y), (w,h), angle = rect
@@ -168,7 +166,6 @@ try:
         #norm = normalizeImage(gray)
         binary  = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,25,0)
         #apply findContours
-        #contourList, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contourList, hierarchy  = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE, offset=(1,1))
         #set variables for maximum values on default
         maxArea =  0
@@ -178,12 +175,7 @@ try:
             contArea = cv2.contourArea(contour)
             #ignore contours larger than the rectangle
             if contArea > w * h:
-                continue
-            #(x, y), (w, h), angle = rect = cv2.minAreaRect(contour)
-            #rectArea = w * h
-            #if rectArea  == 0:
-             #   continue
-         
+                continue         
             #save area and contour if the area is larger than the previous maximum
             if contArea > maxArea:
                 maxArea = contArea
@@ -199,8 +191,6 @@ try:
                 show(crop)
         #return largest contour
         maxCont = cv2.convexHull(maxCont)
-        #epsilon = 0.1*cv2.arcLength(maxCont,True)
-        #maxCont = cv2.approxPolyDP(maxCont,epsilon,True)
         return(maxCont)
         
 ##################################################################################################################################################### 
@@ -234,25 +224,21 @@ try:
         thresh = THRESHOLD_MIN
         allRois = []
         allConts = []
-        
         #convert to grayscale and normalize
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)     
         gray = normalizeImage(gray)
-        
+    
         #search for rectangles with increasing threshold, max 200
-        while thresh <= THRESHOLD_MAX:
-            
+        while thresh <= THRESHOLD_MAX:            
             rois = []            
-            contours = []            
-            
-            ret, binary = cv2.threshold(gray, thresh, 255, cv2.THRESH_BINARY)    
-            
+            contours = []                        
+            ret, binary = cv2.threshold(gray, thresh, 255, cv2.THRESH_BINARY)                
             contours, rois, rectConts = rect_detect(binary)#img for debug
             
             if len(rois) > 0:       
-                
                 allRois.append(rois)
                 allConts.append(rectConts)
+                
             thresh += 5
         
         #new rois list
@@ -262,8 +248,7 @@ try:
             cont = allConts[i]
             for j in range(len(r)):
                 (x,y), (w,h), angle = r[j]
-                rois_dict = {
-                    }
+                rois_dict = {}
                 rois_dict["x"] = x
                 rois_dict["y"] = y
                 rois_dict["w"] = w
@@ -271,7 +256,6 @@ try:
                 rois_dict["angle"] = angle
                 rois_dict["same"] = 0
                 rois_dict["cont"] = cont
-                
                 
                 rois_list.append(rois_dict)
         
@@ -288,7 +272,6 @@ try:
         cont = None
         #same is the number of same rois in the area, 0 is default
         same = 0
-        
         #if there are dictionaries in the list, search for the one with the highest number of same rectangles in the area
         if len(rois_list) > 0:
             roi = rois_list[0]
@@ -304,8 +287,6 @@ try:
                 cont = roi["cont"]
         #convert to colored img for output
         gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
-        #add contours in red to image
-        #roisImg = cv2.drawContours(gray, contours, -1, (0, 0, 230))
         #add the found rectangles in green to image
         roisImg = cv2.drawContours(gray, [cv2.boxPoints(rect).astype('int32') for rect in rects], -1, (0, 230, 0),3)
                     
@@ -490,20 +471,12 @@ try:
         rectcut = imgcut[mask]
         imgcut[mask] = 0
         return(crops, imgcut)   
+#####################################################################################################################################################
+#
+# cannyedge
+#
+#####################################################################################################################################################
 
-    #cannyedge from opencv doc
-    def cannyThresholdNonBinary(img):
-        max_lowThreshold = 100
-        ratio = 3
-        kernel_size = 3
-        low_threshold = 1
-        img_blur = cv2.blur(img, (5,5))
-        #detected_edges = cv2.Canny(img_blur, low_threshold, low_threshold*ratio, kernel_size)
-        detected_edges = cv2.Canny(img_blur, 10, 25, kernel_size)
-        mask = detected_edges != 0
-        dst = img * (mask[:,:].astype(img.dtype))
-        return (dst)
-    #cannyedge from opencv doc
     def cannyThreshold(img):
         max_lowThreshold = 100
         ratio = 3
@@ -515,30 +488,7 @@ try:
         mask = detected_edges != 0
         dst = img * (mask[:,:].astype(img.dtype))
         return (dst)
-    
-    #skeleton from opencv doc
-    def skeleton(img):
-        # Step 1: Create an empty skeleton
-        size = np.size(img)
-        skel = np.zeros(img.shape, np.uint8)
-        
-        # Get a Cross Shaped Kernel
-        element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3))
-        
-        # Repeat steps 2-4
-        while True:
-            #Step 2: Open the image
-            open = cv2.morphologyEx(img, cv2.MORPH_OPEN, element)
-            #Step 3: Substract open from the original image
-            temp = cv2.subtract(img, open)
-            #Step 4: Erode the original image and refine the skeleton
-            eroded = cv2.erode(img, element)
-            skel = cv2.bitwise_or(skel,temp)
-            img = eroded.copy()
-            # Step 5: If there are no white pixels left ie.. the image has been completely eroded, quit the loop
-            if cv2.countNonZero(img)==0:
-                break
-        return(skel)
+
     
 #####################################################################################################################################################
 #
@@ -568,16 +518,6 @@ try:
             #warped = np.rot90(warped)
             #show(warped)
             warped = cv2.rotate(warped, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
-            #show(warped)
-        # dsize
-        #if USE_TEMPLATE == True and 'aspectRatio' in globals():
-         #   dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE / aspectRatio))
-        #else:
-         #   dsize = (IMG_TARGET_SIZE, int(IMG_TARGET_SIZE * 0.8))
-
-        # resize image
-        #warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_CUBIC)
-        
         #resizing while keeping the aspect ratio
         warped = scaleImage(warped)
         
@@ -591,34 +531,7 @@ try:
 #####################################################################################################################################################
 
     def hough_crop(img, rect, threshold):
-        
-        #imgb = img.copy()
-        #imgg = img.copy()
-        #imgr = img.copy()
-        #imgb[:,:,1] = 0
-        #imgb[:,:,2] = 0
-        #imgg[:,:,0] = 0
-        #imgg[:,:,2] = 0
-        #imgr[:,:,0] = 0
-        #imgr[:,:,1] = 0
-            
-        #show(imgb, "blue")
-        #show(imgg, "green")
-        #show(imgr, "red")
-        
-        #warped_list = [hough(img, rect, threshold),hough(imgb, rect, threshold),hough(imgg, rect, threshold),hough(imgr, rect, threshold)]
-        
-        #for warped in warped_list:
-            #show(warped)
-        
-        #return(warped_list)
-        return([hough(img,rect,threshold)])
-
-    def hough(img, rect, threshold):
-        
-        #debug flag
-        debug_hough = False
-        
+               
         #if threshold is too low, use simple crop
         if threshold < 100:
             return (simple_crop(img, rect))
@@ -630,11 +543,9 @@ try:
         crop_img = simple_crop(img, new_rect)
         
         if crop_img.shape[0] > crop_img.shape[1]:
-            #warped = np.rot90(warped)
             crop_img = cv2.rotate(crop_img, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
         
-        #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
-        #crop_img = scaleImage(crop_img)
+        #preprocessing: blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
         blur = crop_img
         blur = cv2.GaussianBlur(blur,(7,7),15)
         blur = cv2.bilateralFilter(blur,9,15,15)
@@ -645,37 +556,17 @@ try:
         gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
         norm = normalizeImage(gray)    
         mean = np.mean(gray)
-        if debug_hough:
-            print("threshold ist " + str(threshold) + " mean ist " + str(np.mean(gray)))
-        #mean *1.2 bisher zweitbeste (31), beste mean+25 (27)
         
         ret, binary = cv2.threshold(gray, int(mean+30), THRESHOLD_MAX, cv2.THRESH_BINARY)
-        
-        if debug_hough:
-            output("pics4thesis", norm, "1073.png", "norm")
-        
-        if debug_hough:
-            cv2.imshow("test", binary)
-            cv2.waitKey()
-        #binary = cv2.GaussianBlur(binary,(3,3),15)    
-        #if CONT_BASED_CUT == False:
-         #   binary = skeleton (binary)
-        #binary = cv2.GaussianBlur(binary,(3,3),15)
-        
+            
         #get shape
         height, width = binary.shape
         
         # cannyedge        
-        #dst = cannyThreshold(binary)
         dst = cannyThreshold(norm)
         
-        if debug_hough:
-            show(dst, "canny")
-        if debug_hough:
-            output("pics4thesis", dst, "1073.png", "canny")
         #hough with canny edge
         lines = cv2.HoughLines(dst, 1, np.pi / 180, threshold)
-        #lines = cv2.HoughLinesP(dst, 1, np.pi / 180, threshold, 30,10)
         cdst = cv2.cvtColor(norm, cv2.COLOR_GRAY2BGR)
         # empty lineList to collect all lines        
         lineList = []
@@ -692,16 +583,12 @@ try:
                 y0 = b * rho
                 pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
                 pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-                #cdst = cv2.circle(cdst, pt1, 4, (255,0,0), 2)
-                #cdst = cv2.circle(cdst, pt2, 4, (255,0,0), 2)
                 # add lines to List                
                 line =[pt1,pt2]
                 newLine = getImageLine(cdst, line)    
                 if len(newLine) == 2:
                     cv2.line(cdst, newLine[0], newLine[1], (0,0,255), 1, cv2.LINE_AA)
-                    lineList.append(newLine)                
-            if debug_hough:
-                output("pics4thesis", cdst, "1073.png", "lines")                
+                    lineList.append(newLine)                           
             # calculate every intersection between lines 
             for i in range(0, len(lineList)):    
                 for j in range(0, len(lineList)):
@@ -723,9 +610,6 @@ try:
                         continue
                     # call intersection calculation
                     inter = intersection(lineList[i], lineList[j])
-                    #ignor if the intersection is in the corners
-                    
-                    #if not ((inter[0] < 1 or inter [0] > width) or inter[1] < 1 or inter[1] > height):
                         
                     heightdiff = int((height - height / 1.1) / 2)
                     widthdiff = int((width - width / 1.1) / 2)
@@ -734,13 +618,7 @@ try:
                         # add intersections as dots to output image for visualization
                         cdst = cv2.circle(cdst, inter, 4, (0,255,0), 2)
                     else:
-                        cdst = cv2.circle(cdst, inter, 4, (0,0,255), 2)
-            if debug_hough:
-                output("pics4thesis", cdst, "1073.png", "intersection")
-            if debug_hough:       
-                cv2.imshow("test", cdst)
-                cv2.waitKey()
-        
+                        cdst = cv2.circle(cdst, inter, 4, (0,0,255), 2)        
         tlList = []
         trList = []
         blList = []
@@ -768,13 +646,10 @@ try:
         
         #when no corner detected return simple cropped image
         if tl == None or tr == None or bl == None or br == None:
-            global COUNTER
-            COUNTER = COUNTER +1
             #return (simple_crop(img, rect))
             #perform hough rotate with lower threshold
             return(hough(img, rect, threshold-10))
-            
-        
+                    
         tl = list(tl)     
         tr = list(tr)
         bl = list(bl)
@@ -787,7 +662,6 @@ try:
         print (src)
         #get rotation matrix
         M = cv2.getPerspectiveTransform(np.float32(src), dst) 
-        #M, mask = cv2.findHomography(np.float32(src), dst, cv2.RANSAC,5.0)
         #warp
         warped = cv2.warpPerspective(crop_img, M, (int(width), int(height)))
         
@@ -800,222 +674,8 @@ try:
         # resize image
         warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_AREA)
         
-        #warped = addborder(warped)
-        
-        if debug_hough:
-            # visualization for debug
-            cdst = crop_img
-            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
-            cv2.imshow("test", cdst)
-            cv2.waitKey()
-            output("pics4thesis", binary, "1073.png", "binary")
         return (warped)
         
-    def houghP(img, rect, threshold):
-        
-        #debug flag
-        debug_hough = False
-        
-        #if threshold is too low, use simple crop
-        if threshold < 100:
-            return (simple_crop(img, rect))
-        
-        (x, y), (w, h), angle = rect
-
-        new_rect = (x,y), (int(w*1.3), int(h*1.3)), angle
-
-        crop_img = simple_crop(img, new_rect)
-        
-        if crop_img.shape[0] > crop_img.shape[1]:
-            #warped = np.rot90(warped)
-            crop_img = cv2.rotate(crop_img, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
-        
-        #preprocessing: scale, blur, grayscale, normalize, binary threshold 180, blur, skeleton, blur
-        #crop_img = scaleImage(crop_img)
-        blur = cv2.bilateralFilter(crop_img,9,75,75)
-        blur = cv2.fastNlMeansDenoising(blur,7,7,15)        
-        blur = cv2.GaussianBlur(blur,(7,7),15)
-        
-        gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)       
-        norm = normalizeImage(gray)    
-        mean = np.mean(gray)
-        if debug_hough:
-            print("threshold ist " + str(threshold) + " mean ist " + str(np.mean(gray)))
-        #mean *1.2 bisher zweitbeste (31), beste mean+25 (27)
-        
-        ret, binary = cv2.threshold(gray, int(mean+30), THRESHOLD_MAX, cv2.THRESH_BINARY)
-        
-       # if debug_hough:
-        #    output("pics4thesis", binary, "1073.png", "binary")
-        
-        if debug_hough:
-            cv2.imshow("test", binary)
-            cv2.waitKey()
-        #binary = cv2.GaussianBlur(binary,(3,3),15)    
-        #if CONT_BASED_CUT == False:
-         #   binary = skeleton (binary)
-        #binary = cv2.GaussianBlur(binary,(3,3),15)
-        
-        #get shape
-        height, width = binary.shape
-        
-        # cannyedge        
-        #dst = cannyThreshold(binary)
-        dst = cannyThreshold(norm)
-        
-        if debug_hough:
-            show(dst, "canny")
-        #if debug_hough:
-            #output("pics4thesis", binary, "1073.png", "dst")
-        #hough with canny edge
-        lines = cv2.HoughLines(dst, 1, np.pi / 180, threshold)
-        #lines = cv2.HoughLinesP(dst, 1, np.pi / 180, threshold, 30,10)
-        cdst = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
-        
-        linesP = cv.HoughLinesP(dst, 1, np.pi / 180, threshold, minLineLength = 100, maxLineGap = 25)
-        # empty lineList to collect all lines        
-        lineList = []
-        interList = []
-        
-        if lines is not None:            
-            # go through lines, calculate the coordinates
-            for i in range(0, len(linesP)):
-                #rho = lines[i][0][0]
-                #theta = lines[i][0][1]
-                #a = math.cos(theta)
-                #b = math.sin(theta)
-                #x0 = a * rho
-                #y0 = b * rho
-                #pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
-                #pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-                #cdst = cv2.circle(cdst, pt1, 4, (255,0,0), 2)
-                #cdst = cv2.circle(cdst, pt2, 4, (255,0,0), 2)
-                # add lines to List                
-                #line =[pt1,pt2]
-                #newLine = getPictureLine(cdst, line)    
-                #if len(newLine) == 2:
-                    #cv2.line(cdst, newLine[0], newLine[1], (0,0,255), 1, cv2.LINE_AA)
-                x1 = linesP[i][0][0]
-                y1 = linesP[i][0][1]
-                x2 = linesP[i][0][2]
-                y2 = linesP[i][0][3]
-                newLine = [(x1,y1), (x2,y2)]
-                cv2.line(cdst, newLine[0], newLine[1], (0,0,255), 1, cv2.LINE_AA)
-                lineList.append(newLine)                
-        #if debug_hough:
-            #output("pics4thesis", cdst, "1073.png", "lines")                
-            # calculate every intersection between lines 
-            for i in range(0, len(lineList)):    
-                for j in range(0, len(lineList)):
-                    # skip intersection of line with itself
-                    if lineList[i] == lineList[j]:
-                        continue
-                    
-                    #skip if lines are in the same direction
-                    quia = getQuadrant(binary, lineList[i][0])
-                    quib = getQuadrant(binary, lineList[i][1])
-                    quja = getQuadrant(binary, lineList[j][0])
-                    qujb = getQuadrant(binary, lineList[j][1])
-                    if quia == quib or quja == qujb:
-                        continue
-                    #if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
-                    if (quia == quja or quia == qujb) and (quib == quja or quib == qujb):
-                        continue
-                    if difflib.SequenceMatcher(None, quia,quib).ratio() == 0 or difflib.SequenceMatcher(None, quja,qujb).ratio() == 0 :
-                        continue
-                    # call intersection calculation
-                    inter = intersection(lineList[i], lineList[j])
-                    #ignor if the intersection is in the corners
-                    
-                    #if not ((inter[0] < 1 or inter [0] > width) or inter[1] < 1 or inter[1] > height):
-                        
-                    heightdiff = int((height - height / 1.1) / 2)
-                    widthdiff = int((width - width / 1.1) / 2)
-                    if not ((inter[0] < widthdiff or inter [0] > width-widthdiff) or inter[1] < heightdiff or inter[1] > height - heightdiff):    
-                        interList.append(inter)
-                        # add intersections as dots to output image for visualization
-                        cdst = cv2.circle(cdst, inter, 4, (0,255,0), 2)
-                    else:
-                        cdst = cv2.circle(cdst, inter, 4, (0,0,255), 2)
-            #if debug_hough:
-             #   output("pics4thesis", cdst, "1073.png", "intersection")
-            if debug_hough:       
-                cv2.imshow("test", cdst)
-                cv2.waitKey()
-        
-        tlList = []
-        trList = []
-        blList = []
-        brList = []
-        
-        #sort inter
-        for inters in interList:
-            if getQuadrant(binary, inters) == "tl":
-                tlList.append(inters)
-
-            if getQuadrant(binary, inters) == "tr":
-                trList.append(inters)
-                
-            if getQuadrant(binary, inters) == "bl":
-                blList.append(inters)
-                
-            if getQuadrant(binary, inters) == "br":
-                brList.append(inters)
-        
-        #cast tuple to list
-        tl = getCorner(tlList, "tl")   
-        tr = getCorner(trList, "tr")
-        bl = getCorner(blList, "bl")
-        br = getCorner(brList, "br")
-        
-        #when no corner detected return simple cropped image
-        if tl == None or tr == None or bl == None or br == None:
-            global COUNTER
-            COUNTER = COUNTER +1
-            #return (simple_crop(img, rect))
-            #perform hough rotate with lower threshold
-            return(hough(img, rect, threshold-10))
-            
-        
-        tl = list(tl)     
-        tr = list(tr)
-        bl = list(bl)
-        br = list(br)
-        
-        #put points in array
-        src = [bl, tl, tr, br]
-        #get array for destination
-        dst = np.array([[0, height],[0, 0],[width, 0],[width, height]], dtype="float32")
-        print (src)
-        #get rotation matrix
-        M = cv2.getPerspectiveTransform(np.float32(src), dst) 
-        #M, mask = cv2.findHomography(np.float32(src), dst, cv2.RANSAC,5.0)
-        #warp
-        warped = cv2.warpPerspective(crop_img, M, (int(width), int(height)))
-        
-        # dsize
-        if USE_TEMPLATE == True:
-            dsize = (warped.shape[1], int(warped.shape[1] / aspectRatio))
-        else:
-            dsize = (warped.shape[1], int(warped.shape[1] * 0.8))
-
-        # resize image
-        warped = cv2.resize(warped, dsize, interpolation = cv2.INTER_AREA)
-        
-        if debug_hough:
-            # visualization for debug
-            cdst = crop_img
-            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tl[0], tl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((tr[0], tr[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((bl[0], bl[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))
-            cdst = cv2.drawContours(cdst, [cv2.boxPoints(((br[0], br[1]), (10, 10), 0)).astype('int32')], -1, (250, 0, 250))   
-            cv2.imshow("test", cdst)
-            cv2.waitKey()
-            output("pics4thesis", warped, "1073.png", "warped")
-        return (warped)
         
 #####################################################################################################################################################
 #
@@ -1046,25 +706,11 @@ try:
         #sort the counter list, return the coordinates with the highest counter
         ioumax = max(iouList)
         ind = [i for i, x in enumerate(iouList) if x == ioumax]
-        #for i, iou in enumerate(iouList):
-         #   if iou <= ioumax/2:
-          #      iouList.pop(i)
-           #     inList.pop(i)
-            #    i = i-1
+
 
         position = np.argsort(iouList)
         n = iouList.count(int(iouList[position[-1]]))
-        #print (str(iouList[position[-1]]) + " kommt " + str(n) + " mal vor")
-        
-        #get mean of coordinates
-        #point = inList[position[-1]]
-        #cornarray = []
-        #cornarray = inList[position[-n:0]]
-        #for i in range(n):
-            #cornarray.append(inList[position[-i]])
-            
-        #corner = (int(sum(c[0] for c in cornarray)/n),int(sum(c[1] for c in cornarray)/n))
-        #corner = np.mean(cornarray, axis = 0)
+
         ioumaxList = []
         for i in range(len(ind)):
             ioumaxList.append (inList[ind[i]]) 
@@ -1083,44 +729,7 @@ try:
             x = min(inter[1]for inter in inList)          
         point = (y,x)
         return(point)
-    
-    ##############original get corner
-    def getCornerorg(inList):
-        
-        # when list empty return 0
-        if len(inList) == 0:
-            return(None)
-        #empty intersection over union list
-        iouList = []
-        #compare every item in list with every other item in list
-        for i in range(len(inList)):
-            iou = 0
-            for j in range(len(inList)):
-                if inList[i] != inList[j]:
-                    #build rectangles around coordinates and check via intersection over union if they are close to each other
-                    recta = inList[i][0], inList[i][1],10,10
-                    rectb = inList[j][0], inList[j][1],10,10
-                    if intersection_over_union(recta, rectb) > 0.9:
-                        #if close, counter +1
-                        iou += 1
-            #save the counters in list
-            iouList.append(iou)
-        #sort the counter list, return the coordinates with the highest counter
-        position = np.argsort(iouList)
-        n = iouList.count(int(iouList[position[-1]]))
-        #print (str(iouList[position[-1]]) + " kommt " + str(n) + " mal vor")
-        
-        #get mean of coordinates
-        corner = inList[position[-1]]
-        cornarray = []
-        #cornarray = inList[position[-n:0]]
-        for i in range(n):
-            cornarray.append(inList[position[-i]])
-
-        corner = (int(sum(c[0] for c in cornarray)/n),int(sum(c[1] for c in cornarray)/n))
-        #corner = np.mean(cornarray, axis = 0)
-        return(corner)
-    
+       
 #####################################################################################################################################################
 #
 # return the abbreviation of the quadrant where the point is located
@@ -1252,10 +861,7 @@ try:
         img = scaleImage(img)
         mask = np.zeros(img.shape,np.uint8)
         cv2.drawContours(mask,[contour],0,(255,255,255),-1)
-        #newmask = np.zeros(img.shape,np.uint8)
-        #newmask = img[mask]
         mask = cv2.bitwise_and(mask, img)
-        #masked = cv2.bitwise_and(img, img, mask=mask)
         out = mask
         cv2.imshow("rotate back", out)
         cv2.waitKey(0)
@@ -1304,19 +910,10 @@ try:
         leftLine = [(0,0),(0, height)]
         bottomLine = [(0,height),(width, height)]
         rightLine = [(width, 0),(width, height)]
-        #cv2.line(img, topLine[0], topLine[1], (255,0,255), 5, cv2.LINE_AA)
-        #cv2.line(img, leftLine[0], leftLine[1], (255,0,255), 5, cv2.LINE_AA)
-        #cv2.line(img, bottomLine[0], bottomLine[1], (255,0,255), 5, cv2.LINE_AA)
-        #cv2.line(img, rightLine[0], rightLine[1], (255,0,255), 5, cv2.LINE_AA)
-        #get intersections of border lines and input line
         pt1 = intersection(topLine, line)
         pt2 = intersection(leftLine, line)
         pt3 = intersection(bottomLine, line)
         pt4 = intersection(rightLine, line)
-        #cdst = cv2.circle(img, pt1, 4, (255,0,0), 2)
-        #cdst = cv2.circle(cdst, pt2, 4, (255,0,0), 2)
-        #cdst = cv2.circle(cdst, pt3, 4, (255,0,0), 2)
-        #cdst = cv2.circle(cdst, pt4, 4, (255,0,0), 2)
         newline = []
         #validity check for each intersection, two of them should pass
         if validCheck(img, pt1):
@@ -1327,20 +924,6 @@ try:
             newline.append(pt3)
         if validCheck(img, pt4):
             newline.append(pt4)            
-        
-        #debug
-        if not len(newline) == 2:
-            cv2.line(img, line[0], line[1], (255,255,0), 1, cv2.LINE_AA)
-            cdst = cv2.circle(img, pt1, 4, (255,0,0), 2)
-            cdst = cv2.circle(cdst, pt2, 4, (255,0,0), 2)
-            cdst = cv2.circle(cdst, pt3, 4, (255,0,0), 2)
-            cdst = cv2.circle(cdst, pt4, 4, (255,0,0), 2)
-            print ("point 1 " + str(pt1) + "\n")
-            print ("point 2 " + str(pt2) + "\n")
-            print ("point 3 " + str(pt3) + "\n")
-            print ("point 4 " + str(pt4) + "\n")
-            #show (img, "rand")
-            print("stop")
         return(newline)
     
 #####################################################################################################################################################
@@ -1360,19 +943,6 @@ try:
         if pt == (0,0) or pt == (width, 0) or pt == (width, height) or pt == (0, height):
             return(False)
         return(True)
-    
-
-    def addborder(img):
-        #show(img)
-        height, width, channels  = img.shape
-        offset = 10
-        thickness = 3
-        cv2.line(img, (offset,offset), (offset, height-offset), (255,255,255), thickness, cv2.LINE_AA)
-        cv2.line(img, (offset,offset), (width-offset, offset), (255,255,255), thickness, cv2.LINE_AA)
-        cv2.line(img, (offset, height-offset), (width-offset, height-offset), (255,255,255), thickness, cv2.LINE_AA)
-        cv2.line(img, (width-offset, offset), (width-offset, height-offset), (255,255,255), thickness, cv2.LINE_AA)
-        #show(img)
-        return(img)
         
 #####################################################################################################################################################
 #

@@ -2,7 +2,11 @@
 """
 Created on Thu Mar  4 16:08:34 2021
 
-@author: Simon
+@author: Simon Metzger
+
+licensend under Attribution-NonCommercial-ShareAlike 3.0 Germany
+
+CC BY-NC-SA 3.0 DE
 """
 
 #####################################################################################################################################################
@@ -22,14 +26,14 @@ THRESHOLD_MAX = 200
 CUT_THRESH = 120
 #change input path (default = same path as pyhon files)
 USE_ABSOLUTE_PATH = True
-ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours" #"D:\Arbeit\Grabungsfotos"#
+ABSOLUTE_PATH = ""
 #use iterative instead of adaptive threshold
 MODIFY_THRESHOLD = False
 #search for a template to get aspect ratio
 USE_TEMPLATE = True
 #use simple crop instead of the more complex hough based crop
 SIMPLE_CROP = True
-#use cut based on contours instead of rects
+#use cut based on contours instead of rects, not recommended
 CONT_BASED_CUT = False
 #use OCR
 OCR = True
@@ -45,8 +49,3 @@ OPTIMUM = True
 FSCORE = False
 #only use picture with this name(s)
 CHECK_PICTURE = ""
-#1110 crasht
-#1073
-
-################################################################
-COUNTER = 0

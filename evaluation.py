@@ -2,7 +2,11 @@
 """
 Created on Fri Mar 12 15:51:09 2021
 
-@author: Simon
+@author: Simon Metzger
+
+licensend under Attribution-NonCommercial-ShareAlike 3.0 Germany
+
+CC BY-NC-SA 3.0 DE
 """
 
 from basics import *
@@ -33,10 +37,6 @@ def evaluate(evaluationdict, ocrlist):
                     best = dicts["bestguess"].replace(" ", "")
                     best = best.replace(",","")
                     
-                    #sbox = difflib.SequenceMatcher(None, ground,box)
-                    #stxt = difflib.SequenceMatcher(None, ground,txt)
-                    #rbox = round(sbox.ratio(),2)
-                    #rtxt = round(stxt.ratio(),2)
                     if FSCORE == True:
                         tp, fp, fn = (getMeasures(ground, txt))
                         pre, rec, f = getScores(tp, fp, fn)
@@ -161,8 +161,6 @@ def csvOutput(outputlist, folder = "evaluation", name = "output"):
                 #write values in csv format
                 file.write(dicts["image"] + ",")
                 rect = "rectangle " + str(i)
-                #for key in dicts[rect]:
-                    #file.write(str(dicts[rect][key]) + ",")
                 file.write(dicts[rect]["rectangle"] + ",")
                 file.write(dicts[rect]["textimage"] + ",")
                 file.write(dicts[rect]["boximage"] + ",")
@@ -267,10 +265,7 @@ def getMeasures(ground, text):
             textdict[letter] = 1
         if letter not in grounddict:
             grounddict[letter] = 0
-    #print("ground\n")
-    #print(grounddict)
-    #print("text\n")
-    #print(textdict)
+
     if len(grounddict) > 0 and len(textdict) > 0:
         for key in grounddict:
             g = grounddict[key]
@@ -282,17 +277,14 @@ def getMeasures(ground, text):
             if g > t:
                 tp = tp + t
                 fn = fn + (g -t)
-    #print("tp: " + str(tp))
-    #print("fp: " + str(fp))
-    #print("fn: " + str(fn))            
+          
     return(tp,fp,fn)
 
 def getScores(tp,fp,fn):
     if tp + fp != 0 and tp + fn != 0:
         precision = round(tp / (tp + fp),2)
         recall = round(tp / (tp + fn),2)
-        fscore = round(2 * ((precision * recall) / (precision + recall)),2)
-        #print ("precision: " + str(precision) + " recall: " + str(recall) + " fscore: " + str(fscore))        
+        fscore = round(2 * ((precision * recall) / (precision + recall)),2)     
         return (precision, recall, fscore)
     else:
         return (0,0,0)

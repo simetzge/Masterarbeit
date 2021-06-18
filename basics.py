@@ -2,7 +2,11 @@
 """
 Created on Thu Mar  4 15:58:04 2021
 
-@author: Simon
+@author: Simon Metzger
+
+licensend under Attribution-NonCommercial-ShareAlike 3.0 Germany
+
+CC BY-NC-SA 3.0 DE
 """
 
 import os
@@ -186,6 +190,11 @@ def ocrOutput(ocrList, folder = "OCR", name = "output"):
                     printed = True
                 file.write("\n")
 
+#####################################################################################################################################################
+#      
+# show image for debug
+#
+#####################################################################################################################################################
         
 def show(img, name = "show"):
     cv2.namedWindow(name, cv2.WINDOW_NORMAL) 
