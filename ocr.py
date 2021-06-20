@@ -124,12 +124,10 @@ def image_to_text(img):
     rotate = False
     
     #try to read
-    config = ("board -l dict --oem 1 --psm 3")
-
-    texta = pytesseract.image_to_string(img, config=config)
+    texta = pytesseract.image_to_string(img, config=OCR_CONFIG)
     #rotate and try again
     img = cv2.rotate(img, cv2.cv2.ROTATE_180)
-    textb = pytesseract.image_to_string(img, config=config)
+    textb = pytesseract.image_to_string(img, config=OCR_CONFIG)
     
     #take the version with more chars detected and send them to textsplit for proper text output, set rotate to True if necessary
     comparea = texta.replace(" ", "")
@@ -164,10 +162,8 @@ def image_to_box(img):
     rotate = False
     
     img = preprocessing(img)
-   
-    config = ("board -l dict --oem 1 --psm 3")
     #get characters with bounding boxes
-    boxes = pytesseract.image_to_boxes(img, config=config)
+    boxes = pytesseract.image_to_boxes(img, config=OCR_CONFIG)
     
     #boxes is a list, where every single letter is a seperate entry. The list is casted into a string, the string is split at every space
     string = ''.join(boxes)
