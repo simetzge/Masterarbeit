@@ -4,4 +4,7 @@ This reposetory contains a tool for the detection of boards in archeological exc
 
 To get the tool running, a few steps are necessary:
 
-- The tool needs input. Create an input folder in the program path or in any other path and provide this path via the ABSOLUTE_PATH-Flag in flags.py. Default input type is jpg
+- The tool is started via main.py
+- The tool needs input. Create an input folder in the program path or in any other path and provide this path via the ABSOLUTE_PATH-Flag in flags.py. Default input type is jpg. It can be changed in flags too.
+- A local version of tesseract is needed, e.g. the version provided by the [UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki). The tesseract path should be added in the flags.py 
+- The packages numpy, difflib, opencv and pytesseract should be installed
