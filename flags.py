@@ -14,8 +14,10 @@ Created on Thu Mar  4 16:08:34 2021
 #change input path (default = same path as pyhon files)
 USE_ABSOLUTE_PATH = True
 ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
+#input data format
+INPUT_FORMAT = ".jpg"
 
-#only use picture with this name(s)
+#only use picture with this name
 CHECK_PICTURE = "1020"
 
 
@@ -55,6 +57,9 @@ CUT_THRESH = 120
 # OCR
 #
 ##################################################################################################################################################### 
+
+#tesseract path
+TESS_PATH = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 #tesseract config
 OCR_CONFIG = ("board -l dict --oem 1 --psm 3")

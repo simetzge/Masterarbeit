@@ -33,7 +33,7 @@ try:
 
     def indiOCR(folder = "crop"):
         #main function for direct testing and comparison of OCR methods, for debug only
-        filePaths, fileNames = searchFiles(".png", folder)
+        filePaths, fileNames = searchFiles(INPUT_FORMAT, folder)
         
         #open the files in cv2
         images = []

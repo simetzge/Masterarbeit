@@ -157,7 +157,7 @@ def textsplit(text):
 def image_to_box(img):
     
     #call for pytesseract
-    pytesseract.pytesseract.tesseract_cmd=r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd=TESS_PATH
     #set default value for rotate flag
     rotate = False
     

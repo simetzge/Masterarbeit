@@ -23,7 +23,7 @@ try:
     def main():
         
         #get paths and names of all images in folder input
-        filePaths, fileNames = searchFiles('.jpg', 'input')
+        filePaths, fileNames = searchFiles(INPUT_FORMAT, 'input')
         #open the files in cv2
         images = []
         ocrlist =[]        
