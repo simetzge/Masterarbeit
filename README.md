@@ -1,6 +1,6 @@
 # Masterarbeit
 
-This reposetory contains a tool for the detection of boards in archeological excavations.
+This repository contains a tool for the detection of boards in archeological excavations.
 
 To get the tool running, a few steps are necessary:
 
