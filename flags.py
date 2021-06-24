@@ -2,7 +2,11 @@
 """
 Created on Thu Mar  4 16:08:34 2021
 
-@author: Simon
+@author: Simon Metzger
+
+licensend under Attribution-NonCommercial-ShareAlike 3.0 Germany
+
+CC BY-NC-SA 3.0 DE
 """
 
 #####################################################################################################################################################
@@ -18,7 +22,7 @@ ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
 INPUT_FORMAT = ".jpg"
 
 #only use picture with this name
-CHECK_PICTURE = "1020"
+CHECK_PICTURE = "test"
 
 
 #use OCR
@@ -64,6 +68,9 @@ TESS_PATH = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 #tesseract config
 OCR_CONFIG = ("board -l dict --oem 1 --psm 3")
 
+#invert image (use this if the background is darker than the text)
+INVERT_IMAGE = True
+
 #####################################################################################################################################################
 #
 # evaluation
@@ -71,7 +78,7 @@ OCR_CONFIG = ("board -l dict --oem 1 --psm 3")
 ##################################################################################################################################################### 
 
 #evaluate OCR
-EVALUATE = True
+EVALUATE = False
 #name of evaluation list
 EVALUATION_LIST = "evaluationlist.csv"
 #add optmimum value to evaluation
