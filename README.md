@@ -9,4 +9,6 @@ To get the tool running, a few steps are necessary:
 - A local version of tesseract is needed, e.g. the version provided by the [UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki). The tesseract path should be added in the flags.py.
 - The packages numpy, difflib, opencv and pytesseract are mandatory.
 - Yolo and Coco weights are not included. The CNN-part won't work without them.
-- Use the image "testimage" as test image.
+- The folder "example" contains everything needed to run a test:
+  - Use the image "testimage" as test image.
+  - Copy the "tessdata" folder into you "Tesseract-OCR" folder to use the dictionary and whitelist or change the ocr config in flags.py accordingly.
