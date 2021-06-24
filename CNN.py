@@ -3,6 +3,8 @@
 Created on Mon 
 
 @author: asellent
+
+@modified: Simon Metzger
 """
 
 import cv2 as cv 
