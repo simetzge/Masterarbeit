@@ -11,7 +11,9 @@ CC BY-NC-SA 3.0 DE
 import pytesseract
 import cv2
 import numpy as np
+
 from basics import *
+from flags import *
 
 def ocr(cropimgs, fileName):
     imagedict = {"image": fileName}
@@ -65,7 +67,7 @@ def ocr(cropimgs, fileName):
             else:
                 bestguess = text
         #output of rectimage and boximage
-        output('rect', textimg, fileName, str(j))
+        output('text', textimg, fileName, str(j))
         output('box', boximg, fileName, str(j))
         rectdict = {"rectangle": fileName + "_" + str(j), "textimage": text, "boximage": boxtext}
         imagedict["rectangle " + str(j)] =  rectdict
@@ -89,7 +91,8 @@ def get_text(img, mode = 'image_to_text'):
     
     preimg = normalizeImage(preimg)
     
-    preimg = (255-preimg)
+    if INVERT_IMAGE:
+        preimg = (255-preimg)
     
     text, rotate = image_to_text(preimg)
     if rotate == True:
@@ -119,7 +122,7 @@ def get_text(img, mode = 'image_to_text'):
 def image_to_text(img):
     
     #call for pytesseract
-    pytesseract.pytesseract.tesseract_cmd=r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd=TESS_PATH
     #set default value for rotate flag
     rotate = False
     
@@ -161,9 +164,9 @@ def image_to_box(img):
     #set default value for rotate flag
     rotate = False
     
-    img = preprocessing(img)
+    preimg = preprocessing(img)
     #get characters with bounding boxes
-    boxes = pytesseract.image_to_boxes(img, config=OCR_CONFIG)
+    boxes = pytesseract.image_to_boxes(preimg, config=OCR_CONFIG)
     
     #boxes is a list, where every single letter is a seperate entry. The list is casted into a string, the string is split at every space
     string = ''.join(boxes)
@@ -181,6 +184,8 @@ def image_to_box(img):
         if len(row) == 6:
             newstring.append(row)
             row = []
+    #convert to colored img for output
+    boximg = cv2.cvtColor(preimg, cv2.COLOR_GRAY2BGR)
     
     #draw every character with its bounding box
     for rows in newstring:
@@ -190,12 +195,12 @@ def image_to_box(img):
         x, y, w, h = (int(rows[1]), int(rows[2]), int(rows[3]), int(rows[4]))
        
         #y has to be inverted to be compatible with cv2 functions
-        cv2.rectangle(img, (x, img.shape[0] - y), (w, img.shape[0] - h), (0, 255, 0), 2)
-        cv2.putText(img, rows[0], (int(x + ((w-x) / 2)), int(img.shape[0] - y + (y-h)/2)),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 3)
+        cv2.rectangle(boximg, (x, boximg.shape[0] - y), (w, boximg.shape[0] - h), (0, 255, 0), 2)
+        cv2.putText(boximg, rows[0], (int(x + ((w-x) / 2)), int(boximg.shape[0] - y + (y-h)/2)),cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 3)
         textlist.append(str(rows[0]))    
     text = "".join(textlist)
    
-    return(img, text)
+    return(boximg, text)
         
 
 #####################################################################################################################################################
