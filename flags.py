@@ -17,16 +17,16 @@ CC BY-NC-SA 3.0 DE
 
 #change input path (default = same path as pyhon files)
 USE_ABSOLUTE_PATH = True
-ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\masterarbeit\\contours"
+ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\Tafelerkennung\\Tool"
 #input data format
 INPUT_FORMAT = ".jpg"
 
 #only use picture with this name
-CHECK_PICTURE = "test"
+CHECK_PICTURE = ""
 
 
 #use OCR
-OCR = True
+OCR = False
 #use CNN: yolo, coco, both
 USE_CNN = ""
 
@@ -66,7 +66,7 @@ CUT_THRESH = 120
 TESS_PATH = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 #tesseract config
-OCR_CONFIG = ("board -l dict --oem 1 --psm 3")
+OCR_CONFIG = ("board --oem 1 --psm 3")
 
 #invert image (use this if the background is darker than the text)
 INVERT_IMAGE = True

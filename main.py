@@ -11,11 +11,12 @@ CC BY-NC-SA 3.0 DE
 
 from flags import *
 from ocr import *
-from cnn import *
+#from cnn import *
 from evaluation import *
 from basics import *
 from rectdetection import *
 import cv2
+import time
 
 try:   
 #####################################################################################################################################################
@@ -23,17 +24,20 @@ try:
     def main():
         
         #get paths and names of all images in folder input
+        start = time.process_time()
         filePaths, fileNames = searchFiles(INPUT_FORMAT, 'input')
         #open the files in cv2
-        images = []
+        #images = []
         ocrlist =[]        
-        images = [cv2.imread(files) for files in filePaths]              
+        #images = [cv2.imread(files) for files in filePaths]              
         #get aspect ratio from template if flag is set
         
         if USE_TEMPLATE == True:
-            getAspectRatio(images, fileNames)            
+            getAspectRatio(filePaths, fileNames)            
         #detect rectangles in every image, adaptive or iterative
-        for i, img  in enumerate(images):
+        #for i, img  in enumerate(images):
+        for i , file in enumerate(filePaths):
+            img = cv2.imread(file)
             #skip template
             if 'template' in fileNames[i]:
                 continue
@@ -41,7 +45,7 @@ try:
             if CHECK_PICTURE != "":
                 if not CHECK_PICTURE in fileNames[i]:
                     continue      
-            print("the next image is " + fileNames[i] + " (" + str(i) + "/" + str(len(images)) + ")")
+            print("the next image is " + fileNames[i] + " (" + str(i) + "/" + str(len(fileNames)) + ")")
             if MODIFY_THRESHOLD:
                 rects,conts = rect_detect_iterative(img, fileNames[i])
             else:
@@ -84,7 +88,8 @@ try:
                 csvOutput(evaluated)
             else:
                 print("no OCR no evaluation")
-                
+        print(time.process_time() - start)
+
 #####################################################################################################################################################
 #
 # call main

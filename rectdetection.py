@@ -294,7 +294,7 @@ try:
 #
 #####################################################################################################################################################
     
-    def getAspectRatio(imgs, fnames):
+    def getAspectRatio(fpaths, fnames):
         
         #define global aspectRatio, default is 0 in case no file is found
         global aspectRatio
@@ -308,7 +308,7 @@ try:
             
             #break if match is found
             if match != None:
-                img = imgs[i]
+                img = cv2.imread(fpaths[i])
                 print('template found')
                 break
         #print error if no match in the entire input is found
