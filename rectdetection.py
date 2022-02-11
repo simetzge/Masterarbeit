@@ -309,11 +309,11 @@ try:
             #break if match is found
             if match != None:
                 img = cv2.imread(fpaths[i])
-                print('template found')
+                print('Template found!')
                 break
         #print error if no match in the entire input is found
         if match == None:
-            print("failed to find template")
+            print("Failed to find template!")
         else:
             img = scaleImage(img)
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

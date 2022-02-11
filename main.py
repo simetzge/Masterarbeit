@@ -30,22 +30,27 @@ try:
         #images = []
         ocrlist =[]        
         #images = [cv2.imread(files) for files in filePaths]              
-        #get aspect ratio from template if flag is set
-        
+        #get aspect ratio from template if flag is set        
         if USE_TEMPLATE == True:
             getAspectRatio(filePaths, fileNames)            
         #detect rectangles in every image, adaptive or iterative
         #for i, img  in enumerate(images):
+            
+        #get number of files to track the progress
+        file_number = len(fileNames)
         for i , file in enumerate(filePaths):
             img = cv2.imread(file)
             #skip template
             if 'template' in fileNames[i]:
+                file_number = file_number -1
                 continue
             #skip all pictures but the one that should be checked
             if CHECK_PICTURE != "":
                 if not CHECK_PICTURE in fileNames[i]:
-                    continue      
-            print("the next image is " + fileNames[i] + " (" + str(i) + "/" + str(len(fileNames)) + ")")
+                    continue            
+            #print progress based on the number of files to be processed                
+            print("The next image is \"" + fileNames[i] + "\" (" + str(i) + "/" + str(file_number) + ")")            
+            #run iterative or adaptive detection, depending on settings    
             if MODIFY_THRESHOLD:
                 rects,conts = rect_detect_iterative(img, fileNames[i])
             else:
@@ -54,7 +59,6 @@ try:
                 #oldconts = conts
                 conts = [getCont(img,rect) for rect in rects]
                 #contCompare(conts, oldconts, img)
-
             if len(rects) > 0:
                 #crop found rectangle
                 if CONT_BASED_CUT == True:
@@ -71,8 +75,7 @@ try:
                     output('crop', crop, fileNames[i], str(j))
                 
                 #write images without rectangles
-                output('imagecut', restimg, fileNames[i])
-            
+                output('imagecut', restimg, fileNames[i])            
             #use cnns to identify objects in the images
             if USE_CNN == "coco" or USE_CNN == "both":
                 output('coco', coco(img), fileNames[i])
@@ -87,8 +90,10 @@ try:
                 evaluated = evaluate(evaluation, compared)
                 csvOutput(evaluated)
             else:
-                print("no OCR no evaluation")
-        print(time.process_time() - start)
+                print("No OCR no evaluation")                
+        #print time measurement
+        run_time = time.process_time() - start
+        print("The detection took " + str(run_time) + " seconds, " + str(run_time / file_number) + " on average.")
 
 #####################################################################################################################################################
 #
@@ -101,4 +106,4 @@ try:
        
 finally:
     cv2.destroyAllWindows()
-    print('done')
+    print('Run complete!')

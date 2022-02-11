@@ -17,7 +17,7 @@ CC BY-NC-SA 3.0 DE
 
 #change input path (default = same path as pyhon files)
 USE_ABSOLUTE_PATH = True
-ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\Tafelerkennung\\Tool"
+ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\Tafelerkennung"
 #input data format
 INPUT_FORMAT = ".jpg"
 

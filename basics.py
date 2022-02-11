@@ -43,7 +43,7 @@ def searchFiles(extension,folder):
         
         #if input dir found
         if folder in dirs:
-            print(folder + ' gefunden')
+            print(folder + ' found!')
             
             #list all files in input dir
             content = os.listdir(path + '\\' + folder)
@@ -58,7 +58,7 @@ def searchFiles(extension,folder):
                     names.append(item)
         #print note and end skript if no input dir
         else:
-            print(folder + ' fehlt')
+            print(folder + ' not found!')
         #return all found files
         return(files, names)
 
@@ -77,9 +77,10 @@ def output(folder, img, name, mod=''):
         #list all files in path
         dirs = os.listdir(path)
         if folder in dirs:
-            print(folder + '-Ordner vorhanden')
+            print(folder + '-folder found!')
         else:
             os.makedirs(path + '\\' + folder)
+            print(folder + '-folder created!')
         #write files, add name modification if necessary
         if len(mod) == 0:
             cv2.imwrite(path + '\\' + folder + '\\' + name[:-4] + '.png', img)
@@ -136,7 +137,7 @@ def csvInput(inputFile, folder = "evaluation"):
         
     #if input dir found
     if folder in dirs:
-        print(folder + ' gefunden')
+        print(folder + ' found!')
         #list all files in input dir
         content = path + '\\' + folder + '\\' + inputFile
         with open(content , newline='') as csvfile:
@@ -146,7 +147,7 @@ def csvInput(inputFile, folder = "evaluation"):
                 csvdict.append(line)
             return(csvdict)
     else:
-        print(folder + ' nicht gefunden')
+        print(folder + ' not found!')
 
 def ocrOutput(ocrList, folder = "OCR", name = "output"):
     
@@ -159,7 +160,7 @@ def ocrOutput(ocrList, folder = "OCR", name = "output"):
     dirs = os.listdir(path)
     #if folder doesn't exist create it
     if folder in dirs:
-        print(folder + '-Ordner vorhanden')
+        print(folder + '-folder found!')
     else:
         os.makedirs(path + '\\' + folder)
     
