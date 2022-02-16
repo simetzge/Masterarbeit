@@ -20,6 +20,7 @@ from datetime import datetime
 import configparser
 from flags import *
 
+
 #####################################################################################################################################################
 #    
 # function for searching all files with the matching extension in the input directory
@@ -200,7 +201,17 @@ def getSetting(section, key):
     setting = settings.get(section, key)
     if setting.lower() == "true" or setting.lower() == "false":
         setting = settings.getboolean(section, key)
+    elif setting.isalpha() == False:
+        setting = settings.getint(section, key)
     return(setting)
+
+def absolutePath():
+    global ABSOLUTE_PATH
+    ABSOLUTE_PATH = "Pfad"
+    print(ABSOLUTE_PATH + " erzeugt")
+    if ABSOLUTE_PATH in globals():
+        print(ABSOLUTE_PATH)
+    return(ABSOLUTE_PATH)
 
 
 #####################################################################################################################################################
