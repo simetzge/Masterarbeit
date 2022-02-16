@@ -9,7 +9,7 @@ licensend under Attribution-NonCommercial-ShareAlike 3.0 Germany
 CC BY-NC-SA 3.0 DE
 """
 
-from flags import *
+#from flags import *
 from ocr import *
 #from cnn import *
 from evaluation import *
@@ -31,8 +31,9 @@ try:
         ocrlist =[]        
         #images = [cv2.imread(files) for files in filePaths]              
         #get aspect ratio from template if flag is set        
-        if USE_TEMPLATE == True:
-            getAspectRatio(filePaths, fileNames)            
+        if getSetting("rect detection", "USE_TEMPLATE") == True:
+            getAspectRatio(filePaths, fileNames)
+            print("template check")            
         #detect rectangles in every image, adaptive or iterative
         #for i, img  in enumerate(images):
             
@@ -93,6 +94,7 @@ try:
                 print("No OCR no evaluation")                
         #print time measurement
         run_time = time.process_time() - start
+        print('Run complete!')
         print("The detection took " + str(run_time) + " seconds, " + str(run_time / file_number) + " on average.")
 
 #####################################################################################################################################################
@@ -106,4 +108,4 @@ try:
        
 finally:
     cv2.destroyAllWindows()
-    print('Run complete!')
+    

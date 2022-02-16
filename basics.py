@@ -17,6 +17,7 @@ import csv
 import itertools
 from datetime import datetime
 
+import configparser
 from flags import *
 
 #####################################################################################################################################################
@@ -190,6 +191,17 @@ def ocrOutput(ocrList, folder = "OCR", name = "output"):
                     file.write(dicts["bestguess"])
                     printed = True
                 file.write("\n")
+                
+                
+def getSetting(section, key):
+    settings = configparser.ConfigParser()
+    path = os.getcwd()
+    settings.read(path + "\\settings.ini")
+    setting = settings.get(section, key)
+    if setting.lower() == "true" or setting.lower() == "false":
+        setting = settings.getboolean(section, key)
+    return(setting)
+
 
 #####################################################################################################################################################
 #      
