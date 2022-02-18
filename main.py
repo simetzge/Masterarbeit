@@ -10,11 +10,11 @@ CC BY-NC-SA 3.0 DE
 """
 
 #from flags import *
-from ocr import *
+import ocr
 #from cnn import *
-from evaluation import *
-from basics import *
-from rectdetection import *
+import evaluation
+import basics
+import rectdetection
 import cv2
 import time
 
@@ -22,17 +22,21 @@ try:
 #####################################################################################################################################################
     
     def main():
+        #start time measurement
+        start = time.process_time()
+        
+        #load settings this is so important i'm so glad it works finally
+        basics.loadSettings()
         
         #get paths and names of all images in folder input
-        start = time.process_time()
-        filePaths, fileNames = searchFiles(INPUT_FORMAT, 'input')
+        filePaths, fileNames = basics.searchFiles(basics.INPUT_FORMAT, 'input')
         #open the files in cv2
         #images = []
         ocrlist =[]        
         #images = [cv2.imread(files) for files in filePaths]              
         #get aspect ratio from template if flag is set        
-        if getSetting("rect detection", "USE_TEMPLATE") == True:
-            getAspectRatio(filePaths, fileNames)
+        if basics.USE_TEMPLATE == True:
+            rectdetection.getAspectRatio(filePaths, fileNames)
             print("template check")            
         #detect rectangles in every image, adaptive or iterative
         #for i, img  in enumerate(images):
@@ -46,50 +50,51 @@ try:
                 file_number = file_number -1
                 continue
             #skip all pictures but the one that should be checked
-            if CHECK_PICTURE != "":
-                if not CHECK_PICTURE in fileNames[i]:
+            if basics.CHECK_PICTURE != "":
+                if not basics.CHECK_PICTURE in fileNames[i]:
                     continue            
             #print progress based on the number of files to be processed                
             print("The next image is \"" + fileNames[i] + "\" (" + str(i) + "/" + str(file_number) + ")")            
             #run iterative or adaptive detection, depending on settings    
-            if MODIFY_THRESHOLD:
-                rects,conts = rect_detect_iterative(img, fileNames[i])
+            if rectdetection.MODIFY_THRESHOLD:
+                rects,conts = rectdetection.rect_detect_iterative(img, fileNames[i])
             else:
-                rects,conts = rect_detect_adaptive(img, fileNames[i])
-                rects = [rescaleRect(img, rect) for rect in rects]
+                rects,conts = rectdetection.rect_detect_adaptive(img, fileNames[i])
+                rects = [rectdetection.rescaleRect(img, rect) for rect in rects]
                 #oldconts = conts
-                conts = [getCont(img,rect) for rect in rects]
+                conts = [rectdetection.getCont(img,rect) for rect in rects]
                 #contCompare(conts, oldconts, img)
             if len(rects) > 0:
                 #crop found rectangle
-                if CONT_BASED_CUT == True:
-                    masked = contMask(img,conts)
+                if basics.CONT_BASED_CUT == True:
+                    masked = rectdetection.contMask(img,conts)
                 else:
                     masked = None
-                cropimgs, restimg = cut(img, rects, masked = masked)
+                cropimgs, restimg = rectdetection.cut(img, rects, masked = masked)
                 #perform OCR on cropped rectangles if flag is set
-                if OCR:
+                if basics.OCR:
                     ocrlist.append(ocr(cropimgs, fileNames[i]))
                 
                     #just print the crops if OCR flag is not set
                 for j, crop in enumerate(cropimgs):
-                    output('crop', crop, fileNames[i], str(j))
+                    basics.output('crop', crop, fileNames[i], str(j))
                 
                 #write images without rectangles
-                output('imagecut', restimg, fileNames[i])            
+                basics.output('imagecut', restimg, fileNames[i])
+            #CNN PART REMOVED
             #use cnns to identify objects in the images
-            if USE_CNN == "coco" or USE_CNN == "both":
-                output('coco', coco(img), fileNames[i])
-            if USE_CNN == "yolo" or USE_CNN == "both":
-                output('yolo', yolo(img), fileNames[i])
-        if OCR: ocrOutput(ocrlist)
+            #if USE_CNN == "coco" or USE_CNN == "both":
+            #    output('coco', coco(img), fileNames[i])
+            #if USE_CNN == "yolo" or USE_CNN == "both":
+            #    output('yolo', yolo(img), fileNames[i])
+        if basics.OCR: ocr.ocrOutput(ocrlist)
         #csvOutput(outputlist)
-        if EVALUATE:
-            if OCR:
-                evaluation = csvInput(EVALUATION_LIST)
-                compared = comparison(ocrlist)
-                evaluated = evaluate(evaluation, compared)
-                csvOutput(evaluated)
+        if basics.EVALUATE:
+            if basics.OCR:
+                evalList = basics.csvInput(basics.EVALUATION_LIST)
+                compared = evaluation.comparison(ocrlist)
+                evaluated = evaluation.evaluate(evalList, compared)
+                basics.csvOutput(evaluated)
             else:
                 print("No OCR no evaluation")                
         #print time measurement

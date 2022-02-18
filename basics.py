@@ -18,7 +18,7 @@ import itertools
 from datetime import datetime
 
 import configparser
-from flags import *
+#from flags import *
 
 
 #####################################################################################################################################################
@@ -31,10 +31,8 @@ from flags import *
 def searchFiles(extension,folder):
         
         #get skript path
-        if USE_ABSOLUTE_PATH == True:
-            path = ABSOLUTE_PATH
-        else:
-            path = os.getcwd()
+
+        path = PATH
         
         #list all files in path
         dirs = os.listdir(path)
@@ -71,11 +69,8 @@ def searchFiles(extension,folder):
 #
 #####################################################################################################################################################
 
-def output(folder, img, name, mod=''):    
-        if USE_ABSOLUTE_PATH == True:
-            path = ABSOLUTE_PATH
-        else:
-            path = os.getcwd()
+def output(folder, img, name, mod=''):
+        path = PATH
         #list all files in path
         dirs = os.listdir(path)
         if folder in dirs:
@@ -95,7 +90,9 @@ def output(folder, img, name, mod=''):
 #
 #####################################################################################################################################################
 
-def scaleImage(img, size = IMG_TARGET_SIZE):
+def scaleImage(img, size = 0):
+        if size == 0:
+            size = IMG_TARGET_SIZE
         scale = size / np.max(img.shape)
         if SIMPLE_CROP:
             interpolation = cv2.INTER_CUBIC
@@ -124,11 +121,7 @@ def normalizeImage(img):
 def csvInput(inputFile, folder = "evaluation"):
     
     #get skript path
-    if USE_ABSOLUTE_PATH == True:
-        path = ABSOLUTE_PATH
-    else:
-        path = os.getcwd()
-        
+    path = PATH   
     #list all files in path
     dirs = os.listdir(path)
         
@@ -154,10 +147,7 @@ def csvInput(inputFile, folder = "evaluation"):
 def ocrOutput(ocrList, folder = "OCR", name = "output"):
     
     #check wich patch should be used    
-    if USE_ABSOLUTE_PATH == True:
-        path = ABSOLUTE_PATH
-    else:
-        path = os.getcwd()
+    path = PATH
     #list all files in path
     dirs = os.listdir(path)
     #if folder doesn't exist create it
@@ -213,6 +203,92 @@ def absolutePath():
         print(ABSOLUTE_PATH)
     return(ABSOLUTE_PATH)
 
+def loadSettings():    
+    settings = configparser.ConfigParser()
+    path = os.getcwd()
+    settings.read(path + "\\settings.ini")
+    
+    #general settings
+    
+    global PATH
+    if settings.getboolean("general settings", "USE_ABSOLUTE_PATH") == True:
+        PATH = settings.get("general settings", "ABSOLUTE_PATH")
+    else:
+        PATH = path
+        
+    global INPUT_FORMAT
+    INPUT_FORMAT = settings.get("general settings", "INPUT_FORMAT")
+
+    global CHECK_PICTURE
+    CHECK_PICTURE = settings.get("general settings", "CHECK_PICTURE")
+
+    global OCR
+    OCR = settings.getboolean("general settings", "USE_OCR")
+    
+    #rect detection
+    
+    global MODIFY_THRESHOLD
+    MODIFY_THRESHOLD = settings.getboolean("rect detection", "MODIFY_THRESHOLD")
+    
+    global USE_TEMPLATE
+    USE_TEMPLATE = settings.getboolean("rect detection", "USE_TEMPLATE")
+    
+    global SIMPLE_CROP
+    SIMPLE_CROP = settings.getboolean("rect detection", "SIMPLE_CROP")
+
+    global CONT_BASED_CUT
+    CONT_BASED_CUT = settings.getboolean("rect detection", "CONT_BASED_CUT")
+
+    global IMG_TARGET_SIZE
+    IMG_TARGET_SIZE = settings.getint("rect detection", "IMG_TARGET_SIZE")
+    
+    global MIN_RECT_AREA
+    MIN_RECT_AREA = settings.getint("rect detection", "MIN_RECT_AREA")
+    
+    global THRESHOLD_MIN
+    THRESHOLD_MIN = settings.getint("rect detection", "THRESHOLD_MIN")
+    
+    global THRESHOLD_MAX
+    THRESHOLD_MAX = settings.getint("rect detection", "THRESHOLD_MAX")
+    
+    global CUT_THRESH
+    CUT_THRESH = settings.getint("rect detection", "CUT_THRESH")
+    
+    #OCR
+    
+    if OCR == True:
+        global TESS_PATH
+        TESS_PATH = settings.get("ocr", "TESS_PATH")
+
+        global OCR_CONFIG
+        OCR_CONFIG = settings.get("ocr", "OCR_CONFIG")
+
+        global INVERT_IMAGE
+        INVERT_IMAGE = settings.getboolean("ocr", "INVERT_IMAGE")
+
+    #evaluation
+    global EVALUATE
+    if OCR == False:
+        EVALUATE = False
+    else:
+        EVALUATE = settings.getboolean("evaluation", "EVALUATE")     
+        
+    if EVALUATE == True:
+        global EVALUATION_LIST
+        EVALUATION_LIST = settings.get("evaluation", "EVALUATION_LIST")
+        
+        global OPTIMUM
+        OPTIMUM = settings.getboolean("evaluation", "OPTIMUM")
+        
+        global FSCORE
+        FSCORE = settings.getboolean("evaluation", "FSCORE")
+    
+        global ALL_MEASURES
+        ALL_MEASURES = settings.getboolean("evaluation", "ALL_MEASURES")    
+
+    global SETTINGS_LOADED
+    SETTINGS_LOADED = True
+    print("Settings loaded")
 
 #####################################################################################################################################################
 #      

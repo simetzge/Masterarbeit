@@ -8,7 +8,8 @@ licensend under Attribution-NonCommercial-ShareAlike 3.0 Germany
 
 CC BY-NC-SA 3.0 DE
 """
-
+import configparser
+import os
 
 #####################################################################################################################################################
 #
@@ -18,7 +19,8 @@ CC BY-NC-SA 3.0 DE
 
 #change input path (default = same path as pyhon files)
 USE_ABSOLUTE_PATH = True
-ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\Tafelerkennung"
+#global ABSOLUTE_PATH
+#ABSOLUTE_PATH = "C:\\Users\\Simon\\Desktop\\Tafelerkennung"
 #input data format
 INPUT_FORMAT = ".jpg"
 
@@ -89,4 +91,19 @@ FSCORE = False
 #add recall, precision to evaluation
 ALL_MEASURES = False
 
+#def absolutePath():
+ #   global ABSOLUTE_PATH
+  #  ABSOLUTE_PATH = "Pfad"
+   # print(ABSOLUTE_PATH + " erzeugt")
 
+
+#def getSetting(section, key):
+ #   settings = configparser.ConfigParser()
+  #  path = os.getcwd()
+   # settings.read(path + "\\settings.ini")
+    #setting = settings.get(section, key)
+    #if setting.lower() == "true" or setting.lower() == "false":
+    #    setting = settings.getboolean(section, key)
+    #elif setting.isalpha() == False:
+    #    setting = settings.getint(section, key)
+    #return(setting)
