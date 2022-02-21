@@ -182,34 +182,22 @@ def ocrOutput(ocrList, folder = "OCR", name = "output"):
                     file.write(dicts["bestguess"])
                     printed = True
                 file.write("\n")
-                
-                
-def getSetting(section, key):
-    settings = configparser.ConfigParser()
-    path = os.getcwd()
-    settings.read(path + "\\settings.ini")
-    setting = settings.get(section, key)
-    if setting.lower() == "true" or setting.lower() == "false":
-        setting = settings.getboolean(section, key)
-    elif setting.isalpha() == False:
-        setting = settings.getint(section, key)
-    return(setting)
 
-def absolutePath():
-    global ABSOLUTE_PATH
-    ABSOLUTE_PATH = "Pfad"
-    print(ABSOLUTE_PATH + " erzeugt")
-    if ABSOLUTE_PATH in globals():
-        print(ABSOLUTE_PATH)
-    return(ABSOLUTE_PATH)
+#####################################################################################################################################################
+#      
+# get settings from settings.ini and provide them as global variables
+#
+#####################################################################################################################################################
+
 
 def loadSettings():    
     settings = configparser.ConfigParser()
     path = os.getcwd()
-    settings.read(path + "\\settings.ini")
+    settings.read(path + "\\test.ini")
     
     #general settings
-    
+    global USE_ABSOLUTE_PATH
+    global ABSOLUTE_PATH
     global PATH
     if settings.getboolean("general settings", "USE_ABSOLUTE_PATH") == True:
         PATH = settings.get("general settings", "ABSOLUTE_PATH")
@@ -221,9 +209,6 @@ def loadSettings():
 
     global CHECK_PICTURE
     CHECK_PICTURE = settings.get("general settings", "CHECK_PICTURE")
-
-    global OCR
-    OCR = settings.getboolean("general settings", "USE_OCR")
     
     #rect detection
     
@@ -255,16 +240,17 @@ def loadSettings():
     CUT_THRESH = settings.getint("rect detection", "CUT_THRESH")
     
     #OCR
-    
-    if OCR == True:
-        global TESS_PATH
-        TESS_PATH = settings.get("ocr", "TESS_PATH")
+    global OCR
+    OCR = settings.getboolean("ocr", "USE_OCR")
 
-        global OCR_CONFIG
-        OCR_CONFIG = settings.get("ocr", "OCR_CONFIG")
+    global TESS_PATH
+    TESS_PATH = settings.get("ocr", "TESS_PATH")
 
-        global INVERT_IMAGE
-        INVERT_IMAGE = settings.getboolean("ocr", "INVERT_IMAGE")
+    global OCR_CONFIG
+    OCR_CONFIG = settings.get("ocr", "OCR_CONFIG")
+
+    global INVERT_IMAGE
+    INVERT_IMAGE = settings.getboolean("ocr", "INVERT_IMAGE")
 
     #evaluation
     global EVALUATE
@@ -272,23 +258,103 @@ def loadSettings():
         EVALUATE = False
     else:
         EVALUATE = settings.getboolean("evaluation", "EVALUATE")     
+  
+    global EVALUATION_LIST
+    EVALUATION_LIST = settings.get("evaluation", "EVALUATION_LIST")
         
-    if EVALUATE == True:
-        global EVALUATION_LIST
-        EVALUATION_LIST = settings.get("evaluation", "EVALUATION_LIST")
-        
-        global OPTIMUM
-        OPTIMUM = settings.getboolean("evaluation", "OPTIMUM")
-        
-        global FSCORE
-        FSCORE = settings.getboolean("evaluation", "FSCORE")
+    global OPTIMUM
+    OPTIMUM = settings.getboolean("evaluation", "OPTIMUM")
     
-        global ALL_MEASURES
-        ALL_MEASURES = settings.getboolean("evaluation", "ALL_MEASURES")    
+    global FSCORE
+    FSCORE = settings.getboolean("evaluation", "FSCORE")
+    
+    global ALL_MEASURES
+    ALL_MEASURES = settings.getboolean("evaluation", "ALL_MEASURES")    
 
     global SETTINGS_LOADED
     SETTINGS_LOADED = True
     print("Settings loaded")
+
+#####################################################################################################################################################
+#      
+# save the global settings variables in a settings.ini
+#
+#####################################################################################################################################################
+
+def saveSettings():
+    settings = configparser.ConfigParser(allow_no_value=True)
+    
+    #general settings
+    settings.add_section('general settings')
+    settings.set('general settings', '#change input path (default = same path as pyhon files)', None)
+    settings.set("general settings", "USE_ABSOLUTE_PATH", str(USE_ABSOLUTE_PATH))
+    settings.set("general settings", "ABSOLUTE_PATH", str(ABSOLUTE_PATH))
+    settings.set('general settings', '#input data format', None)
+    settings.set("general settings", "INPUT_FORMAT", str(INPUT_FORMAT))
+    settings.set('general settings', '#only use picture with this name', None)
+    settings.set("general settings", "CHECK_PICTURE", str(CHECK_PICTURE))
+    
+    #rect detection
+    settings.add_section('rect detection')    
+    settings.set('rect detection', '#search for a template to get aspect ratio', None)
+    settings.set("rect detection", "USE_TEMPLATE",str(USE_TEMPLATE))
+    settings.set('rect detection', '#use simple crop instead of the more complex hough based crop', None)
+    settings.set("rect detection", "SIMPLE_CROP",str(SIMPLE_CROP))
+    settings.set('rect detection', '#use iterative instead of adaptive threshold', None)
+    settings.set("rect detection", "MODIFY_THRESHOLD",str(MODIFY_THRESHOLD))
+    settings.set('rect detection', '#use cut based on contours instead of rects (not recommended)', None)
+    settings.set("rect detection", "CONT_BASED_CUT",str(CONT_BASED_CUT))
+    settings.set('rect detection', '#size for downscaling', None)
+    settings.set("rect detection", "IMG_TARGET_SIZE",str(IMG_TARGET_SIZE))
+    settings.set('rect detection', '#min size of rectangle', None)
+    settings.set("rect detection", "MIN_RECT_AREA",str(MIN_RECT_AREA))
+    settings.set('rect detection', '#thresholds for modifiy threshold', None)
+    settings.set("rect detection", "THRESHOLD_MIN",str(THRESHOLD_MIN))
+    settings.set("rect detection", "THRESHOLD_MAX",str(THRESHOLD_MAX))
+    settings.set('rect detection', '#threshold for hough based crop', None)
+    settings.set("rect detection", "CUT_THRESH",str(CUT_THRESH))
+    
+    #OCR
+    settings.add_section('ocr')
+    settings.set('ocr', '#use OCR', None)
+    settings.set("ocr", "USE_OCR", str(OCR))
+    settings.set('ocr', '#tesseract path', None)
+    settings.set("ocr", "TESS_PATH",str(TESS_PATH))
+    settings.set('ocr', '#tesseract config', None)
+    settings.set("ocr", "OCR_CONFIG",str(OCR_CONFIG))
+    settings.set('ocr', '#invert image (use this if the background is darker than the text)', None)
+    settings.set("ocr", "INVERT_IMAGE",str(INVERT_IMAGE))
+
+    #evaluation
+    settings.add_section('evaluation')
+    settings.set('evaluation', '#evaluate OCR', None)
+    settings.set("evaluation", "EVALUATE",str(EVALUATE))
+    settings.set('evaluation', '#name of evaluation list', None)     
+    settings.set("evaluation", "EVALUATION_LIST",str(EVALUATION_LIST))
+    settings.set('evaluation', '#add optmimum value to evaluation', None)
+    settings.set("evaluation", "OPTIMUM",str(OPTIMUM))
+    settings.set('evaluation', '#F-Score instead of ratio', None)
+    settings.set("evaluation", "FSCORE",str(FSCORE))
+    settings.set('evaluation', '#add recall, precision to evaluation', None)
+    settings.set("evaluation", "ALL_MEASURES",str(ALL_MEASURES))
+    #open file and write settings
+    with open('test.ini', 'w') as fp:
+        settings.write(fp)
+    #reset settings loaded flag
+    settingsFlag()
+    print("Settings saved.")
+    
+#####################################################################################################################################################
+#      
+# set flag if settings need to be loaded (at the beginning and after changes)
+#
+#####################################################################################################################################################
+          
+def settingsFlag():
+    #flag to set if settings need to be loaded (at the beginning and after changes)
+    global SETTINGS_LOADED
+    SETTINGS_LOADED = False
+        
 
 #####################################################################################################################################################
 #      

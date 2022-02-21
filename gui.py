@@ -9,8 +9,9 @@ import PySimpleGUI as sg
 import main
 import basics
 
+basics.settingsFlag()
 
-layout = [[sg.FolderBrowse('Working Directory'),sg.Button('Settings')],
+layout = [[sg.FolderBrowse('Working Directory', key= "foldin"),sg.Button('Settings')],
           [sg.Text('Log')],
           [sg.Output(size=(60,15))], 
           [sg.Button('Run'),sg.Push(), sg.Exit()],
@@ -20,6 +21,13 @@ window = sg.Window('RectDetect', layout)
 
 while True:                             # The Event Loop
     event, values = window.read()
+    if values["foldin"] != "":
+        if basics.SETTINGS_LOADED == False:
+            basics.loadSettings()
+        basics.USE_ABSOLUTE_PATH = True
+        basics.ABSOLUTE_PATH = values["foldin"]
+        basics.saveSettings()
+        
     if event == "Run":
         main.main()
     if event == sg.WIN_CLOSED or event == 'Exit':
@@ -31,9 +39,15 @@ while True:                             # The Event Loop
         #    print("yes")
         #else:
          #   print(test)
-        
-        basics.loadSettings()
-        print(basics.PATH)
+        if basics.SETTINGS_LOADED != True:
+            basics.loadSettings()
+        else:
+            print("Settings already loaded")
+        #print(basics.PATH)
+        print(values["foldin"])
         #absolutePath()
         #print(ABSOLUTE_PATH)
+    
+        
+    
 window.close()
