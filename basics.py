@@ -197,9 +197,10 @@ def loadSettings():
     
     #general settings
     global USE_ABSOLUTE_PATH
+    USE_ABSOLUTE_PATH = settings.getboolean("general settings", "USE_ABSOLUTE_PATH")
     global ABSOLUTE_PATH
     global PATH
-    if settings.getboolean("general settings", "USE_ABSOLUTE_PATH") == True:
+    if USE_ABSOLUTE_PATH == True:
         PATH = settings.get("general settings", "ABSOLUTE_PATH")
     else:
         PATH = path
