@@ -63,7 +63,9 @@ def settingsGUI():
                       [sg.Text("Image Target Size"),sg.Push(), sg.InputText(default_text = basics.IMG_TARGET_SIZE, size = (6,6))],
                       [sg.Text("Minimal Rectangle Size"),sg.Push(), sg.InputText(default_text = basics.MIN_RECT_AREA, size = (6,6))],
                       [sg.Text("Thresholds For Modify Threshold (Min/Max"),sg.Push(), sg.InputText(default_text = basics.THRESHOLD_MIN, size = (3,3)), sg.InputText(default_text = basics.THRESHOLD_MAX, size = (3,3))],
-                      [sg.Text('OCR', font = (15))]
+                      [sg.Text('OCR', font = (15))],
+                      [sg.Checkbox('Use OCR', default = basics.OCR)],
+                      [sg.FileBrowse("Tesseract Path"), sg.InputText(default_text = basics.TESS_PATH)]
                       ]
     settingsWindow = sg.Window("Settings", settingsLayout)
     while True:
