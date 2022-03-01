@@ -54,8 +54,8 @@ def settingsGUI():
     
     dataTypes = [".jpg", ".png"]
     settingsLayout = [[sg.Text('General Settings', font = (15))],
-                      [sg.FolderBrowse('Working Directory', key= "foldin")],
-                      [sg.Checkbox('Use Absolute Path', default = basics.USE_ABSOLUTE_PATH)],
+                      [sg.FolderBrowse('Working Directory', key= "foldin"), sg.InputText(default_text = basics.PATH, key = "path", change_submits = True)],
+                      [sg.Checkbox('Use Absolute Path',key=("use_absolute_path"), default = basics.USE_ABSOLUTE_PATH)],
                       [sg.Text('Input Data Type'),sg.Push(), sg.DropDown(dataTypes)],
                       [sg.Text('Rectangle Detection', font = (15))],
                       [sg.Checkbox('Use Template', default = basics.USE_TEMPLATE, size = (20,1)),sg.Push(), sg.Checkbox('Use Simple Crop', default = basics.SIMPLE_CROP, size = (20,1))],
@@ -64,20 +64,36 @@ def settingsGUI():
                       [sg.Text("Minimal Rectangle Size"),sg.Push(), sg.InputText(default_text = basics.MIN_RECT_AREA, size = (6,6))],
                       [sg.Text("Thresholds For Modify Threshold (Min/Max"),sg.Push(), sg.InputText(default_text = basics.THRESHOLD_MIN, size = (3,3)), sg.InputText(default_text = basics.THRESHOLD_MAX, size = (3,3))],
                       [sg.Text('OCR', font = (15))],
-                      [sg.Checkbox('Use OCR', default = basics.OCR)],
-                      [sg.FileBrowse("Tesseract Path"), sg.InputText(default_text = basics.TESS_PATH)]
+                      [sg.Checkbox('Use OCR', default = basics.OCR, key = "OCR")],
+                      [sg.FileBrowse("Tesseract Path"), sg.InputText(default_text = basics.TESS_PATH, key = "ocrPath", change_submits = True)],
+                      [sg.Text("Tesseract Parameters"),sg.Push(), sg.InputText(default_text = basics.OCR_CONFIG)],
+                      [sg.Checkbox('Invert Image', default = basics.INVERT_IMAGE)],
+                      [sg.Text('Evaluation', font = (15))],
+                      [sg.Checkbox('Evaluate OCR', default = basics.EVALUATE, key = "evaluate")],
+                      [sg.FileBrowse("Evaluation List"), sg.InputText(default_text = basics.EVALUATION_LIST, key = "evalList", change_submits = True)],
+                      [sg.Checkbox('Optimum', default = basics.OPTIMUM),sg.Push(),sg.Checkbox('F-Score', default = basics.FSCORE),sg.Push(),sg.Checkbox('More Measurements', default = basics.ALL_MEASURES)],
+                      [sg.Push()],
+                      [sg.Button("Save Settings"), sg.Button("Discard Settings")]
                       ]
     settingsWindow = sg.Window("Settings", settingsLayout)
     while True:
         event, values = settingsWindow.read()
-        if values["foldin"] != "":
-            if basics.SETTINGS_LOADED == False:
-                basics.loadSettings()
-            useAbsolutePath = True
-            absolutePath = values["foldin"]
+        #if values["foldin"] != "":
+         #   if basics.SETTINGS_LOADED == False:
+          #      basics.loadSettings()
+           # useAbsolutePath = True
+            #absolutePath = values["foldin"]
             #basics.saveSettings()
             
-        if event == sg.WIN_CLOSED or event == 'Exit':
+        if event == sg.WIN_CLOSED or event == 'Discard Settings':
+            break
+        
+        if event == "Save Settings":
+            #basics.ABSOLUTE_PATH = 
+            basics.EVALUATE = values["evaluate"]
+            basics.saveSettings()
+            print(basics.EVALUATE)
+            
             break
     
     settingsWindow.close()
