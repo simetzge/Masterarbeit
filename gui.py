@@ -73,7 +73,7 @@ def settingsGUI():
                       [sg.FileBrowse("Evaluation List"), sg.InputText(default_text = basics.EVALUATION_LIST, key = "evalList", change_submits = True)],
                       [sg.Checkbox('Optimum', default = basics.OPTIMUM),sg.Push(),sg.Checkbox('F-Score', default = basics.FSCORE),sg.Push(),sg.Checkbox('More Measurements', default = basics.ALL_MEASURES)],
                       [sg.Push()],
-                      [sg.Button("Save Settings"), sg.Button("Discard Settings")]
+                      [sg.Button("Save And Quit"), sg.Button("Discard And Quit")]
                       ]
     settingsWindow = sg.Window("Settings", settingsLayout)
     while True:
@@ -85,10 +85,11 @@ def settingsGUI():
             #absolutePath = values["foldin"]
             #basics.saveSettings()
             
-        if event == sg.WIN_CLOSED or event == 'Discard Settings':
+        if event == sg.WIN_CLOSED or event == 'Discard And Quit':
             break
         
-        if event == "Save Settings":
+        if event == "Save And Quit":
+            
             #basics.ABSOLUTE_PATH = 
             basics.EVALUATE = values["evaluate"]
             basics.saveSettings()
