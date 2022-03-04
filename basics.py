@@ -199,9 +199,10 @@ def loadSettings():
     global USE_ABSOLUTE_PATH
     USE_ABSOLUTE_PATH = settings.getboolean("general settings", "USE_ABSOLUTE_PATH")
     global ABSOLUTE_PATH
+    ABSOLUTE_PATH = settings.get("general settings", "ABSOLUTE_PATH")
     global PATH
     if USE_ABSOLUTE_PATH == True:
-        PATH = settings.get("general settings", "ABSOLUTE_PATH")
+        PATH = ABSOLUTE_PATH
     else:
         PATH = path
         
@@ -284,7 +285,7 @@ def loadSettings():
 
 def saveSettings():
     settings = configparser.ConfigParser(allow_no_value=True)
-    
+        
     #general settings
     settings.add_section('general settings')
     settings.set('general settings', '#change input path (default = same path as pyhon files)', None)
